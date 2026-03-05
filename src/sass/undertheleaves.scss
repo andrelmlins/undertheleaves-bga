@@ -1,12 +1,15 @@
+@use './constants.scss' as *;
+
 .undertheleaves-box {
   display: flex;
   padding: 24px 8px;
   box-sizing: border-box;
   flex-direction: column;
   gap: 12px;
-}
-.undertheleaves-box #map_container {
-  position: relative;
-  width: 100%;
-  height: 600px;
+
+  #map_container {
+    position: relative;
+    width: 100%;
+    height: 600px;
+  }
 }

@@ -11,16 +11,16 @@
 
 $gameinfos = [
     // Name of the game in English (will serve as the basis for translation)
-    'game_name' => "My Great Game",
+    'game_name' => "Under the Leaves",
 
     // Game publisher (use empty string if there is no publisher)
-    'publisher' => 'My Publishing Company',
+    'publisher' => 'Fractal Juegos',
 
     // Url of game publisher website
-    'publisher_website' => 'http://www.mypublishingcompany.com/',
+    'publisher_website' => 'https://www.fractaljuegos.com/',
 
     // Board Game Geek ID of the publisher
-    'publisher_bgg_id' => 1234,
+    'publisher_bgg_id' => 33618,
 
     // Board game geek ID of the game
     'bgg_id' => 436751,
@@ -30,7 +30,7 @@ $gameinfos = [
 
     // Suggest players to play with this number of players. Must be null if there is no such advice, or if there is only one possible player configuration.
     // NB: the automatic lobby will try first the lowest number of players if this is not specified. So you _have to_ specify this parameter if the lowest player number is not compatible with the default options.
-    'suggest_player_number' => null,
+    'suggest_player_number' => 2,
 
     // Discourage players to play with these numbers of players. Must be null if there is no such advice.
     'not_recommend_player_number' => null,
@@ -72,7 +72,7 @@ $gameinfos = [
     'language_dependency' => false,
 
     // Colors attributed to players
-    'player_colors' => ['ff0000', '008000', '0000ff', 'ffa500', 'e94190', '982fff', '72c3b1', 'f07f16', 'bdd002', '7b7b7b', '000000', 'ffffff'],                       
+    'player_colors' => ['ff0000', '008000', '0000ff', 'ffa500', 'e94190', '982fff', '72c3b1', 'f07f16', 'bdd002', '7b7b7b', '000000', 'ffffff'],
 
     // Favorite colors support : if set to "true", support attribution of favorite colors based on player's preferences (see reattributeColorsBasedOnPreferences PHP method)
     // NB: this parameter is used only to flag games supporting this feature; you must use (or not use) reattributeColorsBasedOnPreferences PHP method to actually enable or disable the feature.

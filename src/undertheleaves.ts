@@ -1,0 +1,94 @@
+// @ts-ignore
+GameGui = (function () {
+  function GameGui() {}
+  return GameGui;
+})();
+
+class UndertheLeavesGame extends GameGui<Player, UndertheLeavesGamedatas> {
+  games: UndertheLeavesGames;
+
+  animationManager: AnimationManager;
+
+  scoreCtrl: Record<string, Counter>;
+
+  scrollmap: ScrollmapWithZoomNS.ScrollmapWithZoom;
+
+  constructor() {
+    super();
+
+    this.games = {};
+  }
+
+  public setup(gamedatas: UndertheLeavesGamedatas) {
+    this.animationManager = new AnimationManager(this, {
+      duration: 800,
+    });
+
+    document.getElementById('game_play_area').insertAdjacentHTML(
+      'beforeend',
+      `
+        <div id="undertheleaves-box">
+          <div id="map_container">
+            <div id="map_scrollable"></div>
+            <div id="map_surface"></div>
+            <div id="map_scrollable_oversurface"></div>
+          </div>
+        </div>
+      `,
+    );
+
+    this.scrollmap = new ebg.scrollmapWithZoom();
+    this.scrollmap.zoom = 0.8;
+
+    this.scrollmap.create($('map_container'), $('map_scrollable'), $('map_surface'), $('map_scrollable_oversurface'));
+
+    this.scrollmap.onsurface_div.insertAdjacentHTML(
+      'beforeend',
+      '<div style="width: 50px; height:50px; background-color: red"></div>',
+    );
+
+    this.setupNotifications();
+  }
+
+  public bgaFormatText(log, args) {
+    try {
+      if (log && args && !args.processed) {
+        const formatStrings = new FormatStrings(this, args);
+        formatStrings.format();
+
+        args = formatStrings.args;
+        args.processed = true;
+      }
+    } catch (e) {
+      console.error(log, args, 'Exception thrown', e.stack);
+    }
+
+    return { log, args };
+  }
+
+  public onEnteringState(stateName: string, notif: Notif<any>) {
+    for (let gameName in this.games) {
+      this.games[gameName].onEnteringState(stateName, notif);
+    }
+  }
+
+  public onLeavingState(stateName: string) {
+    for (let gameName in this.games) {
+      this.games[gameName].onLeavingState(stateName);
+    }
+  }
+
+  public onUpdateActionButtons(stateName: string, notif: any) {
+    if (this.bga.players.isCurrentPlayerActive()) {
+      for (let gameName in this.games) {
+        this.games[gameName].onUpdateActionButtons(stateName, notif);
+      }
+    }
+  }
+
+  public setupNotifications() {
+    for (let gameName in this.games) {
+      this.games[gameName].setupNotifications();
+    }
+  }
+}
