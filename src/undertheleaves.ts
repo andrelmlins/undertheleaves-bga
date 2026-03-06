@@ -11,12 +11,12 @@ class UndertheLeavesGame extends GameGui<Player, UndertheLeavesGamedatas> {
 
   scoreCtrl: Record<string, Counter>;
 
-  scrollmap: ScrollmapWithZoomNS.ScrollmapWithZoom;
-
   constructor() {
     super();
 
-    this.games = {};
+    this.games = {
+      tileManager: new TileManager(this),
+    };
   }
 
   public setup(gamedatas: UndertheLeavesGamedatas) {
@@ -27,25 +27,15 @@ class UndertheLeavesGame extends GameGui<Player, UndertheLeavesGamedatas> {
     document.getElementById('game_play_area').insertAdjacentHTML(
       'beforeend',
       `
-        <div id="undertheleaves-box">
-          <div id="map_container">
-            <div id="map_scrollable"></div>
-            <div id="map_surface"></div>
-            <div id="map_scrollable_oversurface"></div>
-          </div>
+        <div id="undertheleaves-box" class="undertheleaves-box">
+          <div id="undertheleaves-table" class="undertheleaves-table"></div>
         </div>
       `,
     );
 
-    this.scrollmap = new ebg.scrollmapWithZoom();
-    this.scrollmap.zoom = 0.8;
-
-    this.scrollmap.create($('map_container'), $('map_scrollable'), $('map_surface'), $('map_scrollable_oversurface'));
-
-    this.scrollmap.onsurface_div.insertAdjacentHTML(
-      'beforeend',
-      '<div style="width: 50px; height:50px; background-color: red"></div>',
-    );
+    for (let gameName in this.games) {
+      this.games[gameName].setup(gamedatas);
+    }
 
     this.setupNotifications();
   }

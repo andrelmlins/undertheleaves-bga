@@ -44,18 +44,19 @@ var UndertheLeavesGame = /** @class */ (function (_super) {
     __extends(UndertheLeavesGame, _super);
     function UndertheLeavesGame() {
         var _this = _super.call(this) || this;
-        _this.games = {};
+        _this.games = {
+            tileManager: new TileManager(_this),
+        };
         return _this;
     }
     UndertheLeavesGame.prototype.setup = function (gamedatas) {
         this.animationManager = new AnimationManager(this, {
             duration: 800,
         });
-        document.getElementById('game_play_area').insertAdjacentHTML('beforeend', "\n        <div id=\"undertheleaves-box\">\n          <div id=\"map_container\">\n            <div id=\"map_scrollable\"></div>\n            <div id=\"map_surface\"></div>\n            <div id=\"map_scrollable_oversurface\"></div>\n          </div>\n        </div>\n      ");
-        this.scrollmap = new ebg.scrollmapWithZoom();
-        this.scrollmap.zoom = 0.8;
-        this.scrollmap.create($('map_container'), $('map_scrollable'), $('map_surface'), $('map_scrollable_oversurface'));
-        this.scrollmap.onsurface_div.insertAdjacentHTML('beforeend', '<div style="width: 50px; height:50px; background-color: red"></div>');
+        document.getElementById('game_play_area').insertAdjacentHTML('beforeend', "\n        <div id=\"undertheleaves-box\" class=\"undertheleaves-box\">\n          <div id=\"undertheleaves-table\" class=\"undertheleaves-table\"></div>\n        </div>\n      ");
+        for (var gameName in this.games) {
+            this.games[gameName].setup(gamedatas);
+        }
         this.setupNotifications();
     };
     UndertheLeavesGame.prototype.bgaFormatText = function (log, args) {
@@ -226,6 +227,110 @@ var BgaLocalAnimation = /** @class */ (function () {
         }); });
     };
     return BgaLocalAnimation;
+}());
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
+var TileManager = /** @class */ (function () {
+    function TileManager(game) {
+        this.game = game;
+        this.gridMap = {};
+    }
+    TileManager.prototype.setup = function () {
+        var _this = this;
+        var tableBbox = document.getElementById('undertheleaves-table');
+        var box = document.getElementById('undertheleaves-box');
+        for (var tileId in this.game.gamedatas.tableTiles) {
+            var tile = this.game.gamedatas.tableTiles[tileId];
+            tableBbox.insertAdjacentHTML('beforeend', this.formatTile(tile));
+        }
+        var _loop_1 = function (playerId) {
+            var player = this_1.game.gamedatas.players[playerId];
+            box.insertAdjacentHTML('beforeend', "\n          <div id=\"undertheleaves-player-".concat(playerId, "\" class=\"undertheleaves-player\">\n            <span style=\"--color: #").concat(player.color, "\">").concat(player.name, "</span>\n            <div id=\"undertheleaves-player-map-container-").concat(playerId, "\">\n              <div id=\"undertheleaves-player-map-scrollable-").concat(playerId, "\"></div>\n              <div id=\"undertheleaves-player-map-surface-").concat(playerId, "\"></div>\n              <div id=\"undertheleaves-player-map-scrollable-oversurface-").concat(playerId, "\"></div>\n            </div>\n          </div>\n        "));
+            this_1.gridMap[playerId] = new ebg.scrollmapWithZoom();
+            this_1.gridMap[playerId].bAdaptHeightAuto = true;
+            this_1.gridMap[playerId].hideInfoButton();
+            this_1.gridMap[playerId].create($("undertheleaves-player-map-container-".concat(playerId)), $("undertheleaves-player-map-scrollable-".concat(playerId)), $("undertheleaves-player-map-surface-".concat(playerId)), $("undertheleaves-player-map-scrollable-oversurface-".concat(playerId)));
+            this_1.gridMap[playerId].onsurface_div.insertAdjacentHTML('beforeend', "<div id=\"undertheleaves-player-grid-".concat(playerId, "\" class=\"undertheleaves-player-grid\"></div>"));
+            var playerGridBox = this_1.getGridBoxDiv(Number(playerId));
+            var xs = this_1.game.gamedatas.gridTiles[playerId].map(function (i) { return i.x; });
+            var ys = this_1.game.gamedatas.gridTiles[playerId].map(function (i) { return i.y; });
+            var minX = Math.min.apply(Math, __spreadArray([], __read(xs), false));
+            var maxX = Math.max.apply(Math, __spreadArray([], __read(xs), false));
+            var minY = Math.min.apply(Math, __spreadArray([], __read(ys), false));
+            var maxY = Math.max.apply(Math, __spreadArray([], __read(ys), false));
+            var width = maxX - minX + 1;
+            var height = maxY - minY + 1;
+            for (var y = maxY; y >= minY; y--) {
+                for (var x = minX; x <= maxX; x++) {
+                    document
+                        .getElementById("undertheleaves-player-grid-".concat(playerId))
+                        .insertAdjacentHTML('beforeend', "<div class=\"undertheleaves-player-cell\" --data-x=".concat(x, " --data-y=").concat(y, "></div>"));
+                }
+            }
+            playerGridBox.style.gridTemplateColumns = "repeat(".concat(width, ", 80px)");
+            playerGridBox.style.gridTemplateRows = "repeat(".concat(height, ", 80px)");
+            this_1.game.gamedatas.gridTiles[playerId].forEach(function (gridTile) {
+                playerGridBox
+                    .querySelector('.undertheleaves-player-cell[--data-x="' + gridTile.x + '"][--data-y="' + gridTile.y + '"]')
+                    .insertAdjacentHTML('beforeend', _this.formatTile(gridTile.tile));
+            });
+        };
+        var this_1 = this;
+        for (var playerId in this.game.gamedatas.players) {
+            _loop_1(playerId);
+        }
+    };
+    TileManager.prototype.onEnteringState = function (stateName, notif) {
+        //
+    };
+    TileManager.prototype.onLeavingState = function (stateName) {
+        //
+    };
+    TileManager.prototype.onUpdateActionButtons = function (stateName, args) {
+        //
+    };
+    TileManager.prototype.setupNotifications = function () {
+        //
+    };
+    TileManager.prototype.formatTile = function (tile) {
+        var tileConfig = this.getTileConfig(tile);
+        return "\n      <div class=\"undertheleaves-tile\" line=\"".concat(tileConfig.position.row, "\" column=\"").concat(tileConfig.position.column, "\">\n        <div class=\"undertheleaves-tile-inner\">\n          <div class=\"undertheleaves-tile-front\"></div>\n          <div class=\"undertheleaves-tile-back\"></div>\n        </div>\n      </div>\n    ");
+    };
+    TileManager.prototype.getTileConfig = function (tile) {
+        var _a = __read(tile.type_arg.split('_').map(function (item) { return Number(item); }), 2), row = _a[0], column = _a[1];
+        if (tile.type === 'initial') {
+            console.log(this.game.gamedatas.initialTileConfigs, row, column);
+            return this.game.gamedatas.initialTileConfigs.find(function (tile) { return tile.position.row === row && tile.position.column === column; });
+        }
+        return this.game.gamedatas.tileConfigs.find(function (tile) { return tile.position.row === row && tile.position.column === column; });
+    };
+    TileManager.prototype.getGridBoxDiv = function (playerId) {
+        return document.getElementById("undertheleaves-player-grid-".concat(playerId));
+    };
+    return TileManager;
 }());
 var BgaAnimation = /** @class */ (function () {
     function BgaAnimation(animationFunction, settings) {
@@ -547,31 +652,6 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __read = (this && this.__read) || function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-};
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 var AnimationManager = /** @class */ (function () {
     /**
      * @param game the BGA game class, usually it will be `this`
@@ -692,7 +772,7 @@ var AnimationManager = /** @class */ (function () {
             return __generator(this, function (_a) {
                 promise = new Promise(function (success) {
                     var promises = [];
-                    var _loop_1 = function (i) {
+                    var _loop_2 = function (i) {
                         setTimeout(function () {
                             promises.push(_this.play(animations[i]));
                             if (i == animations.length - 1) {
@@ -703,7 +783,7 @@ var AnimationManager = /** @class */ (function () {
                         }, i * delay);
                     };
                     for (var i = 0; i < animations.length; i++) {
-                        _loop_1(i);
+                        _loop_2(i);
                     }
                 });
                 return [2 /*return*/, promise];

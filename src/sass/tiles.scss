@@ -1,0 +1,56 @@
+@use './constants.scss' as *;
+
+.undertheleaves-tile {
+  width: $TILE_SIZE;
+  height: $TILE_SIZE;
+  transition: 0.5s filter linear;
+  position: relative;
+
+  & .undertheleaves-tile-front,
+  & .undertheleaves-tile-back {
+    box-sizing: border-box;
+    box-shadow:
+      0 2px 2px 0 rgba(0, 0, 0, 0.14),
+      0 3px 1px -2px rgba(0, 0, 0, 0.12),
+      0 1px 5px 0 rgba(0, 0, 0, 0.2);
+    -webkit-box-shadow:
+      0 2px 2px 0 rgba(0, 0, 0, 0.14),
+      0 3px 1px -2px rgba(0, 0, 0, 0.12),
+      0 1px 5px 0 rgba(0, 0, 0, 0.2);
+    background-size: 500% 1000%;
+    background-repeat: no-repeat;
+    background-image: url('img/tiles.png');
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    background-position-y: 100%;
+  }
+
+  & .undertheleaves-tile-back {
+    transform: rotateY(180deg);
+    background-position-y: 0% 100%;
+    background-image: url('img/back_tiles.png');
+  }
+
+  @for $i from 0 through 4 {
+    @for $j from 0 through 9 {
+      &[line='#{$j}'][column='#{$i}'] .undertheleaves-tile-front {
+        background-position: calc((100% / 4) * $i) calc((100% / 9) * $j) !important;
+      }
+    }
+  }
+
+  .undertheleaves-tile-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 1s;
+    transform-style: preserve-3d;
+  }
+
+  &.rotate .undertheleaves-tile-inner {
+    transform: rotateY(180deg);
+  }
+}
