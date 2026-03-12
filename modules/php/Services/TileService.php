@@ -79,7 +79,7 @@ class TileService
         ));
     }
 
-    public function listTilesWithPlayerId(int $playerId)
+    public function listPlayerTiles(int $playerId)
     {
         $sql = "SELECT * FROM grid_tile WHERE tile_player_id = '%s'";
         $list = $this->game->getObjectListFromDB(sprintf($sql, $playerId));
@@ -93,15 +93,57 @@ class TileService
         return $result;
     }
 
-    public function allTiles()
+    public function listAllTiles()
     {
         $players = $this->game->loadPlayersBasicInfos();
         $result = [];
 
         foreach ($players as $player) {
-            $result[$player['player_id']] = $this->listTilesWithPlayerId($player['player_id']);
+            $result[$player['player_id']] = $this->listPlayerTiles($player['player_id']);
         }
 
         return $result;
+    }
+
+    public function getByPosition(int $x, int $y, int $playerId)
+    {
+        $sql = "SELECT * FROM grid_tile WHERE tile_player_id = '%s' AND tile_x = '%s' AND tile_y = '%s'";
+        $item = $this->game->getObjectFromDB(sprintf($sql, $playerId, $x, $y));
+
+        if (is_null($item)) return null;
+
+        return $this->formatGridTile($item);
+    }
+
+    public function getExternalPositions(int $playerId)
+    {
+        $tiles = $this->listPlayerTiles($playerId);
+        $dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+
+        $tileMap = [];
+        foreach ($tiles as $t) {
+            $key = $t->x . ',' . $t->y;
+            $tileMap[$key] = true;
+        }
+
+        $externalsMap = [];
+        foreach ($tiles as $tile) {
+            foreach ($dirs as $dir) {
+                $dx = $dir[0];
+                $dy = $dir[1];
+
+                $x = $tile->x + $dx;
+                $y = $tile->y + $dy;
+
+                $key = $x . ',' . $y;
+
+                if (!isset($tileMap[$key])) {
+                    $tileMap[$key] = true;
+                    $externalsMap[] = ['x' => $x, 'y' => $y];
+                }
+            }
+        }
+
+        return $externalsMap;
     }
 }

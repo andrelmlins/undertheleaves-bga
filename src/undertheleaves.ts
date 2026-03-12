@@ -16,6 +16,7 @@ class UndertheLeavesGame extends GameGui<Player, UndertheLeavesGamedatas> {
 
     this.games = {
       tileManager: new TileManager(this),
+      placeTile: new PlaceTile(this),
     };
   }
 
@@ -28,7 +29,7 @@ class UndertheLeavesGame extends GameGui<Player, UndertheLeavesGamedatas> {
       'beforeend',
       `
         <div id="undertheleaves-box" class="undertheleaves-box">
-          <div id="undertheleaves-table" class="undertheleaves-table"></div>
+          <div id="undertheleaves-offer" class="undertheleaves-offer"></div>
         </div>
       `,
     );

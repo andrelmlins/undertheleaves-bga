@@ -7,6 +7,7 @@ interface UndertheLeavesGamedatas extends Gamedatas {
 
 interface UndertheLeavesGames {
   tileManager: TileManager;
+  placeTile: PlaceTile;
 }
 
 interface Tile {
@@ -38,4 +39,8 @@ interface GridTile {
   rotation: number;
   side: number;
   tile: Tile;
+}
+
+interface PlaceTileState {
+  tableTiles: GridTile[];
 }

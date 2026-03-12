@@ -18,6 +18,7 @@
     "src/animation.ts",
     "bga-framework.d.ts",
     "src/managers/tile.manager.ts",
+    "src/states/place.tile.ts",
     "node_modules/bga-animations/src/framework.d.ts",
     "node_modules/bga-animations/src/animations.ts",
     "node_modules/bga-animations/src/animations/attach-with-animation.ts",

@@ -22,8 +22,9 @@ namespace Bga\Games\undertheleaves;
 
 use Bga\GameFramework\Components\Deck;
 use Bga\Games\undertheleaves\Entities\CardLocation;
+use Bga\Games\undertheleaves\Entities\Messages;
 use Bga\Games\undertheleaves\Services\TileService;
-use Bga\Games\undertheleaves\States\PlayerTurn;
+use Bga\Games\undertheleaves\States\PlaceTile;
 
 class Game extends \Bga\GameFramework\Table
 {
@@ -38,6 +39,7 @@ class Game extends \Bga\GameFramework\Table
         parent::__construct();
         $this->initGameStateLabels([]);
 
+        Messages::initMessages();
         $this->startConstants();
 
         $this->tileService = new TileService($this);
@@ -88,7 +90,7 @@ class Game extends \Bga\GameFramework\Table
         $result["tableTiles"] = $this->tiles->getCardsInLocation(CardLocation::Table->value);
         $result["tileConfigs"] = $this->TILE_CONFIGS;
         $result["initialTileConfigs"] = $this->INITIAL_TILE_CONFIGS;
-        $result["gridTiles"] = $this->tileService->allTiles();
+        $result["gridTiles"] = $this->tileService->listAllTiles();
 
         return $result;
     }
@@ -120,7 +122,7 @@ class Game extends \Bga\GameFramework\Table
 
         $this->activeNextPlayer();
 
-        return PlayerTurn::class;
+        return PlaceTile::class;
     }
 
     public function debug_goToState(int $state = 3)

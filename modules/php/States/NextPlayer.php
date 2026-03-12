@@ -4,40 +4,45 @@ declare(strict_types=1);
 
 namespace Bga\Games\undertheleaves\States;
 
+use Bga\GameFramework\States\GameState;
 use Bga\GameFramework\StateType;
+use Bga\Games\undertheleaves\Entities\CardLocation;
+use Bga\Games\undertheleaves\Entities\Messages;
 use Bga\Games\undertheleaves\Game;
 
-class NextPlayer extends \Bga\GameFramework\States\GameState
+class NextPlayer extends GameState
 {
-
-    function __construct(
-        protected Game $game,
-    ) {
-        parent::__construct($game,
+    function __construct(protected Game $game)
+    {
+        parent::__construct(
+            $game,
             id: 90,
             type: StateType::GAME,
             updateGameProgression: true,
         );
     }
 
-    /**
-     * Game state action, example content.
-     *
-     * The onEnteringState method of state `nextPlayer` is called everytime the current game state is set to `nextPlayer`.
-     */
-    function onEnteringState(int $activePlayerId) {
-
-        // Give some extra time to the active player when he completed an action
+    function onEnteringState(int $activePlayerId)
+    {
         $this->game->giveExtraTime($activePlayerId);
-        
+
+        $tile = $this->game->tiles->pickCardForLocation(CardLocation::Deck->value, CardLocation::Table->value);
+
+        $this->game->notify->all('revealTile', Messages::$RevealTile, [
+            'player_name' => $this->game->getPlayerNameById($activePlayerId),
+            'tile_image' => $tile,
+            'playerId' => $activePlayerId,
+            'tile' => $tile,
+        ]);
+        $this->game->notify->all('simplePause', '', ['time' => 1000]);
+
         $this->game->activeNextPlayer();
 
-        // Go to another gamestate
-        $gameEnd = false; // Here, we would detect if the game is over to make the appropriate transition
+        $gameEnd = false;
         if ($gameEnd) {
             return EndScore::class;
         } else {
-            return PlayerTurn::class;
+            return PlaceTile::class;
         }
     }
 }

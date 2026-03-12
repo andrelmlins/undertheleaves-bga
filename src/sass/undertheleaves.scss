@@ -13,7 +13,7 @@ html {
   flex-direction: column;
   gap: 16px;
 
-  .undertheleaves-table {
+  .undertheleaves-offer {
     width: 100%;
     padding: 12px;
     background-color: #ffffff99;
@@ -66,6 +66,13 @@ html {
       .undertheleaves-player-cell {
         width: $TILE_SIZE;
         height: $TILE_SIZE;
+        position: relative;
+
+        &.selectable {
+          background: #ff000050;
+          box-sizing: border-box;
+          cursor: pointer;
+        }
       }
     }
   }

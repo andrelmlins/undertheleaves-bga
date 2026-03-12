@@ -3,8 +3,9 @@
 .undertheleaves-tile {
   width: $TILE_SIZE;
   height: $TILE_SIZE;
-  transition: 0.5s filter linear;
   position: relative;
+  perspective: 1000px;
+  transition: transform 0.3s ease;
 
   & .undertheleaves-tile-front,
   & .undertheleaves-tile-back {
@@ -30,27 +31,42 @@
 
   & .undertheleaves-tile-back {
     transform: rotateY(180deg);
-    background-position-y: 0% 100%;
     background-image: url('img/back_tiles.png');
   }
 
   @for $i from 0 through 4 {
     @for $j from 0 through 9 {
-      &[line='#{$j}'][column='#{$i}'] .undertheleaves-tile-front {
+      &[line='#{$j}'][column='#{$i}'] .undertheleaves-tile-front,
+      &[line='#{$j}'][column='#{$i}'] .undertheleaves-tile-back {
         background-position: calc((100% / 4) * $i) calc((100% / 9) * $j) !important;
       }
     }
   }
 
   .undertheleaves-tile-inner {
-    position: relative;
     width: 100%;
     height: 100%;
-    transition: transform 1s;
-    transform-style: preserve-3d;
+    position: relative;
+    transition: transform 0.3s ease;
+    transform-origin: center;
+    will-change: transform;
   }
 
-  &.rotate .undertheleaves-tile-inner {
-    transform: rotateY(180deg);
+  &.selectable {
+    transition: 0.1s ease-in-out;
+    cursor: pointer;
+  }
+
+  &.selected {
+    z-index: 2;
+
+    .undertheleaves-tile-front {
+      box-shadow: none;
+      -webkit-box-shadow: none;
+    }
+
+    .undertheleaves-tile-inner {
+      outline: 2px solid red;
+    }
   }
 }

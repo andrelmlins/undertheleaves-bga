@@ -1,21 +1,25 @@
 class TileManager implements Game {
+  private handlers: any[];
+  public tileSelected: string;
+
   gridMap: Record<string, ScrollmapWithZoomNS.ScrollmapWithZoom>;
 
   constructor(public game: UndertheLeavesGame) {
     this.gridMap = {};
+    this.handlers = [];
   }
 
   public setup() {
-    const tableBbox = document.getElementById('undertheleaves-table');
+    const offerBox = document.getElementById('undertheleaves-offer');
     const box = document.getElementById('undertheleaves-box');
 
     for (const tileId in this.game.gamedatas.tableTiles) {
       const tile = this.game.gamedatas.tableTiles[tileId];
 
-      tableBbox.insertAdjacentHTML('beforeend', this.formatTile(tile));
+      offerBox.insertAdjacentHTML('beforeend', this.formatTile(tile));
     }
 
-    for (const playerId in this.game.gamedatas.players) {
+    this.game.gamedatas.playerorder.forEach((playerId) => {
       const player = this.game.gamedatas.players[playerId];
 
       box.insertAdjacentHTML(
@@ -34,7 +38,7 @@ class TileManager implements Game {
 
       this.gridMap[playerId] = new ebg.scrollmapWithZoom();
       this.gridMap[playerId].bAdaptHeightAuto = true;
-      this.gridMap[playerId].hideInfoButton();
+      this.gridMap[playerId].bEnableLongPress = false;
 
       this.gridMap[playerId].create(
         $(`undertheleaves-player-map-container-${playerId}`),
@@ -48,38 +52,8 @@ class TileManager implements Game {
         `<div id="undertheleaves-player-grid-${playerId}" class="undertheleaves-player-grid"></div>`,
       );
 
-      const playerGridBox = this.getGridBoxDiv(Number(playerId));
-      const xs = this.game.gamedatas.gridTiles[playerId].map((i) => i.x);
-      const ys = this.game.gamedatas.gridTiles[playerId].map((i) => i.y);
-
-      const minX = Math.min(...xs);
-      const maxX = Math.max(...xs);
-      const minY = Math.min(...ys);
-      const maxY = Math.max(...ys);
-
-      const width = maxX - minX + 1;
-      const height = maxY - minY + 1;
-
-      for (let y = maxY; y >= minY; y--) {
-        for (let x = minX; x <= maxX; x++) {
-          document
-            .getElementById(`undertheleaves-player-grid-${playerId}`)
-            .insertAdjacentHTML(
-              'beforeend',
-              `<div class="undertheleaves-player-cell" --data-x=${x} --data-y=${y}></div>`,
-            );
-        }
-      }
-
-      playerGridBox.style.gridTemplateColumns = `repeat(${width}, 80px)`;
-      playerGridBox.style.gridTemplateRows = `repeat(${height}, 80px)`;
-
-      this.game.gamedatas.gridTiles[playerId].forEach((gridTile) => {
-        playerGridBox
-          .querySelector('.undertheleaves-player-cell[--data-x="' + gridTile.x + '"][--data-y="' + gridTile.y + '"]')
-          .insertAdjacentHTML('beforeend', this.formatTile(gridTile.tile));
-      });
-    }
+      this.createGridTiles(this.game.gamedatas.gridTiles[playerId], Number(playerId));
+    });
   }
 
   public onEnteringState(stateName: string, notif: Notif<any>) {
@@ -102,8 +76,22 @@ class TileManager implements Game {
     const tileConfig = this.getTileConfig(tile);
 
     return `
-      <div class="undertheleaves-tile" line="${tileConfig.position.row}" column="${tileConfig.position.column}">
+      <div id="undertheleaves-tile-${tile.id}" class="undertheleaves-tile" line="${tileConfig.position.row}" column="${tileConfig.position.column}">
         <div class="undertheleaves-tile-inner">
+          <div class="undertheleaves-tile-front"></div>
+          <div class="undertheleaves-tile-back"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  public formatGridTile(gridTile: GridTile) {
+    const tileConfig = this.getTileConfig(gridTile.tile);
+    const style = `transform: rotate(${gridTile.rotation}deg)`;
+
+    return `
+      <div id="undertheleaves-tile-${gridTile.tile.id}" style="${style}" class="undertheleaves-tile" line="${tileConfig.position.row}" column="${tileConfig.position.column}">
+        <div class="undertheleaves-tile-inner" style="${gridTile.side == 1 ? 'transform: rotateY(180deg)' : ''}">
           <div class="undertheleaves-tile-front"></div>
           <div class="undertheleaves-tile-back"></div>
         </div>
@@ -125,5 +113,121 @@ class TileManager implements Game {
 
   public getGridBoxDiv(playerId: number) {
     return document.getElementById(`undertheleaves-player-grid-${playerId}`);
+  }
+
+  public createGridTiles(tiles: GridTile[], playerId: number) {
+    const playerGridBox = this.getGridBoxDiv(Number(playerId));
+
+    playerGridBox.innerHTML = '';
+
+    tiles.forEach((gridTile) => {
+      playerGridBox.insertAdjacentHTML(
+        'beforeend',
+        `<div class="undertheleaves-player-cell" data-x=${gridTile.x} data-y=${gridTile.y}></div>`,
+      );
+
+      playerGridBox
+        .querySelector('[data-x="' + gridTile.x + '"][data-y="' + gridTile.y + '"]')
+        .insertAdjacentHTML('beforeend', this.formatGridTile(gridTile));
+    });
+
+    this.recalculateGrid(playerId);
+  }
+
+  public recalculateGrid(playerId: number) {
+    const playerGridBox = this.getGridBoxDiv(Number(playerId));
+    const cells = Array.from(playerGridBox.children) as HTMLElement[];
+    const all = cells.map((el) => ({
+      x: parseInt(el.dataset.x),
+      y: parseInt(el.dataset.y),
+    }));
+
+    const xs = all.map((i) => i.x);
+    const ys = all.map((i) => i.y);
+
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+
+    const rangeX = Math.max(Math.abs(minX), Math.abs(maxX));
+    const rangeY = Math.max(Math.abs(minY), Math.abs(maxY));
+
+    const width = rangeX * 2 + 1;
+    const height = rangeY * 2 + 1;
+
+    for (let y = rangeY; y >= -rangeY; y--) {
+      for (let x = -rangeX; x <= rangeX; x++) {
+        if (!playerGridBox.querySelector(`[data-x="${x}"][data-y="${y}"]`)) {
+          playerGridBox.insertAdjacentHTML(
+            'beforeend',
+            `<div class="undertheleaves-player-cell" data-x=${x} data-y=${y}></div>`,
+          );
+        }
+      }
+    }
+
+    playerGridBox.style.gridTemplateColumns = `repeat(${width}, ${TILE_SIZE}px)`;
+    playerGridBox.style.gridTemplateRows = `repeat(${height}, ${TILE_SIZE}px)`;
+
+    const newCells = Array.from(playerGridBox.children) as HTMLElement[];
+    newCells.sort((a, b) => {
+      const ay = Number(a.dataset.y);
+      const by = Number(b.dataset.y);
+      const ax = Number(a.dataset.x);
+      const bx = Number(b.dataset.x);
+
+      if (ay !== by) {
+        return by - ay;
+      }
+
+      return ax - bx;
+    });
+
+    const frag = document.createDocumentFragment();
+    newCells.forEach((el) => frag.appendChild(el));
+    playerGridBox.appendChild(frag);
+  }
+
+  public showOfferCardSelectable(onChanged: (tileId?: string) => void) {
+    const tiles = document.getElementById('undertheleaves-offer').querySelectorAll<HTMLElement>('.undertheleaves-tile');
+
+    tiles.forEach((element) => {
+      const id = element.id.split('-')[2];
+      element.classList.add('selectable');
+
+      this.handlers.push(
+        dojo.connect(element, 'onclick', () => {
+          if (this.tileSelected) {
+            document.getElementById(`undertheleaves-tile-${this.tileSelected}`).classList.remove('selected');
+          }
+
+          if (this.tileSelected == id) {
+            element.classList.remove('selected');
+            this.tileSelected = null;
+          } else {
+            element.classList.add('selected');
+            this.tileSelected = id;
+          }
+
+          onChanged(this.tileSelected);
+        }),
+      );
+    });
+  }
+
+  public removeOfferCardSelectable() {
+    const tiles = document.getElementById('undertheleaves-offer').querySelectorAll('.undertheleaves-tile');
+
+    tiles.forEach((element) => {
+      element.classList.remove('selectable');
+      element.classList.remove('selected');
+      this.handlers.forEach((handler) => dojo.disconnect(handler));
+      this.handlers = [];
+    });
+  }
+
+  public getTileById(id: string | number) {
+    return document.getElementById(`undertheleaves-tile-${id}`);
   }
 }
