@@ -19,5 +19,9 @@ class FormatStrings {
         this.args[key] = `<b>${_(this.args[key])}</b>`;
       }
     });
+
+    if (this.args.tile_image) {
+      this.args.tile_image = this.game.games.tileManager.formatTile(this.args.tile_image, true);
+    }
   }
 }

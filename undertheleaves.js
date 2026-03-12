@@ -17,6 +17,9 @@ var FormatStrings = /** @class */ (function () {
                 _this.args[key] = "<b>".concat(_(_this.args[key]), "</b>");
             }
         });
+        if (this.args.tile_image) {
+            this.args.tile_image = this.game.games.tileManager.formatTile(this.args.tile_image, true);
+        }
     };
     return FormatStrings;
 }());
@@ -291,14 +294,14 @@ var TileManager = /** @class */ (function () {
     TileManager.prototype.setupNotifications = function () {
         //
     };
-    TileManager.prototype.formatTile = function (tile) {
+    TileManager.prototype.formatTile = function (tile, notif) {
+        if (notif === void 0) { notif = false; }
         var tileConfig = this.getTileConfig(tile);
-        return "\n      <div id=\"undertheleaves-tile-".concat(tile.id, "\" class=\"undertheleaves-tile\" line=\"").concat(tileConfig.position.row, "\" column=\"").concat(tileConfig.position.column, "\">\n        <div class=\"undertheleaves-tile-inner\">\n          <div class=\"undertheleaves-tile-front\"></div>\n          <div class=\"undertheleaves-tile-back\"></div>\n        </div>\n      </div>\n    ");
+        return "\n      <div ".concat(!notif ? "id=\"undertheleaves-tile-".concat(tile.id, "\"") : '', " class=\"undertheleaves-tile ").concat(notif ? 'notif' : '', "\" line=\"").concat(tileConfig.position.row, "\" column=\"").concat(tileConfig.position.column, "\">\n        <div class=\"undertheleaves-tile-box\">  \n          <div class=\"undertheleaves-tile-inner\">\n            <div class=\"undertheleaves-tile-front\"></div>\n            <div class=\"undertheleaves-tile-back\"></div>\n          </div>\n        </div>\n      </div>\n    ");
     };
     TileManager.prototype.formatGridTile = function (gridTile) {
         var tileConfig = this.getTileConfig(gridTile.tile);
-        var style = "transform: rotate(".concat(gridTile.rotation, "deg)");
-        return "\n      <div id=\"undertheleaves-tile-".concat(gridTile.tile.id, "\" style=\"").concat(style, "\" class=\"undertheleaves-tile\" line=\"").concat(tileConfig.position.row, "\" column=\"").concat(tileConfig.position.column, "\">\n        <div class=\"undertheleaves-tile-inner\" style=\"").concat(gridTile.side == 1 ? 'transform: rotateY(180deg)' : '', "\">\n          <div class=\"undertheleaves-tile-front\"></div>\n          <div class=\"undertheleaves-tile-back\"></div>\n        </div>\n      </div>\n    ");
+        return "\n      <div id=\"undertheleaves-tile-".concat(gridTile.tile.id, "\" class=\"undertheleaves-tile\" line=\"").concat(tileConfig.position.row, "\" column=\"").concat(tileConfig.position.column, "\">\n        <div class=\"undertheleaves-tile-box\" style=\"transform: rotate(").concat(gridTile.rotation, "deg)\">\n          <div class=\"undertheleaves-tile-inner\" style=\"").concat(gridTile.side == 1 ? 'transform: rotateY(180deg)' : '', "\">\n            <div class=\"undertheleaves-tile-front\"></div>\n            <div class=\"undertheleaves-tile-back\"></div>\n          </div>\n        </div>\n      </div>\n    ");
     };
     TileManager.prototype.getTileConfig = function (tile) {
         var _a = __read(tile.type_arg.split('_').map(function (item) { return Number(item); }), 2), row = _a[0], column = _a[1];
@@ -325,24 +328,23 @@ var TileManager = /** @class */ (function () {
     TileManager.prototype.recalculateGrid = function (playerId) {
         var playerGridBox = this.getGridBoxDiv(Number(playerId));
         var cells = Array.from(playerGridBox.children);
-        var all = cells.map(function (el) { return ({
-            x: parseInt(el.dataset.x),
-            y: parseInt(el.dataset.y),
+        var coords = cells.map(function (el) { return ({
+            x: Number(el.dataset.x),
+            y: Number(el.dataset.y),
         }); });
-        var xs = all.map(function (i) { return i.x; });
-        var ys = all.map(function (i) { return i.y; });
+        var xs = coords.map(function (c) { return c.x; });
+        var ys = coords.map(function (c) { return c.y; });
         var minX = Math.min.apply(Math, __spreadArray([], __read(xs), false));
         var maxX = Math.max.apply(Math, __spreadArray([], __read(xs), false));
         var minY = Math.min.apply(Math, __spreadArray([], __read(ys), false));
         var maxY = Math.max.apply(Math, __spreadArray([], __read(ys), false));
-        var rangeX = Math.max(Math.abs(minX), Math.abs(maxX));
-        var rangeY = Math.max(Math.abs(minY), Math.abs(maxY));
-        var width = rangeX * 2 + 1;
-        var height = rangeY * 2 + 1;
-        for (var y = rangeY; y >= -rangeY; y--) {
-            for (var x = -rangeX; x <= rangeX; x++) {
+        var width = maxX - minX + 1;
+        var height = maxY - minY + 1;
+        // garantir todas as células
+        for (var y = maxY; y >= minY; y--) {
+            for (var x = minX; x <= maxX; x++) {
                 if (!playerGridBox.querySelector("[data-x=\"".concat(x, "\"][data-y=\"").concat(y, "\"]"))) {
-                    playerGridBox.insertAdjacentHTML('beforeend', "<div class=\"undertheleaves-player-cell\" data-x=".concat(x, " data-y=").concat(y, "></div>"));
+                    playerGridBox.insertAdjacentHTML('beforeend', "<div class=\"undertheleaves-player-cell\" data-x=\"".concat(x, "\" data-y=\"").concat(y, "\"></div>"));
                 }
             }
         }
@@ -354,9 +356,8 @@ var TileManager = /** @class */ (function () {
             var by = Number(b.dataset.y);
             var ax = Number(a.dataset.x);
             var bx = Number(b.dataset.x);
-            if (ay !== by) {
+            if (ay !== by)
                 return by - ay;
-            }
             return ax - bx;
         });
         var frag = document.createDocumentFragment();
@@ -394,9 +395,13 @@ var TileManager = /** @class */ (function () {
             _this.handlers.forEach(function (handler) { return dojo.disconnect(handler); });
             _this.handlers = [];
         });
+        this.tileSelected = null;
     };
     TileManager.prototype.getTileById = function (id) {
         return document.getElementById("undertheleaves-tile-".concat(id));
+    };
+    TileManager.prototype.getBoxTileById = function (id) {
+        return this.getTileById(id).querySelector('.undertheleaves-tile-box');
     };
     return TileManager;
 }());
@@ -517,9 +522,21 @@ var PlaceTile = /** @class */ (function () {
         this.game.games.tileManager.gridMap[playerId].scrollToCenter();
     };
     PlaceTile.prototype.removeSelectExternals = function (tiles) {
-        var playerId = this.game.bga.players.getCurrentPlayerId();
-        this.game.games.tileManager.createGridTiles(tiles, playerId);
-        this.game.games.tileManager.gridMap[playerId].scrollToCenter();
+        return __awaiter(this, void 0, void 0, function () {
+            var playerId;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        playerId = this.game.bga.players.getCurrentPlayerId();
+                        this.game.games.tileManager.createGridTiles(tiles, playerId);
+                        return [4 /*yield*/, delayTime(300)];
+                    case 1:
+                        _a.sent();
+                        this.game.games.tileManager.gridMap[playerId].scrollToCenter();
+                        return [2 /*return*/];
+                }
+            });
+        });
     };
     PlaceTile.prototype.onClick = function (tiles) {
         var _this = this;
@@ -540,13 +557,16 @@ var PlaceTile = /** @class */ (function () {
                         tileElement = this.game.games.tileManager.getTileById(this.externalTileSelected.tileId);
                         offerElement = document.getElementById('undertheleaves-offer');
                         tileElement.classList.remove('selected');
+                        if (!(tileElement.parentElement.id !== 'undertheleaves-offer')) return [3 /*break*/, 2];
                         animation = new BgaLocalAnimation(this.game);
                         animation.setOptions(tileElement, offerElement, 500);
-                        animation.setRotation(0);
                         return [4 /*yield*/, animation.call()];
                     case 1:
                         _a.sent();
-                        tileElement.style.transform = "rotate(0deg)";
+                        _a.label = 2;
+                    case 2:
+                        tileElement.querySelector('.undertheleaves-tile-box').style.transform = "rotate(0deg)";
+                        tileElement.querySelector('.undertheleaves-tile-inner').style.transform = '';
                         this.externalTileSelected = null;
                         this.removeSelectExternals(tiles);
                         this.game.bga.states.setClientState('client_SelectTile', {
@@ -565,7 +585,7 @@ var PlaceTile = /** @class */ (function () {
                     case 0:
                         if (this.isAnimating)
                             return [2 /*return*/];
-                        tileElement = this.game.games.tileManager.getTileById(this.externalTileSelected.tileId);
+                        tileElement = this.game.games.tileManager.getBoxTileById(this.externalTileSelected.tileId);
                         inner = tileElement.querySelector('.undertheleaves-tile-inner');
                         this.isAnimating = true;
                         if (type === 'right')
@@ -576,7 +596,7 @@ var PlaceTile = /** @class */ (function () {
                             this.externalTileSelected.inverse = !this.externalTileSelected.inverse;
                         tileElement.style.transform = "rotate(".concat(this.externalTileSelected.rotation, "deg)");
                         inner.style.transform = this.externalTileSelected.inverse ? 'rotateY(180deg)' : '';
-                        return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 300); })];
+                        return [4 /*yield*/, delayTime(300)];
                     case 1:
                         _a.sent();
                         this.isAnimating = false;
@@ -601,7 +621,6 @@ var PlaceTile = /** @class */ (function () {
                         return [4 /*yield*/, animation.call()];
                     case 1:
                         _a.sent();
-                        tileElement.style.transform = "rotate(".concat(this.externalTileSelected.rotation, "deg)");
                         return [2 /*return*/];
                 }
             });

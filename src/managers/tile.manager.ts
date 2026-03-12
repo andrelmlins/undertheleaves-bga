@@ -72,14 +72,16 @@ class TileManager implements Game {
     //
   }
 
-  public formatTile(tile: Tile) {
+  public formatTile(tile: Tile, notif: boolean = false) {
     const tileConfig = this.getTileConfig(tile);
 
     return `
-      <div id="undertheleaves-tile-${tile.id}" class="undertheleaves-tile" line="${tileConfig.position.row}" column="${tileConfig.position.column}">
-        <div class="undertheleaves-tile-inner">
-          <div class="undertheleaves-tile-front"></div>
-          <div class="undertheleaves-tile-back"></div>
+      <div ${!notif ? `id="undertheleaves-tile-${tile.id}"` : ''} class="undertheleaves-tile ${notif ? 'notif' : ''}" line="${tileConfig.position.row}" column="${tileConfig.position.column}">
+        <div class="undertheleaves-tile-box">  
+          <div class="undertheleaves-tile-inner">
+            <div class="undertheleaves-tile-front"></div>
+            <div class="undertheleaves-tile-back"></div>
+          </div>
         </div>
       </div>
     `;
@@ -87,13 +89,14 @@ class TileManager implements Game {
 
   public formatGridTile(gridTile: GridTile) {
     const tileConfig = this.getTileConfig(gridTile.tile);
-    const style = `transform: rotate(${gridTile.rotation}deg)`;
 
     return `
-      <div id="undertheleaves-tile-${gridTile.tile.id}" style="${style}" class="undertheleaves-tile" line="${tileConfig.position.row}" column="${tileConfig.position.column}">
-        <div class="undertheleaves-tile-inner" style="${gridTile.side == 1 ? 'transform: rotateY(180deg)' : ''}">
-          <div class="undertheleaves-tile-front"></div>
-          <div class="undertheleaves-tile-back"></div>
+      <div id="undertheleaves-tile-${gridTile.tile.id}" class="undertheleaves-tile" line="${tileConfig.position.row}" column="${tileConfig.position.column}">
+        <div class="undertheleaves-tile-box" style="transform: rotate(${gridTile.rotation}deg)">
+          <div class="undertheleaves-tile-inner" style="${gridTile.side == 1 ? 'transform: rotateY(180deg)' : ''}">
+            <div class="undertheleaves-tile-front"></div>
+            <div class="undertheleaves-tile-back"></div>
+          </div>
         </div>
       </div>
     `;
@@ -137,31 +140,30 @@ class TileManager implements Game {
   public recalculateGrid(playerId: number) {
     const playerGridBox = this.getGridBoxDiv(Number(playerId));
     const cells = Array.from(playerGridBox.children) as HTMLElement[];
-    const all = cells.map((el) => ({
-      x: parseInt(el.dataset.x),
-      y: parseInt(el.dataset.y),
+
+    const coords = cells.map((el) => ({
+      x: Number(el.dataset.x),
+      y: Number(el.dataset.y),
     }));
 
-    const xs = all.map((i) => i.x);
-    const ys = all.map((i) => i.y);
+    const xs = coords.map((c) => c.x);
+    const ys = coords.map((c) => c.y);
 
     const minX = Math.min(...xs);
     const maxX = Math.max(...xs);
     const minY = Math.min(...ys);
     const maxY = Math.max(...ys);
 
-    const rangeX = Math.max(Math.abs(minX), Math.abs(maxX));
-    const rangeY = Math.max(Math.abs(minY), Math.abs(maxY));
+    const width = maxX - minX + 1;
+    const height = maxY - minY + 1;
 
-    const width = rangeX * 2 + 1;
-    const height = rangeY * 2 + 1;
-
-    for (let y = rangeY; y >= -rangeY; y--) {
-      for (let x = -rangeX; x <= rangeX; x++) {
+    // garantir todas as células
+    for (let y = maxY; y >= minY; y--) {
+      for (let x = minX; x <= maxX; x++) {
         if (!playerGridBox.querySelector(`[data-x="${x}"][data-y="${y}"]`)) {
           playerGridBox.insertAdjacentHTML(
             'beforeend',
-            `<div class="undertheleaves-player-cell" data-x=${x} data-y=${y}></div>`,
+            `<div class="undertheleaves-player-cell" data-x="${x}" data-y="${y}"></div>`,
           );
         }
       }
@@ -171,16 +173,14 @@ class TileManager implements Game {
     playerGridBox.style.gridTemplateRows = `repeat(${height}, ${TILE_SIZE}px)`;
 
     const newCells = Array.from(playerGridBox.children) as HTMLElement[];
+
     newCells.sort((a, b) => {
       const ay = Number(a.dataset.y);
       const by = Number(b.dataset.y);
       const ax = Number(a.dataset.x);
       const bx = Number(b.dataset.x);
 
-      if (ay !== by) {
-        return by - ay;
-      }
-
+      if (ay !== by) return by - ay;
       return ax - bx;
     });
 
@@ -225,9 +225,15 @@ class TileManager implements Game {
       this.handlers.forEach((handler) => dojo.disconnect(handler));
       this.handlers = [];
     });
+
+    this.tileSelected = null;
   }
 
   public getTileById(id: string | number) {
     return document.getElementById(`undertheleaves-tile-${id}`);
+  }
+
+  public getBoxTileById(id: string | number) {
+    return this.getTileById(id).querySelector<HTMLElement>('.undertheleaves-tile-box');
   }
 }

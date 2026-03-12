@@ -126,9 +126,12 @@ class PlaceTile implements Game {
     this.game.games.tileManager.gridMap[playerId].scrollToCenter();
   }
 
-  public removeSelectExternals(tiles: GridTile[]) {
+  public async removeSelectExternals(tiles: GridTile[]) {
     const playerId = this.game.bga.players.getCurrentPlayerId();
     this.game.games.tileManager.createGridTiles(tiles, playerId);
+
+    await delayTime(300);
+
     this.game.games.tileManager.gridMap[playerId].scrollToCenter();
   }
 
@@ -152,12 +155,14 @@ class PlaceTile implements Game {
 
     tileElement.classList.remove('selected');
 
-    const animation = new BgaLocalAnimation(this.game);
-    animation.setOptions(tileElement, offerElement, 500);
-    animation.setRotation(0);
-    await animation.call();
+    if (tileElement.parentElement.id !== 'undertheleaves-offer') {
+      const animation = new BgaLocalAnimation(this.game);
+      animation.setOptions(tileElement, offerElement, 500);
+      await animation.call();
+    }
 
-    tileElement.style.transform = `rotate(0deg)`;
+    tileElement.querySelector<HTMLElement>('.undertheleaves-tile-box').style.transform = `rotate(0deg)`;
+    tileElement.querySelector<HTMLElement>('.undertheleaves-tile-inner').style.transform = '';
 
     this.externalTileSelected = null;
     this.removeSelectExternals(tiles);
@@ -169,7 +174,7 @@ class PlaceTile implements Game {
   public async onClickChangeDirection(type: 'right' | 'left' | 'inverse') {
     if (this.isAnimating) return;
 
-    const tileElement = this.game.games.tileManager.getTileById(this.externalTileSelected.tileId);
+    const tileElement = this.game.games.tileManager.getBoxTileById(this.externalTileSelected.tileId);
     const inner = tileElement.querySelector<HTMLElement>('.undertheleaves-tile-inner');
 
     this.isAnimating = true;
@@ -182,7 +187,7 @@ class PlaceTile implements Game {
 
     inner.style.transform = this.externalTileSelected.inverse ? 'rotateY(180deg)' : '';
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await delayTime(300);
 
     this.isAnimating = false;
   }
@@ -196,8 +201,7 @@ class PlaceTile implements Game {
 
     const animation = new BgaLocalAnimation(this.game);
     animation.setOptions(tileElement, externalTileSelectedElement, 500);
-    await animation.call();
 
-    tileElement.style.transform = `rotate(${this.externalTileSelected.rotation}deg)`;
+    await animation.call();
   }
 }

@@ -4,60 +4,67 @@
   width: $TILE_SIZE;
   height: $TILE_SIZE;
   position: relative;
-  perspective: 1000px;
-  transition: transform 0.3s ease;
 
-  & .undertheleaves-tile-front,
-  & .undertheleaves-tile-back {
-    box-sizing: border-box;
-    box-shadow:
-      0 2px 2px 0 rgba(0, 0, 0, 0.14),
-      0 3px 1px -2px rgba(0, 0, 0, 0.12),
-      0 1px 5px 0 rgba(0, 0, 0, 0.2);
-    -webkit-box-shadow:
-      0 2px 2px 0 rgba(0, 0, 0, 0.14),
-      0 3px 1px -2px rgba(0, 0, 0, 0.12),
-      0 1px 5px 0 rgba(0, 0, 0, 0.2);
-    background-size: 500% 1000%;
-    background-repeat: no-repeat;
-    background-image: url('img/tiles.png');
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    background-position-y: 100%;
-  }
+  .undertheleaves-tile-box {
+    width: $TILE_SIZE;
+    height: $TILE_SIZE;
+    position: relative;
+    perspective: 1000px;
+    transition: transform 0.3s ease;
 
-  & .undertheleaves-tile-back {
-    transform: rotateY(180deg);
-    background-image: url('img/back_tiles.png');
+    & .undertheleaves-tile-front,
+    & .undertheleaves-tile-back {
+      box-sizing: border-box;
+      box-shadow:
+        0 2px 2px 0 rgba(0, 0, 0, 0.14),
+        0 3px 1px -2px rgba(0, 0, 0, 0.12),
+        0 1px 5px 0 rgba(0, 0, 0, 0.2);
+      -webkit-box-shadow:
+        0 2px 2px 0 rgba(0, 0, 0, 0.14),
+        0 3px 1px -2px rgba(0, 0, 0, 0.12),
+        0 1px 5px 0 rgba(0, 0, 0, 0.2);
+      background-size: 500% 1000%;
+      background-repeat: no-repeat;
+      background-image: url('img/tiles.png');
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      background-position-y: 100%;
+    }
+
+    & .undertheleaves-tile-back {
+      transform: rotateY(180deg);
+      background-image: url('img/back_tiles.png');
+    }
+    .undertheleaves-tile-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transition: transform 0.3s ease;
+      transform-origin: center;
+      will-change: transform;
+    }
   }
 
   @for $i from 0 through 4 {
     @for $j from 0 through 9 {
-      &[line='#{$j}'][column='#{$i}'] .undertheleaves-tile-front,
-      &[line='#{$j}'][column='#{$i}'] .undertheleaves-tile-back {
-        background-position: calc((100% / 4) * $i) calc((100% / 9) * $j) !important;
+      &[line='#{$j}'][column='#{$i}'] .undertheleaves-tile-box {
+        .undertheleaves-tile-front,
+        .undertheleaves-tile-back {
+          background-position: calc((100% / 4) * $i) calc((100% / 9) * $j) !important;
+        }
       }
     }
   }
 
-  .undertheleaves-tile-inner {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    transition: transform 0.3s ease;
-    transform-origin: center;
-    will-change: transform;
-  }
-
-  &.selectable {
+  &.selectable .undertheleaves-tile-box {
     transition: 0.1s ease-in-out;
     cursor: pointer;
   }
 
-  &.selected {
+  &.selected .undertheleaves-tile-box {
     z-index: 2;
 
     .undertheleaves-tile-front {
@@ -67,6 +74,19 @@
 
     .undertheleaves-tile-inner {
       outline: 2px solid red;
+    }
+  }
+
+  &.notif {
+    height: 90px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+
+    .undertheleaves-tile-box {
+      width: 90px;
+      height: 90px;
     }
   }
 }
