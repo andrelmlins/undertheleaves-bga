@@ -265,6 +265,7 @@ var TileManager = /** @class */ (function () {
         this.game = game;
         this.gridMap = {};
         this.handlers = [];
+        this.mapContainerIds = [];
     }
     TileManager.prototype.setup = function () {
         var _this = this;
@@ -277,12 +278,21 @@ var TileManager = /** @class */ (function () {
         this.game.gamedatas.playerorder.forEach(function (playerId) {
             var player = _this.game.gamedatas.players[playerId];
             box.insertAdjacentHTML('beforeend', "\n          <div id=\"undertheleaves-player-".concat(playerId, "\" class=\"undertheleaves-player\">\n            <span style=\"--color: #").concat(player.color, "\">").concat(player.name, "</span>\n            <div id=\"undertheleaves-player-map-container-").concat(playerId, "\">\n              <div id=\"undertheleaves-player-map-scrollable-").concat(playerId, "\"></div>\n              <div id=\"undertheleaves-player-map-surface-").concat(playerId, "\"></div>\n              <div id=\"undertheleaves-player-map-scrollable-oversurface-").concat(playerId, "\"></div>\n            </div>\n          </div>\n        "));
+            var container = document.getElementById("undertheleaves-player-map-container-".concat(playerId));
+            container.id = "".concat(container.id, "-").concat(Date.now());
+            _this.mapContainerIds[playerId] = container.id;
             _this.gridMap[playerId] = new ebg.scrollmapWithZoom();
-            _this.gridMap[playerId].bAdaptHeightAuto = true;
-            _this.gridMap[playerId].bEnableLongPress = false;
-            _this.gridMap[playerId].create($("undertheleaves-player-map-container-".concat(playerId)), $("undertheleaves-player-map-scrollable-".concat(playerId)), $("undertheleaves-player-map-surface-".concat(playerId)), $("undertheleaves-player-map-scrollable-oversurface-".concat(playerId)));
+            _this.gridMap[playerId].bAdaptHeightAuto = false;
+            _this.gridMap[playerId].create($(container.id), $("undertheleaves-player-map-scrollable-".concat(playerId)), $("undertheleaves-player-map-surface-".concat(playerId)), $("undertheleaves-player-map-scrollable-oversurface-".concat(playerId)));
             _this.gridMap[playerId].onsurface_div.insertAdjacentHTML('beforeend', "<div id=\"undertheleaves-player-grid-".concat(playerId, "\" class=\"undertheleaves-player-grid\"></div>"));
             _this.createGridTiles(_this.game.gamedatas.gridTiles[playerId], Number(playerId));
+        });
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                _this.game.gamedatas.playerorder.forEach(function (playerId) {
+                    _this.applyZoom(Number(playerId));
+                });
+            });
         });
     };
     TileManager.prototype.onEnteringState = function (stateName, notif) {
@@ -296,6 +306,31 @@ var TileManager = /** @class */ (function () {
     };
     TileManager.prototype.setupNotifications = function () {
         //
+    };
+    TileManager.prototype.applyZoom = function (playerId) {
+        var playerGridBox = this.getGridBoxDiv(Number(playerId));
+        var cells = Array.from(playerGridBox.children);
+        if (!cells.length)
+            return;
+        var xs = cells.map(function (c) { return Number(c.dataset.x); });
+        var ys = cells.map(function (c) { return Number(c.dataset.y); });
+        var minX = Math.min.apply(Math, __spreadArray([], __read(xs), false));
+        var maxX = Math.max.apply(Math, __spreadArray([], __read(xs), false));
+        var minY = Math.min.apply(Math, __spreadArray([], __read(ys), false));
+        var maxY = Math.max.apply(Math, __spreadArray([], __read(ys), false));
+        var width = maxX - minX + 1;
+        var height = maxY - minY + 1;
+        var map = this.gridMap[playerId];
+        var container = document.getElementById(this.mapContainerIds[playerId]);
+        var padding = TILE_SIZE * 0.5;
+        var mapWidth = width * TILE_SIZE + padding * 2;
+        var mapHeight = height * TILE_SIZE + padding * 2;
+        var containerWidth = container.clientWidth;
+        var zoom = containerWidth / mapWidth;
+        zoom = Math.min(zoom, 1);
+        map.setMapZoom(zoom);
+        container.style.height = "".concat(mapHeight * zoom, "px");
+        map.scrollToCenter();
     };
     TileManager.prototype.formatTile = function (tile, notif) {
         if (notif === void 0) { notif = false; }
@@ -323,7 +358,7 @@ var TileManager = /** @class */ (function () {
         tiles.forEach(function (gridTile) {
             playerGridBox.insertAdjacentHTML('beforeend', "<div class=\"undertheleaves-player-cell\" data-x=".concat(gridTile.x, " data-y=").concat(gridTile.y, "></div>"));
             playerGridBox
-                .querySelector('[data-x="' + gridTile.x + '"][data-y="' + gridTile.y + '"]')
+                .querySelector("[data-x=\"".concat(gridTile.x, "\"][data-y=\"").concat(gridTile.y, "\"]"))
                 .insertAdjacentHTML('beforeend', _this.formatGridTile(gridTile));
         });
         this.recalculateGrid(playerId);
@@ -530,26 +565,20 @@ var PlaceTile = /** @class */ (function () {
             }); }));
         });
         this.game.games.tileManager.recalculateGrid(playerId);
-        this.game.games.tileManager.gridMap[playerId].scrollToCenter();
+        this.game.games.tileManager.applyZoom(Number(playerId));
     };
     PlaceTile.prototype.removeSelectExternals = function () {
         return __awaiter(this, void 0, void 0, function () {
             var playerId;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        playerId = this.game.bga.players.getCurrentPlayerId();
-                        this.game.games.tileManager
-                            .getGridBoxDiv(playerId)
-                            .querySelectorAll('.selectable')
-                            .forEach(function (item) { return item.classList.remove('selectable'); });
-                        this.game.games.tileManager.recalculateGrid(playerId);
-                        return [4 /*yield*/, delayTime(300)];
-                    case 1:
-                        _a.sent();
-                        this.game.games.tileManager.gridMap[playerId].scrollToCenter();
-                        return [2 /*return*/];
-                }
+                playerId = this.game.bga.players.getCurrentPlayerId();
+                this.game.games.tileManager
+                    .getGridBoxDiv(playerId)
+                    .querySelectorAll('.selectable')
+                    .forEach(function (item) { return item.classList.remove('selectable'); });
+                this.game.games.tileManager.recalculateGrid(playerId);
+                this.game.games.tileManager.applyZoom(playerId);
+                return [2 /*return*/];
             });
         });
     };
@@ -677,6 +706,7 @@ var PlaceTile = /** @class */ (function () {
                                 .insertAdjacentHTML('afterbegin', "<div class=\"undertheleaves-player-cell selectable\" data-x=\"".concat(notif.args.gridTile.x, "\" data-y=\"").concat(notif.args.gridTile.y, "\"></div>"));
                         }
                         this.game.games.tileManager.recalculateGrid(notif.args.playerId);
+                        this.game.games.tileManager.applyZoom(notif.args.playerId);
                         return [4 /*yield*/, delayTime(300)];
                     case 1:
                         _a.sent();

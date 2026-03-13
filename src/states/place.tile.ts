@@ -126,7 +126,7 @@ class PlaceTile implements Game {
     });
 
     this.game.games.tileManager.recalculateGrid(playerId);
-    this.game.games.tileManager.gridMap[playerId].scrollToCenter();
+    this.game.games.tileManager.applyZoom(Number(playerId));
   }
 
   public async removeSelectExternals() {
@@ -137,10 +137,7 @@ class PlaceTile implements Game {
       .forEach((item) => item.classList.remove('selectable'));
 
     this.game.games.tileManager.recalculateGrid(playerId);
-
-    await delayTime(300);
-
-    this.game.games.tileManager.gridMap[playerId].scrollToCenter();
+    this.game.games.tileManager.applyZoom(playerId);
   }
 
   public onClick() {
@@ -251,6 +248,7 @@ class PlaceTile implements Game {
     }
 
     this.game.games.tileManager.recalculateGrid(notif.args.playerId);
+    this.game.games.tileManager.applyZoom(notif.args.playerId);
 
     await delayTime(300);
 
