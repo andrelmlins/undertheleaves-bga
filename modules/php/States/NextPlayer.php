@@ -17,6 +17,7 @@ class NextPlayer extends GameState
         parent::__construct(
             $game,
             id: 90,
+            description: clienttranslate('Revealing a new garden tile'),
             type: StateType::GAME,
             updateGameProgression: true,
         );

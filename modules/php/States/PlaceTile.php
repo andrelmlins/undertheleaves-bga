@@ -67,9 +67,9 @@ class PlaceTile extends GameState
             'player_name' => $this->game->getPlayerNameById($activePlayerId),
             'tile_image' => $tile,
             'playerId' => $activePlayerId,
-            'tile' => $tile,
+            'gridTile' => $gridTile,
         ]);
-        $this->game->notify->all('simplePause', '', ['time' => 1000]);
+        $this->game->notify->all('simplePause', '', ['time' => 1200]);
 
         return NextPlayer::class;
     }

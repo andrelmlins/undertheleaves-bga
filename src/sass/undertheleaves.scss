@@ -73,7 +73,24 @@ html {
           box-sizing: border-box;
           cursor: pointer;
         }
+
+        .undertheleaves-tile .undertheleaves-tile-box {
+          .undertheleaves-tile-front,
+          .undertheleaves-tile-back {
+            box-shadow: none;
+            -webkit-box-shadow: none;
+          }
+        }
       }
     }
   }
+}
+
+.undertheleaves-void-stock {
+  top: 50%;
+  left: 50%;
+  z-index: 100;
+  transform: translate(-50%, -50%);
+  width: 0px;
+  height: 0px;
 }

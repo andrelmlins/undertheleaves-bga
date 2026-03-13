@@ -27,7 +27,7 @@ class GridTile
             playerId: $playerId ?? $this->playerId,
             rotation: $rotation ?? $this->rotation,
             side: $side ?? $this->side,
-            tile: $this->tile
+            tile: $tile ?? $this->tile
         );
     }
 }

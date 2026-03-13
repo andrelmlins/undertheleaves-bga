@@ -279,7 +279,8 @@
 .undertheleaves-tile.selected .undertheleaves-tile-box {
   z-index: 2;
 }
-.undertheleaves-tile.selected .undertheleaves-tile-box .undertheleaves-tile-front {
+.undertheleaves-tile.selected .undertheleaves-tile-box .undertheleaves-tile-front,
+.undertheleaves-tile.selected .undertheleaves-tile-box .undertheleaves-tile-back {
   box-shadow: none;
   -webkit-box-shadow: none;
 }
@@ -364,4 +365,18 @@ html {
   background: rgba(255, 0, 0, 0.3137254902);
   box-sizing: border-box;
   cursor: pointer;
+}
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-tile .undertheleaves-tile-box .undertheleaves-tile-front,
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-tile .undertheleaves-tile-box .undertheleaves-tile-back {
+  box-shadow: none;
+  -webkit-box-shadow: none;
+}
+
+.undertheleaves-void-stock {
+  top: 50%;
+  left: 50%;
+  z-index: 100;
+  transform: translate(-50%, -50%);
+  width: 0px;
+  height: 0px;
 }

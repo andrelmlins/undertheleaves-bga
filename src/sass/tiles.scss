@@ -67,7 +67,8 @@
   &.selected .undertheleaves-tile-box {
     z-index: 2;
 
-    .undertheleaves-tile-front {
+    .undertheleaves-tile-front,
+    .undertheleaves-tile-back {
       box-shadow: none;
       -webkit-box-shadow: none;
     }

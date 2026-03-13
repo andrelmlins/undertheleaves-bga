@@ -34,6 +34,13 @@ class UndertheLeavesGame extends GameGui<Player, UndertheLeavesGamedatas> {
       `,
     );
 
+    document
+      .getElementById('page-title')
+      .insertAdjacentHTML(
+        'afterbegin',
+        '<div id="undertheleaves-general-void-stock" class="undertheleaves-void-stock"></div>',
+      );
+
     for (let gameName in this.games) {
       this.games[gameName].setup(gamedatas);
     }

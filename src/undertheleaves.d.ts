@@ -44,3 +44,12 @@ interface GridTile {
 interface PlaceTileState {
   tableTiles: GridTile[];
 }
+
+interface RevealTileNotif {
+  tile: Tile;
+}
+
+interface PlaceTileNotif {
+  gridTile: GridTile;
+  playerId: number;
+}

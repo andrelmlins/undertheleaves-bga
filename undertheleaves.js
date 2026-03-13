@@ -58,6 +58,9 @@ var UndertheLeavesGame = /** @class */ (function (_super) {
             duration: 800,
         });
         document.getElementById('game_play_area').insertAdjacentHTML('beforeend', "\n        <div id=\"undertheleaves-box\" class=\"undertheleaves-box\">\n          <div id=\"undertheleaves-offer\" class=\"undertheleaves-offer\"></div>\n        </div>\n      ");
+        document
+            .getElementById('page-title')
+            .insertAdjacentHTML('afterbegin', '<div id="undertheleaves-general-void-stock" class="undertheleaves-void-stock"></div>');
         for (var gameName in this.games) {
             this.games[gameName].setup(gamedatas);
         }
@@ -327,7 +330,12 @@ var TileManager = /** @class */ (function () {
     };
     TileManager.prototype.recalculateGrid = function (playerId) {
         var playerGridBox = this.getGridBoxDiv(Number(playerId));
-        var cells = Array.from(playerGridBox.children);
+        Array.from(playerGridBox.children).forEach(function (cell) {
+            if (!cell.classList.contains('selectable') && cell.childNodes.length === 0) {
+                cell.remove();
+            }
+        });
+        var cells = Array.from(playerGridBox.children).filter(function (cell) { return cell.classList.contains('selectable') || cell.childNodes.length > 0; });
         var coords = cells.map(function (el) { return ({
             x: Number(el.dataset.x),
             y: Number(el.dataset.y),
@@ -340,7 +348,6 @@ var TileManager = /** @class */ (function () {
         var maxY = Math.max.apply(Math, __spreadArray([], __read(ys), false));
         var width = maxX - minX + 1;
         var height = maxY - minY + 1;
-        // garantir todas as células
         for (var y = maxY; y >= minY; y--) {
             for (var x = minX; x <= maxX; x++) {
                 if (!playerGridBox.querySelector("[data-x=\"".concat(x, "\"][data-y=\"").concat(y, "\"]"))) {
@@ -449,20 +456,24 @@ var PlaceTile = /** @class */ (function () {
     PlaceTile.prototype.onUpdateActionButtons = function (stateName, args) {
         var _this = this;
         if (stateName === 'client_MoveTile') {
-            this.game.statusBar.addActionButton(_('Place tile'), function () { return _this.onClick(args.tableTiles); });
+            this.game.statusBar.addActionButton(_('Place tile'), function () { return _this.onClick(); });
         }
         if (stateName === 'client_PlaceTile' || stateName === 'client_MoveTile') {
             this.game.statusBar.addActionButton('<i class="fa6 fa6-rotate-right"></i>', function () { return _this.onClickChangeDirection('right'); }, { color: 'secondary' });
             this.game.statusBar.addActionButton('<i class="fa6 fa6-rotate-left"></i>', function () { return _this.onClickChangeDirection('left'); }, { color: 'secondary' });
             this.game.statusBar.addActionButton('<i class="fa6 fa6-right-left"></i>', function () { return _this.onClickChangeDirection('inverse'); }, { color: 'secondary' });
-            this.game.statusBar.addActionButton(_('Cancel'), function () { return _this.onClickCancel(args.tableTiles); }, {
+            this.game.statusBar.addActionButton(_('Cancel'), function () { return _this.onClickCancel(); }, {
                 color: 'alert',
             });
         }
     };
-    PlaceTile.prototype.onLeavingState = function (stateName) { };
-    PlaceTile.prototype.setupNotifications = function () {
+    PlaceTile.prototype.onLeavingState = function (stateName) {
         //
+    };
+    PlaceTile.prototype.setupNotifications = function () {
+        var _this = this;
+        dojo.subscribe('revealTile', this, function (notif) { return _this.revealTileNotif(notif); });
+        dojo.subscribe('placeTile', this, function (notif) { return _this.placeTileNotif(notif); });
     };
     PlaceTile.prototype.showSelectExternals = function (tiles) {
         var _this = this;
@@ -521,14 +532,18 @@ var PlaceTile = /** @class */ (function () {
         this.game.games.tileManager.recalculateGrid(playerId);
         this.game.games.tileManager.gridMap[playerId].scrollToCenter();
     };
-    PlaceTile.prototype.removeSelectExternals = function (tiles) {
+    PlaceTile.prototype.removeSelectExternals = function () {
         return __awaiter(this, void 0, void 0, function () {
             var playerId;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         playerId = this.game.bga.players.getCurrentPlayerId();
-                        this.game.games.tileManager.createGridTiles(tiles, playerId);
+                        this.game.games.tileManager
+                            .getGridBoxDiv(playerId)
+                            .querySelectorAll('.selectable')
+                            .forEach(function (item) { return item.classList.remove('selectable'); });
+                        this.game.games.tileManager.recalculateGrid(playerId);
                         return [4 /*yield*/, delayTime(300)];
                     case 1:
                         _a.sent();
@@ -538,17 +553,16 @@ var PlaceTile = /** @class */ (function () {
             });
         });
     };
-    PlaceTile.prototype.onClick = function (tiles) {
+    PlaceTile.prototype.onClick = function () {
         var _this = this;
-        this.game.bga.actions
-            .performAction('actPlaceTile', __assign(__assign({}, this.externalTileSelected), { rotation: this.externalTileSelected.rotation % 360 }))
-            .then(function () {
+        var rotation = ((this.externalTileSelected.rotation % 360) + 360) % 360;
+        this.game.bga.actions.performAction('actPlaceTile', __assign(__assign({}, this.externalTileSelected), { rotation: rotation })).then(function () {
             _this.game.games.tileManager.getTileById(_this.externalTileSelected.tileId).classList.remove('selected');
             _this.externalTileSelected = null;
-            _this.removeSelectExternals(tiles);
+            _this.removeSelectExternals();
         });
     };
-    PlaceTile.prototype.onClickCancel = function (tiles) {
+    PlaceTile.prototype.onClickCancel = function () {
         return __awaiter(this, void 0, void 0, function () {
             var tileElement, offerElement, animation;
             return __generator(this, function (_a) {
@@ -568,7 +582,7 @@ var PlaceTile = /** @class */ (function () {
                         tileElement.querySelector('.undertheleaves-tile-box').style.transform = "rotate(0deg)";
                         tileElement.querySelector('.undertheleaves-tile-inner').style.transform = '';
                         this.externalTileSelected = null;
-                        this.removeSelectExternals(tiles);
+                        this.removeSelectExternals();
                         this.game.bga.states.setClientState('client_SelectTile', {
                             descriptionmyturn: _('${you} must select a garden tile'),
                         });
@@ -621,6 +635,60 @@ var PlaceTile = /** @class */ (function () {
                         return [4 /*yield*/, animation.call()];
                     case 1:
                         _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    PlaceTile.prototype.revealTileNotif = function (notif) {
+        return __awaiter(this, void 0, void 0, function () {
+            var offerElement, tileSelectedElement, animation;
+            return __generator(this, function (_a) {
+                document
+                    .getElementById('undertheleaves-general-void-stock')
+                    .insertAdjacentHTML('beforeend', this.game.games.tileManager.formatTile(notif.args.tile));
+                offerElement = document.getElementById('undertheleaves-offer');
+                tileSelectedElement = this.game.games.tileManager.getTileById(notif.args.tile.id);
+                animation = new BgaLocalAnimation(this.game);
+                animation.setWhere('afterbegin');
+                animation.setOptions(tileSelectedElement, offerElement, 500);
+                animation.call();
+                return [2 /*return*/];
+            });
+        });
+    };
+    PlaceTile.prototype.placeTileNotif = function (notif) {
+        return __awaiter(this, void 0, void 0, function () {
+            var tileBoxElement, inner, playerGridBoxElement, tileElement, externalElement, animation;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (notif.args.playerId == this.game.bga.players.getCurrentPlayerId()) {
+                            return [2 /*return*/];
+                        }
+                        tileBoxElement = this.game.games.tileManager.getBoxTileById(notif.args.gridTile.tile.id);
+                        inner = tileBoxElement.querySelector('.undertheleaves-tile-inner');
+                        tileBoxElement.style.transform = "rotate(".concat(notif.args.gridTile.rotation, "deg)");
+                        inner.style.transform = notif.args.gridTile.side == 1 ? 'rotateY(180deg)' : '';
+                        playerGridBoxElement = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
+                        if (!playerGridBoxElement.querySelector("[data-x=\"".concat(notif.args.gridTile.x, "\"][data-y=\"").concat(notif.args.gridTile.y, "\"]"))) {
+                            this.game.games.tileManager
+                                .getGridBoxDiv(notif.args.playerId)
+                                .insertAdjacentHTML('afterbegin', "<div class=\"undertheleaves-player-cell selectable\" data-x=\"".concat(notif.args.gridTile.x, "\" data-y=\"").concat(notif.args.gridTile.y, "\"></div>"));
+                        }
+                        this.game.games.tileManager.recalculateGrid(notif.args.playerId);
+                        return [4 /*yield*/, delayTime(300)];
+                    case 1:
+                        _a.sent();
+                        tileElement = this.game.games.tileManager.getTileById(notif.args.gridTile.tile.id);
+                        externalElement = playerGridBoxElement.querySelector("[data-x=\"".concat(notif.args.gridTile.x, "\"][data-y=\"").concat(notif.args.gridTile.y, "\"]"));
+                        animation = new BgaLocalAnimation(this.game);
+                        animation.setWhere('afterbegin');
+                        animation.setOptions(tileElement, externalElement, 700);
+                        return [4 /*yield*/, animation.call()];
+                    case 2:
+                        _a.sent();
+                        externalElement.classList.remove('selectable');
                         return [2 /*return*/];
                 }
             });

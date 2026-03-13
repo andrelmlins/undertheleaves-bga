@@ -33,7 +33,7 @@ class PlaceTile implements Game {
 
   public onUpdateActionButtons(stateName: string, args: PlaceTileState) {
     if (stateName === 'client_MoveTile') {
-      this.game.statusBar.addActionButton(_('Place tile'), () => this.onClick(args.tableTiles));
+      this.game.statusBar.addActionButton(_('Place tile'), () => this.onClick());
     }
 
     if (stateName === 'client_PlaceTile' || stateName === 'client_MoveTile') {
@@ -52,16 +52,19 @@ class PlaceTile implements Game {
         () => this.onClickChangeDirection('inverse'),
         { color: 'secondary' },
       );
-      this.game.statusBar.addActionButton(_('Cancel'), () => this.onClickCancel(args.tableTiles), {
+      this.game.statusBar.addActionButton(_('Cancel'), () => this.onClickCancel(), {
         color: 'alert',
       });
     }
   }
 
-  public onLeavingState(stateName: string) {}
+  public onLeavingState(stateName: string) {
+    //
+  }
 
   public setupNotifications() {
-    //
+    dojo.subscribe('revealTile', this, (notif) => this.revealTileNotif(notif));
+    dojo.subscribe('placeTile', this, (notif) => this.placeTileNotif(notif));
   }
 
   public showSelectExternals(tiles: GridTile[]) {
@@ -126,30 +129,32 @@ class PlaceTile implements Game {
     this.game.games.tileManager.gridMap[playerId].scrollToCenter();
   }
 
-  public async removeSelectExternals(tiles: GridTile[]) {
+  public async removeSelectExternals() {
     const playerId = this.game.bga.players.getCurrentPlayerId();
-    this.game.games.tileManager.createGridTiles(tiles, playerId);
+    this.game.games.tileManager
+      .getGridBoxDiv(playerId)
+      .querySelectorAll<HTMLElement>('.selectable')
+      .forEach((item) => item.classList.remove('selectable'));
+
+    this.game.games.tileManager.recalculateGrid(playerId);
 
     await delayTime(300);
 
     this.game.games.tileManager.gridMap[playerId].scrollToCenter();
   }
 
-  public onClick(tiles: GridTile[]) {
-    this.game.bga.actions
-      .performAction('actPlaceTile', {
-        ...this.externalTileSelected,
-        rotation: this.externalTileSelected.rotation % 360,
-      })
-      .then(() => {
-        this.game.games.tileManager.getTileById(this.externalTileSelected.tileId).classList.remove('selected');
+  public onClick() {
+    const rotation = ((this.externalTileSelected.rotation % 360) + 360) % 360;
 
-        this.externalTileSelected = null;
-        this.removeSelectExternals(tiles);
-      });
+    this.game.bga.actions.performAction('actPlaceTile', { ...this.externalTileSelected, rotation }).then(() => {
+      this.game.games.tileManager.getTileById(this.externalTileSelected.tileId).classList.remove('selected');
+
+      this.externalTileSelected = null;
+      this.removeSelectExternals();
+    });
   }
 
-  public async onClickCancel(tiles: GridTile[]) {
+  public async onClickCancel() {
     const tileElement = this.game.games.tileManager.getTileById(this.externalTileSelected.tileId);
     const offerElement = document.getElementById('undertheleaves-offer');
 
@@ -165,7 +170,7 @@ class PlaceTile implements Game {
     tileElement.querySelector<HTMLElement>('.undertheleaves-tile-inner').style.transform = '';
 
     this.externalTileSelected = null;
-    this.removeSelectExternals(tiles);
+    this.removeSelectExternals();
     this.game.bga.states.setClientState('client_SelectTile', {
       descriptionmyturn: _('${you} must select a garden tile'),
     });
@@ -184,7 +189,6 @@ class PlaceTile implements Game {
     if (type === 'inverse') this.externalTileSelected.inverse = !this.externalTileSelected.inverse;
 
     tileElement.style.transform = `rotate(${this.externalTileSelected.rotation}deg)`;
-
     inner.style.transform = this.externalTileSelected.inverse ? 'rotateY(180deg)' : '';
 
     await delayTime(300);
@@ -203,5 +207,64 @@ class PlaceTile implements Game {
     animation.setOptions(tileElement, externalTileSelectedElement, 500);
 
     await animation.call();
+  }
+
+  private async revealTileNotif(notif: Notif<RevealTileNotif>) {
+    document
+      .getElementById('undertheleaves-general-void-stock')
+      .insertAdjacentHTML('beforeend', this.game.games.tileManager.formatTile(notif.args.tile));
+
+    const offerElement = document.getElementById('undertheleaves-offer');
+    const tileSelectedElement = this.game.games.tileManager.getTileById(notif.args.tile.id);
+
+    const animation = new BgaLocalAnimation(this.game);
+    animation.setWhere('afterbegin');
+    animation.setOptions(tileSelectedElement, offerElement, 500);
+
+    animation.call();
+  }
+
+  private async placeTileNotif(notif: Notif<PlaceTileNotif>) {
+    if (notif.args.playerId == this.game.bga.players.getCurrentPlayerId()) {
+      return;
+    }
+
+    const tileBoxElement = this.game.games.tileManager.getBoxTileById(notif.args.gridTile.tile.id);
+    const inner = tileBoxElement.querySelector<HTMLElement>('.undertheleaves-tile-inner');
+
+    tileBoxElement.style.transform = `rotate(${notif.args.gridTile.rotation}deg)`;
+    inner.style.transform = notif.args.gridTile.side == 1 ? 'rotateY(180deg)' : '';
+
+    const playerGridBoxElement = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
+
+    if (
+      !playerGridBoxElement.querySelector<HTMLElement>(
+        `[data-x="${notif.args.gridTile.x}"][data-y="${notif.args.gridTile.y}"]`,
+      )
+    ) {
+      this.game.games.tileManager
+        .getGridBoxDiv(notif.args.playerId)
+        .insertAdjacentHTML(
+          'afterbegin',
+          `<div class="undertheleaves-player-cell selectable" data-x="${notif.args.gridTile.x}" data-y="${notif.args.gridTile.y}"></div>`,
+        );
+    }
+
+    this.game.games.tileManager.recalculateGrid(notif.args.playerId);
+
+    await delayTime(300);
+
+    const tileElement = this.game.games.tileManager.getTileById(notif.args.gridTile.tile.id);
+    const externalElement = playerGridBoxElement.querySelector<HTMLElement>(
+      `[data-x="${notif.args.gridTile.x}"][data-y="${notif.args.gridTile.y}"]`,
+    );
+
+    const animation = new BgaLocalAnimation(this.game);
+    animation.setWhere('afterbegin');
+    animation.setOptions(tileElement, externalElement, 700);
+
+    await animation.call();
+
+    externalElement.classList.remove('selectable');
   }
 }

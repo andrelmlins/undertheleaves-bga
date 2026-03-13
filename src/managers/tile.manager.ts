@@ -139,7 +139,16 @@ class TileManager implements Game {
 
   public recalculateGrid(playerId: number) {
     const playerGridBox = this.getGridBoxDiv(Number(playerId));
-    const cells = Array.from(playerGridBox.children) as HTMLElement[];
+
+    (Array.from(playerGridBox.children) as HTMLElement[]).forEach((cell) => {
+      if (!cell.classList.contains('selectable') && cell.childNodes.length === 0) {
+        cell.remove();
+      }
+    });
+
+    const cells = (Array.from(playerGridBox.children) as HTMLElement[]).filter(
+      (cell) => cell.classList.contains('selectable') || cell.childNodes.length > 0,
+    );
 
     const coords = cells.map((el) => ({
       x: Number(el.dataset.x),
@@ -157,7 +166,6 @@ class TileManager implements Game {
     const width = maxX - minX + 1;
     const height = maxY - minY + 1;
 
-    // garantir todas as células
     for (let y = maxY; y >= minY; y--) {
       for (let x = minX; x <= maxX; x++) {
         if (!playerGridBox.querySelector(`[data-x="${x}"][data-y="${y}"]`)) {
