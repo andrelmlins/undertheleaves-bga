@@ -1,0 +1,28 @@
+.undertheleaves-piece {
+  width: 20px;
+  height: 20px;
+  background-size: 500% 100%;
+  background-repeat: no-repeat;
+  background-image: url('img/pieces.png');
+  background-clip: content-box;
+
+  &[piece='bee'] {
+    background-position-x: 0%;
+  }
+
+  &[piece='hummingbird'] {
+    background-position-x: 25%;
+  }
+
+  &[piece='leaf'] {
+    background-position-x: 50%;
+  }
+
+  &[piece='mushroom'] {
+    background-position-x: 75%;
+  }
+
+  &[piece='puddle'] {
+    background-position-x: 100%;
+  }
+}

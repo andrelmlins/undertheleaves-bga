@@ -49,6 +49,8 @@ var UndertheLeavesGame = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         _this.games = {
             tileManager: new TileManager(_this),
+            cardManager: new CardManager(_this),
+            playerManager: new PlayerManager(_this),
             placeTile: new PlaceTile(_this),
         };
         return _this;
@@ -57,7 +59,7 @@ var UndertheLeavesGame = /** @class */ (function (_super) {
         this.animationManager = new AnimationManager(this, {
             duration: 800,
         });
-        document.getElementById('game_play_area').insertAdjacentHTML('beforeend', "\n        <div id=\"undertheleaves-box\" class=\"undertheleaves-box\">\n          <div id=\"undertheleaves-offer\" class=\"undertheleaves-offer\"></div>\n        </div>\n      ");
+        document.getElementById('game_play_area').insertAdjacentHTML('beforeend', "\n        <div id=\"undertheleaves-box\" class=\"undertheleaves-box\">\n          <div id=\"undertheleaves-cards\" class=\"undertheleaves-cards\"></div>\n          <div id=\"undertheleaves-offer\" class=\"undertheleaves-offer\"></div>\n        </div>\n      ");
         document
             .getElementById('page-title')
             .insertAdjacentHTML('afterbegin', '<div id="undertheleaves-general-void-stock" class="undertheleaves-void-stock"></div>');
@@ -446,6 +448,70 @@ var TileManager = /** @class */ (function () {
         return this.getTileById(id).querySelector('.undertheleaves-tile-box');
     };
     return TileManager;
+}());
+var CardManager = /** @class */ (function () {
+    function CardManager(game) {
+        this.game = game;
+    }
+    CardManager.prototype.setup = function () {
+        var cardsBox = document.getElementById('undertheleaves-cards');
+        cardsBox.insertAdjacentHTML('beforeend', this.formatCard(this.game.gamedatas.cards.leaf));
+        cardsBox.insertAdjacentHTML('beforeend', this.formatCard(this.game.gamedatas.cards.mushroom));
+        cardsBox.insertAdjacentHTML('beforeend', this.formatCard(this.game.gamedatas.cards.puddle));
+    };
+    CardManager.prototype.onEnteringState = function (stateName, notif) {
+        //
+    };
+    CardManager.prototype.onLeavingState = function (stateName) {
+        //
+    };
+    CardManager.prototype.onUpdateActionButtons = function (stateName, args) {
+        //
+    };
+    CardManager.prototype.setupNotifications = function () {
+        //
+    };
+    CardManager.prototype.formatCard = function (card) {
+        return "<div class=\"undertheleaves-card\" line=\"".concat(card.position.row, "\" column=\"").concat(card.position.column, "\"></div>");
+    };
+    return CardManager;
+}());
+var PlayerManager = /** @class */ (function () {
+    function PlayerManager(game) {
+        this.game = game;
+        this.counters = {};
+    }
+    PlayerManager.prototype.setup = function () {
+        for (var playerId in this.game.gamedatas.players) {
+            this.counters[playerId] = {
+                leaf: new ebg.counter(),
+                puddle: new ebg.counter(),
+                mushroom: new ebg.counter(),
+                hummingbird: new ebg.counter(),
+                bee: new ebg.counter(),
+            };
+            var playerBoardHtml = "\n        <div id=\"undertheleaves-player-board-".concat(playerId, "\" class=\"undertheleaves-player-board\">\n          <div class=\"undertheleaves-player-board-count\">\n            <div class=\"undertheleaves-piece\" piece=\"bee\"></div>\n            <span id=\"undertheleaves-bee-count-").concat(playerId, "\">0</span>\n          </div>\n          <div class=\"undertheleaves-player-board-count\">\n            <div class=\"undertheleaves-piece\" piece=\"hummingbird\"></div>\n            <span id=\"undertheleaves-hummingbird-count-").concat(playerId, "\">0</span>\n          </div>\n          <div class=\"undertheleaves-player-board-count\">\n            <div class=\"undertheleaves-piece\" piece=\"leaf\"></div>\n            <span id=\"undertheleaves-leaf-count-").concat(playerId, "\">0</span>\n          </div>\n          <div class=\"undertheleaves-player-board-count\">\n            <div class=\"undertheleaves-piece\" piece=\"mushroom\"></div>\n            <span id=\"undertheleaves-mushroom-count-").concat(playerId, "\">0</span>\n          </div>\n          <div class=\"undertheleaves-player-board-count\">\n            <div class=\"undertheleaves-piece\" piece=\"puddle\"></div>\n            <span id=\"undertheleaves-puddle-count-").concat(playerId, "\">0</span>\n          </div>\n        </div>\n      ");
+            document.getElementById("overall_player_board_".concat(playerId)).insertAdjacentHTML('beforeend', playerBoardHtml);
+            this.counters[playerId].leaf.create("undertheleaves-leaf-count-".concat(playerId));
+            this.counters[playerId].puddle.create("undertheleaves-puddle-count-".concat(playerId));
+            this.counters[playerId].mushroom.create("undertheleaves-mushroom-count-".concat(playerId));
+            this.counters[playerId].hummingbird.create("undertheleaves-hummingbird-count-".concat(playerId));
+            this.counters[playerId].bee.create("undertheleaves-bee-count-".concat(playerId));
+        }
+    };
+    PlayerManager.prototype.onEnteringState = function (stateName, notif) {
+        //
+    };
+    PlayerManager.prototype.onLeavingState = function (stateName) {
+        //
+    };
+    PlayerManager.prototype.onUpdateActionButtons = function (stateName, args) {
+        //
+    };
+    PlayerManager.prototype.setupNotifications = function () {
+        //
+    };
+    return PlayerManager;
 }());
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {

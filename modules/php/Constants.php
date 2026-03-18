@@ -2,6 +2,8 @@
 
 namespace Bga\Games\undertheleaves;
 
+use Bga\Games\undertheleaves\Entities\CardConfig;
+use Bga\Games\undertheleaves\Entities\CardType;
 use Bga\Games\undertheleaves\Entities\Position;
 use Bga\Games\undertheleaves\Entities\Terrain;
 use Bga\Games\undertheleaves\Entities\TerrainType;
@@ -14,6 +16,12 @@ trait Constants
 
     /** @var TileConfig[] $INITIAL_TILE_CONFIGS */
     public array $INITIAL_TILE_CONFIGS;
+
+    /** @var CardConfig[] $CARD_CONFIGS */
+    public array $CARD_CONFIGS;
+
+    /** @var int[] $REMOVE_TILES */
+    public array $REMOVE_TILES;
 
     public function startConstants()
     {
@@ -508,5 +516,85 @@ trait Constants
                 ]
             ),
         ];
+
+        $this->CARD_CONFIGS = [
+            new CardConfig(
+                new Position(0, 0),
+                CardType::Leaf,
+                clienttranslate('Thoughtful'),
+                clienttranslate('If a pollinized sector has four terrain spaces arranged in a square, it will attract a leaf dweller. Place its piece in the center of the square. You cannot use any of these four spaces to attract any other leaf dweller.'),
+                true
+            ),
+            new CardConfig(
+                new Position(0, 1),
+                CardType::Leaf,
+                clienttranslate('Restless'),
+                clienttranslate('If you have a pollinized sector of at least 5 terrain spaces, it will attract a leaf dweller. Place its piece anywhere within the sector.')
+            ),
+            new CardConfig(
+                new Position(0, 2),
+                CardType::Leaf,
+                clienttranslate('Flirty'),
+                clienttranslate('If you have 4 terrain spaces that are differently colored and/or a puddle, it will attract a leaf dweller. Place the dweller in the center of the four spaces. You cannot use any of these four spaces to attract any other leaf dweller.')
+            ),
+            new CardConfig(
+                new Position(0, 3),
+                CardType::Leaf,
+                clienttranslate('Runner'),
+                clienttranslate('If you have a pollinized sector with 4 terrain spaces in a row vertically or horizontally, it will attract a leaf dweller. Place its piece anywhere on the sector.')
+            ),
+            new CardConfig(
+                new Position(1, 0),
+                CardType::Mushroom,
+                clienttranslate('Host'),
+                clienttranslate('If a sector has at least 2 mushrooms, it attracts a mushroom dweller. The sector does not need to be pollinized. Place its piece anywhere on the sector.'),
+                true
+            ),
+            new CardConfig(
+                new Position(1, 1),
+                CardType::Mushroom,
+                clienttranslate('Explorer'),
+                clienttranslate('If you make a line that contains 3 mushrooms, regardless of the distance between each of them, it will attract a mushroom dweller. Put the mushroom dweller piece on the mushroom in the middle. The mushrooms can be on any type of terrain and at any distance from one another. You can attract another mushroom dweller with the mushrooms that do not have a mushroom dweller piece on them if you again fulfil this requirement with the placement of a new garden tile.')
+            ),
+            new CardConfig(
+                new Position(1, 2),
+                CardType::Mushroom,
+                clienttranslate('Collector'),
+                clienttranslate('If you form a diagonal of 2 spaces that contain mushrooms, it will attract a mushroom dweller. Place the dweller piece on one of the two the mushrooms. The mushroom that doesn’t have the dweller piece can be used again to atract a new dweller if you again fulfil this requirement with the placement of a new garden tile.')
+            ),
+            new CardConfig(
+                new Position(1, 3),
+                CardType::Mushroom,
+                clienttranslate('Loner'),
+                clienttranslate('If you surround a terrain space that contains a mushroom with eight spaces of any type that do not have any mushrooms in them, it will attract a mushroom dweller. Place the dweller piece on the mushroom.')
+            ),
+            new CardConfig(
+                new Position(2, 0),
+                CardType::Puddle,
+                clienttranslate('Diver'),
+                clienttranslate('If you create a puddle of 2 or more spaces, it will attract a puddle dweller. No new dwellers will be attracted if the puddle grows in later turns.'),
+                true
+            ),
+            new CardConfig(
+                new Position(2, 1),
+                CardType::Puddle,
+                clienttranslate('Skipper'),
+                clienttranslate('If you align 2 puddles with one terrain space (not puddle) between them, it will attract a puddle dweller. Place its piece in that terrain space. You can attract more dwellers using the existing puddles if the condition is fulfilled again by adding a new tile.')
+            ),
+            new CardConfig(
+                new Position(2, 2),
+                CardType::Puddle,
+                clienttranslate('Friendly'),
+                clienttranslate('If you create a diagonal using 2 puddles, it will attract a puddle dweller. Place its piece in one of the two puddle spaces. The puddle that remains empty can be used to attract another dweller if the condition is fulfilled again with the placement of a new tile in a later turn.')
+            ),
+            new CardConfig(
+                new Position(2, 3),
+                CardType::Puddle,
+                clienttranslate('Shy'),
+                clienttranslate('If you surround a puddle space with eight terrain spaces of any type (not puddles), it will attract a puddle dweller. Place the dweller piece on the puddle.')
+            ),
+        ];
+
+        $this->REMOVE_TILES = [4 => 0, 3 => 12, 2 => 24];
     }
 }

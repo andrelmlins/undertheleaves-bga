@@ -23,6 +23,7 @@ namespace Bga\Games\undertheleaves;
 use Bga\GameFramework\Components\Deck;
 use Bga\Games\undertheleaves\Entities\CardLocation;
 use Bga\Games\undertheleaves\Entities\Messages;
+use Bga\Games\undertheleaves\Services\CardService;
 use Bga\Games\undertheleaves\Services\TileService;
 use Bga\Games\undertheleaves\States\PlaceTile;
 
@@ -31,18 +32,20 @@ class Game extends \Bga\GameFramework\Table
     use Constants;
 
     public TileService $tileService;
+    public CardService $cardService;
 
     public Deck $tiles;
 
     public function __construct()
     {
         parent::__construct();
-        $this->initGameStateLabels([]);
+        $this->initGameStateLabels(['initialCards' => 100, 'visibleScore' => 101]);
 
         Messages::initMessages();
         $this->startConstants();
 
         $this->tileService = new TileService($this);
+        $this->cardService = new CardService($this);
 
         $this->tiles = $this->deckFactory->createDeck('tile');
     }
@@ -91,6 +94,8 @@ class Game extends \Bga\GameFramework\Table
         $result["tileConfigs"] = $this->TILE_CONFIGS;
         $result["initialTileConfigs"] = $this->INITIAL_TILE_CONFIGS;
         $result["gridTiles"] = $this->tileService->listAllTiles();
+        $result["countDeckTiles"] = (int)$this->tiles->countCardsInLocation(CardLocation::Deck->value);
+        $result["cards"] = $this->cardService->list();
 
         return $result;
     }
@@ -119,6 +124,7 @@ class Game extends \Bga\GameFramework\Table
         $this->reloadPlayersBasicInfos();
 
         $this->tileService->setup();
+        $this->cardService->setup();
 
         $this->activeNextPlayer();
 

@@ -299,6 +299,115 @@
   height: 90px;
 }
 
+.undertheleaves-card {
+  width: 140px;
+  height: 210px;
+  position: relative;
+  border-radius: 6px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
+  -webkit-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
+  background-size: 500% 300%;
+  background-repeat: no-repeat;
+  background-image: url("img/cards.png");
+}
+.undertheleaves-card[line="0"][column="0"] {
+  background-position: 0% 0% !important;
+}
+.undertheleaves-card[line="1"][column="0"] {
+  background-position: 0% 50% !important;
+}
+.undertheleaves-card[line="2"][column="0"] {
+  background-position: 0% 100% !important;
+}
+.undertheleaves-card[line="3"][column="0"] {
+  background-position: 0% 150% !important;
+}
+.undertheleaves-card[line="0"][column="1"] {
+  background-position: 25% 0% !important;
+}
+.undertheleaves-card[line="1"][column="1"] {
+  background-position: 25% 50% !important;
+}
+.undertheleaves-card[line="2"][column="1"] {
+  background-position: 25% 100% !important;
+}
+.undertheleaves-card[line="3"][column="1"] {
+  background-position: 25% 150% !important;
+}
+.undertheleaves-card[line="0"][column="2"] {
+  background-position: 50% 0% !important;
+}
+.undertheleaves-card[line="1"][column="2"] {
+  background-position: 50% 50% !important;
+}
+.undertheleaves-card[line="2"][column="2"] {
+  background-position: 50% 100% !important;
+}
+.undertheleaves-card[line="3"][column="2"] {
+  background-position: 50% 150% !important;
+}
+.undertheleaves-card[line="0"][column="3"] {
+  background-position: 75% 0% !important;
+}
+.undertheleaves-card[line="1"][column="3"] {
+  background-position: 75% 50% !important;
+}
+.undertheleaves-card[line="2"][column="3"] {
+  background-position: 75% 100% !important;
+}
+.undertheleaves-card[line="3"][column="3"] {
+  background-position: 75% 150% !important;
+}
+.undertheleaves-card[line="0"][column="4"] {
+  background-position: 100% 0% !important;
+}
+.undertheleaves-card[line="1"][column="4"] {
+  background-position: 100% 50% !important;
+}
+.undertheleaves-card[line="2"][column="4"] {
+  background-position: 100% 100% !important;
+}
+.undertheleaves-card[line="3"][column="4"] {
+  background-position: 100% 150% !important;
+}
+.undertheleaves-card[line="0"][column="5"] {
+  background-position: 125% 0% !important;
+}
+.undertheleaves-card[line="1"][column="5"] {
+  background-position: 125% 50% !important;
+}
+.undertheleaves-card[line="2"][column="5"] {
+  background-position: 125% 100% !important;
+}
+.undertheleaves-card[line="3"][column="5"] {
+  background-position: 125% 150% !important;
+}
+
+.undertheleaves-piece {
+  width: 20px;
+  height: 20px;
+  background-size: 500% 100%;
+  background-repeat: no-repeat;
+  background-image: url("img/pieces.png");
+  background-clip: content-box;
+}
+.undertheleaves-piece[piece=bee] {
+  background-position-x: 0%;
+}
+.undertheleaves-piece[piece=hummingbird] {
+  background-position-x: 25%;
+}
+.undertheleaves-piece[piece=leaf] {
+  background-position-x: 50%;
+}
+.undertheleaves-piece[piece=mushroom] {
+  background-position-x: 75%;
+}
+.undertheleaves-piece[piece=puddle] {
+  background-position-x: 100%;
+}
+
 html {
   background-image: url(img/background.png);
   background-size: auto;
@@ -311,6 +420,15 @@ html {
   flex-direction: column;
   gap: 16px;
 }
+.undertheleaves-box .undertheleaves-cards {
+  width: 100%;
+  padding: 12px;
+  background-color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  box-sizing: border-box;
+  gap: 12px;
+  justify-content: center;
+}
 .undertheleaves-box .undertheleaves-offer {
   width: 100%;
   padding: 12px;
@@ -321,6 +439,7 @@ html {
   justify-content: center;
 }
 .undertheleaves-box .undertheleaves-player {
+  position: relative;
   background-color: rgba(255, 255, 255, 0.6);
   display: flex;
   padding: 12px;
@@ -379,4 +498,30 @@ html {
   transform: translate(-50%, -50%);
   width: 0px;
   height: 0px;
+}
+
+.player-board {
+  background-image: url(img/user_background.png);
+  background-size: 100% 100%;
+  padding: 6px 12px;
+}
+
+.undertheleaves-player-board {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-bottom: 2px;
+}
+.undertheleaves-player-board .undertheleaves-player-board-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.undertheleaves-player-board .undertheleaves-player-board-count span {
+  font-family: "Libre Baskerville";
+  font-weight: 700;
+}
+.undertheleaves-player-board .undertheleaves-player-board-count .undertheleaves-piece {
+  width: 40px;
+  height: 40px;
 }

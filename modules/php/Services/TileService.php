@@ -24,6 +24,7 @@ class TileService
 
         $this->game->tiles->createCards($tiles, CardLocation::Deck->value);
         $this->game->tiles->shuffle(CardLocation::Deck->value);
+        $this->game->tiles->pickCardsForLocation($this->game->REMOVE_TILES[count($players)], CardLocation::Deck->value, CardLocation::Discard->value);
         $this->game->tiles->pickCardsForLocation(3, CardLocation::Deck->value, CardLocation::Table->value);
 
         $initialTiles = [];

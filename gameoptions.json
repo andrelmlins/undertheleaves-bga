@@ -1,1 +1,31 @@
-{}
+{
+  "100": {
+    "name": "Use the initial garden dweller cards",
+    "values": {
+      "1": {
+        "name": "Off",
+        "tmdisplay": ""
+      },
+      "2": {
+        "name": "On",
+        "tmdisplay": "",
+        "firstgameonly": true
+      }
+    },
+    "default": 1
+  },
+  "101": {
+    "name": "Visible score",
+    "values": {
+      "1": {
+        "name": "Off",
+        "tmdisplay": "Play without live scoring"
+      },
+      "2": {
+        "name": "On",
+        "tmdisplay": "Play with live scoring"
+      }
+    },
+    "default": 1
+  }
+}

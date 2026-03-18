@@ -3,10 +3,13 @@ interface UndertheLeavesGamedatas extends Gamedatas {
   initialTileConfigs: TileConfig[];
   tileConfigs: TileConfig[];
   gridTiles: Record<string, GridTile[]>;
+  cards: { leaf: CardConfig; mushroom: CardConfig; puddle: CardConfig };
 }
 
 interface UndertheLeavesGames {
   tileManager: TileManager;
+  cardManager: CardManager;
+  playerManager: PlayerManager;
   placeTile: PlaceTile;
 }
 
@@ -39,6 +42,14 @@ interface GridTile {
   rotation: number;
   side: number;
   tile: Tile;
+}
+
+interface CardConfig {
+  position: Position;
+  type: string;
+  name: string;
+  description: string;
+  firstGame: boolean;
 }
 
 interface PlaceTileState {
