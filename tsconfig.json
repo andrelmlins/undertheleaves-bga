@@ -20,6 +20,7 @@
     "src/managers/tile.manager.ts",
     "src/managers/card.manager.ts",
     "src/managers/player.manager.ts",
+    "src/managers/beings.manager.ts",
     "src/states/place.tile.ts",
     "node_modules/bga-animations/src/framework.d.ts",
     "node_modules/bga-animations/src/animations.ts",

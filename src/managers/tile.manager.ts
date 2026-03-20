@@ -129,7 +129,7 @@ class TileManager implements Game {
     return `
       <div ${!notif ? `id="undertheleaves-tile-${tile.id}"` : ''} class="undertheleaves-tile ${
         notif ? 'notif' : ''
-      }" line="${tileConfig.position.row}" column="${tileConfig.position.column}">
+      }" line="${tileConfig.position.row}" column="${tileConfig.position.column}" type="${tile.type}">
         <div class="undertheleaves-tile-box">  
           <div class="undertheleaves-tile-inner">
             <div class="undertheleaves-tile-front"></div>
@@ -144,16 +144,47 @@ class TileManager implements Game {
     const tileConfig = this.getTileConfig(gridTile.tile);
 
     return `
-      <div id="undertheleaves-tile-${gridTile.tile.id}" class="undertheleaves-tile" line="${tileConfig.position.row}" column="${tileConfig.position.column}">
+      <div id="undertheleaves-tile-${gridTile.tile.id}" class="undertheleaves-tile" line="${tileConfig.position.row}" column="${tileConfig.position.column}" type="${gridTile.tile.type}" data-x="${gridTile.x}" data-y="${gridTile.y}" data-rotation="${gridTile.rotation}" data-side="${gridTile.side}">
         <div class="undertheleaves-tile-box" style="transform: rotate(${gridTile.rotation}deg)">
           <div class="undertheleaves-tile-inner" style="${gridTile.side == 1 ? 'transform: rotateY(180deg)' : ''}">
             <div class="undertheleaves-tile-front"></div>
             <div class="undertheleaves-tile-back"></div>
           </div>
         </div>
+        ${this.formatBeingPositions(gridTile.x, gridTile.y)}
       </div>
     `;
   }
+
+  public formatBeingPositions(x: number, y: number) {
+    const localPositions = [
+      { localX: 0, localY: 0 },
+      { localX: 1, localY: 0 },
+      { localX: 0, localY: -1 },
+      { localX: 1, localY: -1 },
+    ];
+
+    const positions = localPositions.map((pos, index) => ({
+      localX: localPositions[index].localX,
+      localY: localPositions[index].localY,
+      x: x * 2 + pos.localX,
+      y: y * 2 + pos.localY,
+    }));
+
+    return positions
+      .map((pos) => {
+        const div = document.createElement('div');
+        div.className = 'undertheleaves-being-position';
+        div.dataset.localX = String(pos.localX);
+        div.dataset.localY = String(pos.localY);
+        div.dataset.x = String(pos.x);
+        div.dataset.y = String(pos.y);
+        return div.outerHTML;
+      })
+      .join('');
+  }
+
+  public createBeingPositionDivs(cellElement: HTMLElement, x: number, y: number, rotation: number, side: number) {}
 
   public getTileConfig(tile: Tile) {
     const [row, column] = tile.type_arg.split('_').map((item) => Number(item));
@@ -177,14 +208,15 @@ class TileManager implements Game {
     playerGridBox.innerHTML = '';
 
     tiles.forEach((gridTile) => {
-      playerGridBox.insertAdjacentHTML(
-        'beforeend',
-        `<div class="undertheleaves-player-cell" data-x=${gridTile.x} data-y=${gridTile.y}></div>`,
-      );
+      const cellDiv = document.createElement('div');
+      cellDiv.className = 'undertheleaves-player-cell';
+      cellDiv.dataset.x = String(gridTile.x);
+      cellDiv.dataset.y = String(gridTile.y);
 
-      playerGridBox
-        .querySelector(`[data-x="${gridTile.x}"][data-y="${gridTile.y}"]`)
-        .insertAdjacentHTML('beforeend', this.formatGridTile(gridTile));
+      playerGridBox.appendChild(cellDiv);
+
+      cellDiv.insertAdjacentHTML('beforeend', this.formatGridTile(gridTile));
+      this.createBeingPositionDivs(cellDiv, gridTile.x, gridTile.y, gridTile.rotation, gridTile.side);
     });
 
     this.recalculateGrid(playerId);
@@ -221,7 +253,7 @@ class TileManager implements Game {
 
     for (let y = maxY; y >= minY; y--) {
       for (let x = minX; x <= maxX; x++) {
-        if (!playerGridBox.querySelector(`[data-x="${x}"][data-y="${y}"]`)) {
+        if (!playerGridBox.querySelector(`.undertheleaves-player-cell[data-x="${x}"][data-y="${y}"]`)) {
           playerGridBox.insertAdjacentHTML(
             'beforeend',
             `<div class="undertheleaves-player-cell" data-x="${x}" data-y="${y}"></div>`,

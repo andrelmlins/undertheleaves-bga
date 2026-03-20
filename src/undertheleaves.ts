@@ -19,6 +19,7 @@ class UndertheLeavesGame extends GameGui<Player, UndertheLeavesGamedatas> {
       cardManager: new CardManager(this),
       playerManager: new PlayerManager(this),
       placeTile: new PlaceTile(this),
+      beingsManager: new BeingsManager(this),
     };
   }
 

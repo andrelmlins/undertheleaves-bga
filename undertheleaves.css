@@ -272,6 +272,25 @@
 .undertheleaves-tile[line="9"][column="4"] .undertheleaves-tile-box .undertheleaves-tile-back {
   background-position: 100% 100% !important;
 }
+.undertheleaves-tile[type=initial] .undertheleaves-tile-box .undertheleaves-tile-front {
+  background-image: url("img/initial_tiles.png");
+  background-size: 500% 100%;
+}
+.undertheleaves-tile[type=initial] .undertheleaves-tile-box .undertheleaves-tile-front[line="0"][column="0"] .undertheleaves-tile-box .undertheleaves-tile-front {
+  background-position: 0% 0%;
+}
+.undertheleaves-tile[type=initial] .undertheleaves-tile-box .undertheleaves-tile-front[line="0"][column="1"] .undertheleaves-tile-box .undertheleaves-tile-front {
+  background-position: 25% 0%;
+}
+.undertheleaves-tile[type=initial] .undertheleaves-tile-box .undertheleaves-tile-front[line="0"][column="2"] .undertheleaves-tile-box .undertheleaves-tile-front {
+  background-position: 50% 0%;
+}
+.undertheleaves-tile[type=initial] .undertheleaves-tile-box .undertheleaves-tile-front[line="0"][column="3"] .undertheleaves-tile-box .undertheleaves-tile-front {
+  background-position: 75% 0%;
+}
+.undertheleaves-tile[type=initial] .undertheleaves-tile-box .undertheleaves-tile-front[line="0"][column="4"] .undertheleaves-tile-box .undertheleaves-tile-front {
+  background-position: 100% 0%;
+}
 .undertheleaves-tile.selectable .undertheleaves-tile-box {
   transition: 0.1s ease-in-out;
   cursor: pointer;
@@ -385,8 +404,8 @@
 }
 
 .undertheleaves-piece {
-  width: 20px;
-  height: 20px;
+  width: 40px;
+  height: 40px;
   background-size: 500% 100%;
   background-repeat: no-repeat;
   background-image: url("img/pieces.png");
@@ -406,6 +425,12 @@
 }
 .undertheleaves-piece[piece=puddle] {
   background-position-x: 100%;
+}
+.undertheleaves-piece.notif {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  margin-bottom: -4px;
 }
 
 html {
@@ -474,6 +499,7 @@ html {
 }
 .undertheleaves-box .undertheleaves-player .undertheleaves-player-grid {
   display: grid;
+  position: relative;
 }
 .undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell {
   width: 180px;
@@ -489,6 +515,45 @@ html {
 .undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-tile .undertheleaves-tile-box .undertheleaves-tile-back {
   box-shadow: none;
   -webkit-box-shadow: none;
+}
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-position {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-position[data-local-x="0"][data-local-y="0"] {
+  top: 25%;
+  left: 25%;
+  transform: translate(-50%, -50%);
+}
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-position[data-local-x="1"][data-local-y="0"] {
+  top: 25%;
+  left: 75%;
+  transform: translate(-50%, -50%);
+}
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-position[data-local-x="0"][data-local-y="-1"] {
+  top: 75%;
+  left: 25%;
+  transform: translate(-50%, -50%);
+}
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-position[data-local-x="1"][data-local-y="-1"] {
+  top: 75%;
+  left: 75%;
+  transform: translate(-50%, -50%);
+}
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-position .undertheleaves-piece {
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
+  min-height: 50px;
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.55));
+}
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-position .undertheleaves-piece:not(:first-child) {
+  margin-top: -65px;
 }
 
 .undertheleaves-void-stock {
@@ -510,7 +575,7 @@ html {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  margin-bottom: 2px;
+  margin: 4px 0px;
 }
 .undertheleaves-player-board .undertheleaves-player-board-count {
   display: flex;
@@ -522,6 +587,6 @@ html {
   font-weight: 700;
 }
 .undertheleaves-player-board .undertheleaves-player-board-count .undertheleaves-piece {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
 }

@@ -1,6 +1,6 @@
 .undertheleaves-piece {
-  width: 20px;
-  height: 20px;
+  width: 40px;
+  height: 40px;
   background-size: 500% 100%;
   background-repeat: no-repeat;
   background-image: url('img/pieces.png');
@@ -24,5 +24,12 @@
 
   &[piece='puddle'] {
     background-position-x: 100%;
+  }
+
+  &.notif {
+    display: inline-flex;
+    width: 20px;
+    height: 20px;
+    margin-bottom: -4px;
   }
 }

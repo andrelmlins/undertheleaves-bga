@@ -1,4 +1,4 @@
-const BOLD_ARGS_VALUE = [];
+const BOLD_ARGS_VALUE = ['count_beings'];
 const BOLD_ARGS_I18N = [];
 
 class FormatStrings {
@@ -22,6 +22,10 @@ class FormatStrings {
 
     if (this.args.tile_image) {
       this.args.tile_image = this.game.games.tileManager.formatTile(this.args.tile_image, true);
+    }
+
+    if (this.args.being_icon) {
+      this.args.being_icon = `<div class="undertheleaves-piece notif" piece="${this.args.being_icon}"></div>`;
     }
   }
 }

@@ -4,12 +4,21 @@ interface UndertheLeavesGamedatas extends Gamedatas {
   tileConfigs: TileConfig[];
   gridTiles: Record<string, GridTile[]>;
   cards: { leaf: CardConfig; mushroom: CardConfig; puddle: CardConfig };
+  beings: Record<string, Being[]>;
+}
+
+interface BeingPosition {
+  localX: number;
+  localY: number;
+  x: number;
+  y: number;
 }
 
 interface UndertheLeavesGames {
   tileManager: TileManager;
   cardManager: CardManager;
   playerManager: PlayerManager;
+  beingsManager: BeingsManager;
   placeTile: PlaceTile;
 }
 
@@ -63,4 +72,26 @@ interface RevealTileNotif {
 interface PlaceTileNotif {
   gridTile: GridTile;
   playerId: number;
+}
+
+interface Being {
+  playerId: number;
+  type: 'bee' | 'hummingbird' | 'leaf_dweller' | 'puddle_dweller' | 'mushroom_dweller';
+  color?: string;
+  cells: number[][];
+  count: number;
+  x?: number;
+  y?: number;
+}
+
+interface BeingsAddedNotif {
+  playerId: number;
+  player_name: string;
+  being_type: string;
+  newSectors: number;
+}
+
+interface ArrivalBee {
+  playerId: number;
+  sectors: { cells: number[][] }[];
 }

@@ -96,7 +96,9 @@ class PlaceTile implements Game {
     });
 
     externalsMap.forEach((pos) => {
-      let element = gridBoxDiv.querySelector<HTMLElement>(`[data-x="${pos.x}"][data-y="${pos.y}"]`);
+      let element = gridBoxDiv.querySelector<HTMLElement>(
+        `.undertheleaves-player-cell[data-x="${pos.x}"][data-y="${pos.y}"]`,
+      );
 
       if (!element) {
         gridBoxDiv.insertAdjacentHTML(
@@ -104,7 +106,9 @@ class PlaceTile implements Game {
           `<div class="undertheleaves-player-cell selectable" data-x=${pos.x} data-y=${pos.y}></div>`,
         );
 
-        element = gridBoxDiv.querySelector<HTMLElement>(`[data-x="${pos.x}"][data-y="${pos.y}"]`);
+        element = gridBoxDiv.querySelector<HTMLElement>(
+          `.undertheleaves-player-cell[data-x="${pos.x}"][data-y="${pos.y}"]`,
+        );
       } else {
         element.classList.add('selectable');
       }
@@ -116,6 +120,10 @@ class PlaceTile implements Game {
             this.externalTileSelected.y = pos.y;
 
             await this.moveTileSelected(this.externalTileSelected.tileId);
+
+            const tileElement = this.game.games.tileManager.getTileById(this.externalTileSelected.tileId);
+            tileElement.querySelectorAll('.undertheleaves-being-position').forEach((item) => item.remove());
+            tileElement.insertAdjacentHTML('beforeend', this.game.games.tileManager.formatBeingPositions(pos.x, pos.y));
 
             this.game.bga.states.setClientState('client_MoveTile', {
               descriptionmyturn: _('${you} must place a garden tile'),
@@ -198,7 +206,9 @@ class PlaceTile implements Game {
     const tileElement = this.game.games.tileManager.getTileById(tileSelectedId);
     const externalTileSelectedElement = this.game.games.tileManager
       .getGridBoxDiv(playerId)
-      .querySelector<HTMLElement>(`[data-x="${this.externalTileSelected.x}"][data-y="${this.externalTileSelected.y}"]`);
+      .querySelector<HTMLElement>(
+        `.undertheleaves-player-cell[data-x="${this.externalTileSelected.x}"][data-y="${this.externalTileSelected.y}"]`,
+      );
 
     const animation = new BgaLocalAnimation(this.game);
     animation.setOptions(tileElement, externalTileSelectedElement, 500);
@@ -236,7 +246,7 @@ class PlaceTile implements Game {
 
     if (
       !playerGridBoxElement.querySelector<HTMLElement>(
-        `[data-x="${notif.args.gridTile.x}"][data-y="${notif.args.gridTile.y}"]`,
+        `.undertheleaves-player-cell[data-x="${notif.args.gridTile.x}"][data-y="${notif.args.gridTile.y}"]`,
       )
     ) {
       this.game.games.tileManager
@@ -254,7 +264,7 @@ class PlaceTile implements Game {
 
     const tileElement = this.game.games.tileManager.getTileById(notif.args.gridTile.tile.id);
     const externalElement = playerGridBoxElement.querySelector<HTMLElement>(
-      `[data-x="${notif.args.gridTile.x}"][data-y="${notif.args.gridTile.y}"]`,
+      `.undertheleaves-player-cell[data-x="${notif.args.gridTile.x}"][data-y="${notif.args.gridTile.y}"]`,
     );
 
     const animation = new BgaLocalAnimation(this.game);

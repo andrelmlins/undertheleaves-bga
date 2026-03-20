@@ -7,6 +7,8 @@ class Messages
     static string $PlaceTile = '';
     static string $RevealTile = '';
 
+    static string $ArrivalBeing = '';
+
     static string $InvalidPosition = '';
     static string $InvalidTile = '';
 
@@ -14,6 +16,8 @@ class Messages
     {
         Messages::$PlaceTile = '${player_name} places a garden tile ${tile_image}';
         Messages::$RevealTile = '${player_name} reveals a new garden tile ${tile_image}';
+
+        Messages::$ArrivalBeing = '${player_name} receives ${count_beings} ${being_icon}';
 
         Messages::$InvalidPosition = 'Invalid position';
         Messages::$InvalidTile = 'Invalid tile';

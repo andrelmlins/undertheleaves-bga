@@ -147,4 +147,12 @@ class TileService
 
         return $externalsMap;
     }
+
+    public function getTileConfigFromCard(array $card)
+    {
+        $isInitial = $card['type'] === 'initial';
+        $configs = $isInitial ? $this->game->INITIAL_TILE_CONFIGS : $this->game->TILE_CONFIGS;
+
+        return array_find($configs, fn($config) => $config->position->typeArg() == $card['type_arg']);
+    }
 }

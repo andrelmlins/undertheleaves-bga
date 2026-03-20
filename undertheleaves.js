@@ -1,4 +1,4 @@
-var BOLD_ARGS_VALUE = [];
+var BOLD_ARGS_VALUE = ['count_beings'];
 var BOLD_ARGS_I18N = [];
 var FormatStrings = /** @class */ (function () {
     function FormatStrings(game, args) {
@@ -19,6 +19,9 @@ var FormatStrings = /** @class */ (function () {
         });
         if (this.args.tile_image) {
             this.args.tile_image = this.game.games.tileManager.formatTile(this.args.tile_image, true);
+        }
+        if (this.args.being_icon) {
+            this.args.being_icon = "<div class=\"undertheleaves-piece notif\" piece=\"".concat(this.args.being_icon, "\"></div>");
         }
     };
     return FormatStrings;
@@ -52,6 +55,7 @@ var UndertheLeavesGame = /** @class */ (function (_super) {
             cardManager: new CardManager(_this),
             playerManager: new PlayerManager(_this),
             placeTile: new PlaceTile(_this),
+            beingsManager: new BeingsManager(_this),
         };
         return _this;
     }
@@ -337,12 +341,38 @@ var TileManager = /** @class */ (function () {
     TileManager.prototype.formatTile = function (tile, notif) {
         if (notif === void 0) { notif = false; }
         var tileConfig = this.getTileConfig(tile);
-        return "\n      <div ".concat(!notif ? "id=\"undertheleaves-tile-".concat(tile.id, "\"") : '', " class=\"undertheleaves-tile ").concat(notif ? 'notif' : '', "\" line=\"").concat(tileConfig.position.row, "\" column=\"").concat(tileConfig.position.column, "\">\n        <div class=\"undertheleaves-tile-box\">  \n          <div class=\"undertheleaves-tile-inner\">\n            <div class=\"undertheleaves-tile-front\"></div>\n            <div class=\"undertheleaves-tile-back\"></div>\n          </div>\n        </div>\n      </div>\n    ");
+        return "\n      <div ".concat(!notif ? "id=\"undertheleaves-tile-".concat(tile.id, "\"") : '', " class=\"undertheleaves-tile ").concat(notif ? 'notif' : '', "\" line=\"").concat(tileConfig.position.row, "\" column=\"").concat(tileConfig.position.column, "\" type=\"").concat(tile.type, "\">\n        <div class=\"undertheleaves-tile-box\">  \n          <div class=\"undertheleaves-tile-inner\">\n            <div class=\"undertheleaves-tile-front\"></div>\n            <div class=\"undertheleaves-tile-back\"></div>\n          </div>\n        </div>\n      </div>\n    ");
     };
     TileManager.prototype.formatGridTile = function (gridTile) {
         var tileConfig = this.getTileConfig(gridTile.tile);
-        return "\n      <div id=\"undertheleaves-tile-".concat(gridTile.tile.id, "\" class=\"undertheleaves-tile\" line=\"").concat(tileConfig.position.row, "\" column=\"").concat(tileConfig.position.column, "\">\n        <div class=\"undertheleaves-tile-box\" style=\"transform: rotate(").concat(gridTile.rotation, "deg)\">\n          <div class=\"undertheleaves-tile-inner\" style=\"").concat(gridTile.side == 1 ? 'transform: rotateY(180deg)' : '', "\">\n            <div class=\"undertheleaves-tile-front\"></div>\n            <div class=\"undertheleaves-tile-back\"></div>\n          </div>\n        </div>\n      </div>\n    ");
+        return "\n      <div id=\"undertheleaves-tile-".concat(gridTile.tile.id, "\" class=\"undertheleaves-tile\" line=\"").concat(tileConfig.position.row, "\" column=\"").concat(tileConfig.position.column, "\" type=\"").concat(gridTile.tile.type, "\" data-x=\"").concat(gridTile.x, "\" data-y=\"").concat(gridTile.y, "\" data-rotation=\"").concat(gridTile.rotation, "\" data-side=\"").concat(gridTile.side, "\">\n        <div class=\"undertheleaves-tile-box\" style=\"transform: rotate(").concat(gridTile.rotation, "deg)\">\n          <div class=\"undertheleaves-tile-inner\" style=\"").concat(gridTile.side == 1 ? 'transform: rotateY(180deg)' : '', "\">\n            <div class=\"undertheleaves-tile-front\"></div>\n            <div class=\"undertheleaves-tile-back\"></div>\n          </div>\n        </div>\n        ").concat(this.formatBeingPositions(gridTile.x, gridTile.y), "\n      </div>\n    ");
     };
+    TileManager.prototype.formatBeingPositions = function (x, y) {
+        var localPositions = [
+            { localX: 0, localY: 0 },
+            { localX: 1, localY: 0 },
+            { localX: 0, localY: -1 },
+            { localX: 1, localY: -1 },
+        ];
+        var positions = localPositions.map(function (pos, index) { return ({
+            localX: localPositions[index].localX,
+            localY: localPositions[index].localY,
+            x: x * 2 + pos.localX,
+            y: y * 2 + pos.localY,
+        }); });
+        return positions
+            .map(function (pos) {
+            var div = document.createElement('div');
+            div.className = 'undertheleaves-being-position';
+            div.dataset.localX = String(pos.localX);
+            div.dataset.localY = String(pos.localY);
+            div.dataset.x = String(pos.x);
+            div.dataset.y = String(pos.y);
+            return div.outerHTML;
+        })
+            .join('');
+    };
+    TileManager.prototype.createBeingPositionDivs = function (cellElement, x, y, rotation, side) { };
     TileManager.prototype.getTileConfig = function (tile) {
         var _a = __read(tile.type_arg.split('_').map(function (item) { return Number(item); }), 2), row = _a[0], column = _a[1];
         if (tile.type === 'initial') {
@@ -358,10 +388,13 @@ var TileManager = /** @class */ (function () {
         var playerGridBox = this.getGridBoxDiv(Number(playerId));
         playerGridBox.innerHTML = '';
         tiles.forEach(function (gridTile) {
-            playerGridBox.insertAdjacentHTML('beforeend', "<div class=\"undertheleaves-player-cell\" data-x=".concat(gridTile.x, " data-y=").concat(gridTile.y, "></div>"));
-            playerGridBox
-                .querySelector("[data-x=\"".concat(gridTile.x, "\"][data-y=\"").concat(gridTile.y, "\"]"))
-                .insertAdjacentHTML('beforeend', _this.formatGridTile(gridTile));
+            var cellDiv = document.createElement('div');
+            cellDiv.className = 'undertheleaves-player-cell';
+            cellDiv.dataset.x = String(gridTile.x);
+            cellDiv.dataset.y = String(gridTile.y);
+            playerGridBox.appendChild(cellDiv);
+            cellDiv.insertAdjacentHTML('beforeend', _this.formatGridTile(gridTile));
+            _this.createBeingPositionDivs(cellDiv, gridTile.x, gridTile.y, gridTile.rotation, gridTile.side);
         });
         this.recalculateGrid(playerId);
     };
@@ -387,7 +420,7 @@ var TileManager = /** @class */ (function () {
         var height = maxY - minY + 1;
         for (var y = maxY; y >= minY; y--) {
             for (var x = minX; x <= maxX; x++) {
-                if (!playerGridBox.querySelector("[data-x=\"".concat(x, "\"][data-y=\"").concat(y, "\"]"))) {
+                if (!playerGridBox.querySelector(".undertheleaves-player-cell[data-x=\"".concat(x, "\"][data-y=\"").concat(y, "\"]"))) {
                     playerGridBox.insertAdjacentHTML('beforeend', "<div class=\"undertheleaves-player-cell\" data-x=\"".concat(x, "\" data-y=\"").concat(y, "\"></div>"));
                 }
             }
@@ -490,7 +523,7 @@ var PlayerManager = /** @class */ (function () {
                 hummingbird: new ebg.counter(),
                 bee: new ebg.counter(),
             };
-            var playerBoardHtml = "\n        <div id=\"undertheleaves-player-board-".concat(playerId, "\" class=\"undertheleaves-player-board\">\n          <div class=\"undertheleaves-player-board-count\">\n            <div class=\"undertheleaves-piece\" piece=\"bee\"></div>\n            <span id=\"undertheleaves-bee-count-").concat(playerId, "\">0</span>\n          </div>\n          <div class=\"undertheleaves-player-board-count\">\n            <div class=\"undertheleaves-piece\" piece=\"hummingbird\"></div>\n            <span id=\"undertheleaves-hummingbird-count-").concat(playerId, "\">0</span>\n          </div>\n          <div class=\"undertheleaves-player-board-count\">\n            <div class=\"undertheleaves-piece\" piece=\"leaf\"></div>\n            <span id=\"undertheleaves-leaf-count-").concat(playerId, "\">0</span>\n          </div>\n          <div class=\"undertheleaves-player-board-count\">\n            <div class=\"undertheleaves-piece\" piece=\"mushroom\"></div>\n            <span id=\"undertheleaves-mushroom-count-").concat(playerId, "\">0</span>\n          </div>\n          <div class=\"undertheleaves-player-board-count\">\n            <div class=\"undertheleaves-piece\" piece=\"puddle\"></div>\n            <span id=\"undertheleaves-puddle-count-").concat(playerId, "\">0</span>\n          </div>\n        </div>\n      ");
+            var playerBoardHtml = "\n        <div id=\"undertheleaves-player-board-".concat(playerId, "\" class=\"undertheleaves-player-board\">\n          <div class=\"undertheleaves-player-board-count\">\n            ").concat(this.game.games.beingsManager.formatPiece('bee'), "\n            <span id=\"undertheleaves-bee-count-").concat(playerId, "\">0</span>\n          </div>\n          <div class=\"undertheleaves-player-board-count\">\n            ").concat(this.game.games.beingsManager.formatPiece('hummingbird'), "\n            <span id=\"undertheleaves-hummingbird-count-").concat(playerId, "\">0</span>\n          </div>\n          <div class=\"undertheleaves-player-board-count\">\n            ").concat(this.game.games.beingsManager.formatPiece('leaf'), "\n            <span id=\"undertheleaves-leaf-count-").concat(playerId, "\">0</span>\n          </div>\n          <div class=\"undertheleaves-player-board-count\">\n            ").concat(this.game.games.beingsManager.formatPiece('mushroom'), "\n            <span id=\"undertheleaves-mushroom-count-").concat(playerId, "\">0</span>\n          </div>\n          <div class=\"undertheleaves-player-board-count\">\n            ").concat(this.game.games.beingsManager.formatPiece('puddle'), "\n            <span id=\"undertheleaves-puddle-count-").concat(playerId, "\">0</span>\n          </div>\n        </div>\n      ");
             document.getElementById("overall_player_board_".concat(playerId)).insertAdjacentHTML('beforeend', playerBoardHtml);
             this.counters[playerId].leaf.create("undertheleaves-leaf-count-".concat(playerId));
             this.counters[playerId].puddle.create("undertheleaves-puddle-count-".concat(playerId));
@@ -512,6 +545,97 @@ var PlayerManager = /** @class */ (function () {
         //
     };
     return PlayerManager;
+}());
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
+var BeingsManager = /** @class */ (function () {
+    function BeingsManager(game) {
+        this.game = game;
+    }
+    BeingsManager.prototype.setup = function () {
+        var e_1, _a;
+        for (var playerId in this.game.gamedatas.beings) {
+            var playerBeings = this.game.gamedatas.beings[playerId];
+            try {
+                for (var playerBeings_1 = (e_1 = void 0, __values(playerBeings)), playerBeings_1_1 = playerBeings_1.next(); !playerBeings_1_1.done; playerBeings_1_1 = playerBeings_1.next()) {
+                    var being = playerBeings_1_1.value;
+                    this.renderBeing(being);
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (playerBeings_1_1 && !playerBeings_1_1.done && (_a = playerBeings_1.return)) _a.call(playerBeings_1);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+        }
+    };
+    BeingsManager.prototype.onEnteringState = function (stateName, notif) {
+        //
+    };
+    BeingsManager.prototype.onLeavingState = function (stateName) {
+        //
+    };
+    BeingsManager.prototype.onUpdateActionButtons = function (stateName, args) {
+        //
+    };
+    BeingsManager.prototype.setupNotifications = function () {
+        var _this = this;
+        dojo.subscribe('arrivalBee', this, function (notif) { return _this.arrivalBeeNotif(notif); });
+    };
+    BeingsManager.prototype.renderBeing = function (being) {
+        var gridBox = this.game.games.tileManager.getGridBoxDiv(being.playerId);
+        for (var i = 1; i <= being.count; i++) {
+            var cellIndex = i % being.cells.length;
+            var cell = being.cells[cellIndex - 1];
+            var cellBox = gridBox.querySelector(".undertheleaves-being-position[data-x='".concat(cell[0], "'][data-y='").concat(cell[1], "']"));
+            cellBox.insertAdjacentHTML('beforeend', this.formatPiece('bee'));
+        }
+    };
+    BeingsManager.prototype.formatPiece = function (piece, id) {
+        return "<div ".concat(id ? "id=".concat(id) : '', " class=\"undertheleaves-piece\" piece=\"").concat(piece, "\"></div>");
+    };
+    BeingsManager.prototype.arrivalBeeNotif = function (notif) {
+        return __awaiter(this, void 0, void 0, function () {
+            var gridBox;
+            var _this = this;
+            return __generator(this, function (_a) {
+                gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
+                notif.args.sectors.map(function (sector) {
+                    var id = generateId();
+                    document
+                        .getElementById('undertheleaves-general-void-stock')
+                        .insertAdjacentHTML('beforeend', _this.formatPiece('bee', id));
+                    var countBeings = sector.cells.reduce(function (acc, cell) {
+                        console.log(cell, gridBox.querySelector(".undertheleaves-being-position[data-x='".concat(cell[0], "'][data-y='").concat(cell[1], "']")));
+                        var itens = gridBox
+                            .querySelector(".undertheleaves-being-position[data-x='".concat(cell[0], "'][data-y='").concat(cell[1], "']"))
+                            .querySelectorAll('.undertheleaves-piece[piece="bee"]');
+                        return __spreadArray(__spreadArray([], __read(acc), false), __read(Array.from(itens)), false);
+                    }, []).length;
+                    var cellDestination = sector.cells[(countBeings % sector.cells.length) - 1];
+                    var beingElement = document.getElementById(id);
+                    var beingPositionElement = gridBox.querySelector(".undertheleaves-being-position[data-x='".concat(cellDestination[0], "'][data-y='").concat(cellDestination[1], "']"));
+                    var animation = new BgaLocalAnimation(_this.game);
+                    animation.setWhere('afterbegin');
+                    animation.setOptions(beingElement, beingPositionElement, 500);
+                    animation.call();
+                });
+                return [2 /*return*/];
+            });
+        });
+    };
+    return BeingsManager;
 }());
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
@@ -602,15 +726,16 @@ var PlaceTile = /** @class */ (function () {
             });
         });
         externalsMap.forEach(function (pos) {
-            var element = gridBoxDiv.querySelector("[data-x=\"".concat(pos.x, "\"][data-y=\"").concat(pos.y, "\"]"));
+            var element = gridBoxDiv.querySelector(".undertheleaves-player-cell[data-x=\"".concat(pos.x, "\"][data-y=\"").concat(pos.y, "\"]"));
             if (!element) {
                 gridBoxDiv.insertAdjacentHTML('beforeend', "<div class=\"undertheleaves-player-cell selectable\" data-x=".concat(pos.x, " data-y=").concat(pos.y, "></div>"));
-                element = gridBoxDiv.querySelector("[data-x=\"".concat(pos.x, "\"][data-y=\"").concat(pos.y, "\"]"));
+                element = gridBoxDiv.querySelector(".undertheleaves-player-cell[data-x=\"".concat(pos.x, "\"][data-y=\"").concat(pos.y, "\"]"));
             }
             else {
                 element.classList.add('selectable');
             }
             _this.handlers.push(dojo.connect(element, 'onclick', function () { return __awaiter(_this, void 0, void 0, function () {
+                var tileElement;
                 var _a, _b;
                 return __generator(this, function (_c) {
                     switch (_c.label) {
@@ -621,6 +746,9 @@ var PlaceTile = /** @class */ (function () {
                             return [4 /*yield*/, this.moveTileSelected(this.externalTileSelected.tileId)];
                         case 1:
                             _c.sent();
+                            tileElement = this.game.games.tileManager.getTileById(this.externalTileSelected.tileId);
+                            tileElement.querySelectorAll('.undertheleaves-being-position').forEach(function (item) { return item.remove(); });
+                            tileElement.insertAdjacentHTML('beforeend', this.game.games.tileManager.formatBeingPositions(pos.x, pos.y));
                             this.game.bga.states.setClientState('client_MoveTile', {
                                 descriptionmyturn: _('${you} must place a garden tile'),
                             });
@@ -724,7 +852,7 @@ var PlaceTile = /** @class */ (function () {
                         tileElement = this.game.games.tileManager.getTileById(tileSelectedId);
                         externalTileSelectedElement = this.game.games.tileManager
                             .getGridBoxDiv(playerId)
-                            .querySelector("[data-x=\"".concat(this.externalTileSelected.x, "\"][data-y=\"").concat(this.externalTileSelected.y, "\"]"));
+                            .querySelector(".undertheleaves-player-cell[data-x=\"".concat(this.externalTileSelected.x, "\"][data-y=\"").concat(this.externalTileSelected.y, "\"]"));
                         animation = new BgaLocalAnimation(this.game);
                         animation.setOptions(tileElement, externalTileSelectedElement, 500);
                         return [4 /*yield*/, animation.call()];
@@ -766,7 +894,7 @@ var PlaceTile = /** @class */ (function () {
                         tileBoxElement.style.transform = "rotate(".concat(notif.args.gridTile.rotation, "deg)");
                         inner.style.transform = notif.args.gridTile.side == 1 ? 'rotateY(180deg)' : '';
                         playerGridBoxElement = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
-                        if (!playerGridBoxElement.querySelector("[data-x=\"".concat(notif.args.gridTile.x, "\"][data-y=\"").concat(notif.args.gridTile.y, "\"]"))) {
+                        if (!playerGridBoxElement.querySelector(".undertheleaves-player-cell[data-x=\"".concat(notif.args.gridTile.x, "\"][data-y=\"").concat(notif.args.gridTile.y, "\"]"))) {
                             this.game.games.tileManager
                                 .getGridBoxDiv(notif.args.playerId)
                                 .insertAdjacentHTML('afterbegin', "<div class=\"undertheleaves-player-cell selectable\" data-x=\"".concat(notif.args.gridTile.x, "\" data-y=\"").concat(notif.args.gridTile.y, "\"></div>"));
@@ -777,7 +905,7 @@ var PlaceTile = /** @class */ (function () {
                     case 1:
                         _a.sent();
                         tileElement = this.game.games.tileManager.getTileById(notif.args.gridTile.tile.id);
-                        externalElement = playerGridBoxElement.querySelector("[data-x=\"".concat(notif.args.gridTile.x, "\"][data-y=\"").concat(notif.args.gridTile.y, "\"]"));
+                        externalElement = playerGridBoxElement.querySelector(".undertheleaves-player-cell[data-x=\"".concat(notif.args.gridTile.x, "\"][data-y=\"").concat(notif.args.gridTile.y, "\"]"));
                         animation = new BgaLocalAnimation(this.game);
                         animation.setWhere('afterbegin');
                         animation.setOptions(tileElement, externalElement, 700);

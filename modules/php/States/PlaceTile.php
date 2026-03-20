@@ -71,7 +71,9 @@ class PlaceTile extends GameState
         ]);
         $this->game->notify->all('simplePause', '', ['time' => 1200]);
 
-        return NextPlayer::class;
+        $this->game->globals->set('placeTile:gridTile', $gridTile);
+
+        return ArrivalBeings::class;
     }
 
     function zombie(int $playerId)
