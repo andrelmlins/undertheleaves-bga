@@ -592,6 +592,7 @@ var BeingsManager = /** @class */ (function () {
     BeingsManager.prototype.setupNotifications = function () {
         var _this = this;
         dojo.subscribe('arrivalBee', this, function (notif) { return _this.arrivalBeeNotif(notif); });
+        dojo.subscribe('mergeBee', this, function (notif) { return _this.mergeBeeNotif(notif); });
     };
     BeingsManager.prototype.renderBeing = function (being) {
         var gridBox = this.game.games.tileManager.getGridBoxDiv(being.playerId);
@@ -605,6 +606,33 @@ var BeingsManager = /** @class */ (function () {
     BeingsManager.prototype.formatPiece = function (piece, id) {
         return "<div ".concat(id ? "id=".concat(id) : '', " class=\"undertheleaves-piece\" piece=\"").concat(piece, "\"></div>");
     };
+    BeingsManager.prototype.mergeBeeNotif = function (notif) {
+        return __awaiter(this, void 0, void 0, function () {
+            var gridBox, existingPieces, cells;
+            var _this = this;
+            return __generator(this, function (_a) {
+                gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
+                existingPieces = [];
+                notif.args.oldBeings.forEach(function (being) {
+                    being.cells.forEach(function (cell) {
+                        gridBox
+                            .querySelectorAll(".undertheleaves-being-position[data-x='".concat(cell[0], "'][data-y='").concat(cell[1], "'] .undertheleaves-piece[piece=\"bee\"]"))
+                            .forEach(function (el) { return existingPieces.push(el); });
+                    });
+                });
+                cells = notif.args.mergedBeing.cells;
+                existingPieces.forEach(function (piece, i) {
+                    var cell = cells[i % cells.length];
+                    var beingPositionElement = gridBox.querySelector(".undertheleaves-being-position[data-x='".concat(cell[0], "'][data-y='").concat(cell[1], "']"));
+                    var animation = new BgaLocalAnimation(_this.game);
+                    animation.setWhere('afterbegin');
+                    animation.setOptions(piece, beingPositionElement, 300);
+                    animation.call();
+                });
+                return [2 /*return*/];
+            });
+        });
+    };
     BeingsManager.prototype.arrivalBeeNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
             var gridBox;
@@ -617,13 +645,12 @@ var BeingsManager = /** @class */ (function () {
                         .getElementById('undertheleaves-general-void-stock')
                         .insertAdjacentHTML('beforeend', _this.formatPiece('bee', id));
                     var countBeings = sector.cells.reduce(function (acc, cell) {
-                        console.log(cell, gridBox.querySelector(".undertheleaves-being-position[data-x='".concat(cell[0], "'][data-y='").concat(cell[1], "']")));
                         var itens = gridBox
                             .querySelector(".undertheleaves-being-position[data-x='".concat(cell[0], "'][data-y='").concat(cell[1], "']"))
                             .querySelectorAll('.undertheleaves-piece[piece="bee"]');
                         return __spreadArray(__spreadArray([], __read(acc), false), __read(Array.from(itens)), false);
                     }, []).length;
-                    var cellDestination = sector.cells[(countBeings % sector.cells.length) - 1];
+                    var cellDestination = sector.cells[countBeings % sector.cells.length];
                     var beingElement = document.getElementById(id);
                     var beingPositionElement = gridBox.querySelector(".undertheleaves-being-position[data-x='".concat(cellDestination[0], "'][data-y='").concat(cellDestination[1], "']"));
                     var animation = new BgaLocalAnimation(_this.game);
@@ -712,7 +739,10 @@ var PlaceTile = /** @class */ (function () {
         var externalsMap = [];
         var playerId = this.game.bga.players.getCurrentPlayerId();
         var gridBoxDiv = this.game.games.tileManager.getGridBoxDiv(playerId);
-        this.game.games.tileManager.createGridTiles(tiles, playerId);
+        gridBoxDiv.querySelectorAll('.undertheleaves-player-cell').forEach(function (cell) {
+            if (cell.childNodes.length === 0)
+                cell.remove();
+        });
         tiles.forEach(function (tile) {
             dirs.forEach(function (_a) {
                 var _b = __read(_a, 2), dx = _b[0], dy = _b[1];
@@ -912,6 +942,7 @@ var PlaceTile = /** @class */ (function () {
                         return [4 /*yield*/, animation.call()];
                     case 2:
                         _a.sent();
+                        tileElement.insertAdjacentHTML('beforeend', this.game.games.tileManager.formatBeingPositions(notif.args.gridTile.x, notif.args.gridTile.y));
                         externalElement.classList.remove('selectable');
                         return [2 /*return*/];
                 }

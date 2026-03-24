@@ -179,4 +179,9 @@ class SectorService
     {
         return array_map('intval', explode('_', $cellKey));
     }
+
+    public static function coordinatesToCellKey(array $coordinates): string
+    {
+        return $coordinates[0] . '_' . $coordinates[1];
+    }
 }

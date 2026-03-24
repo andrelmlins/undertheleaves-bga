@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\undertheleaves\Being;
 
-use Bga\Games\undertheleaves\Entities\GridTile;
+use Bga\Games\undertheleaves\Entities\Being;
 use Bga\Games\undertheleaves\Entities\Messages;
 use Bga\Games\undertheleaves\Services\SectorService;
 use Bga\Games\undertheleaves\Game;
@@ -13,100 +13,132 @@ class BeeBeing
 {
     public function __construct(public Game $game) {}
 
-    public function process(int $playerId, GridTile $newGridTile): void
+    public function process(int $playerId): void
     {
-        $allTiles = $this->game->tileService->listPlayerTiles($playerId);
-
         $sectorService = new SectorService($this->game);
-
         $sectorService->buildTerrainGrid($playerId);
-        $allSectors = $sectorService->getAllTerrainGroups(3);
+        $allTerrainGroups = $sectorService->getAllTerrainGroups(3);
 
-        if (empty($allSectors)) {
+        if (empty($allTerrainGroups)) {
             return;
         }
 
-        $tilesWithoutNew = array_filter(
-            $allTiles,
-            fn($t) => !($t->x === $newGridTile->x && $t->y === $newGridTile->y && $t->side === $newGridTile->side && $t->rotation === $newGridTile->rotation)
-        );
+        $registeredBees = $this->game->beingService->getBeingsBySector($playerId, 'bee');
 
-        $sectorServiceBefore = new SectorService($this->game);
-        $sectorServiceBefore->buildTerrainGrid($playerId, includeTiles: array_values($tilesWithoutNew));
-        $beforeSectors = $sectorServiceBefore->getAllTerrainGroups(3);
+        $newSectors = [];
 
-        $newlySectors = $sectorService->findNewlySectors($beforeSectors, $allSectors);
+        foreach ($allTerrainGroups as $color => $sectors) {
+            foreach ($sectors as $sectorCells) {
+                $beingsInSector = $this->findBeingsContainedInSector($registeredBees, $color, $sectorCells);
+                $sectorExistsUnchanged = $this->sectorMatchesExistingBeing($registeredBees, $color, $sectorCells);
 
-        $this->updateGrowthSectors($playerId, $beforeSectors, $allSectors);
-
-        if (empty($newlySectors)) {
-            return;
-        }
-
-        foreach ($newlySectors as $newSector) {
-            $color = $newSector['color'];
-            $cells = $newSector['cells'];
-
-            $this->game->beingService->addBeing($playerId, 'bee', $cells, $color, 1);
-
-            if (isset($allSectors[$color])) {
-                foreach ($allSectors[$color] as $existingSector) {
-                    if ($this->game->beingService->areSectorsSame($existingSector, $cells)) {
-                        continue;
-                    }
-
-                    if (!$this->game->beingService->beingExists($playerId, 'bee', $existingSector, $color)) {
-                        $this->game->beingService->addBeing($playerId, 'bee', $existingSector, $color, 1);
-                    }
+                if ($sectorExistsUnchanged) {
+                } elseif (count($beingsInSector) > 1) {
+                    $registeredBees = $this->processMergedSector($playerId, $beingsInSector, $sectorCells, $registeredBees);
+                } elseif (count($beingsInSector) === 1) {
+                    $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $sectorCells);
+                    $this->game->beingService->updateBeingCells($beingsInSector[0]->copyWith(cells: $cells));
+                } else {
+                    $newSectors[] = ['color' => $color, 'cells' => $sectorCells];
                 }
             }
         }
+
+        if (empty($newSectors)) {
+            return;
+        }
+
+        $colorsToIncrement = array_unique(array_column($newSectors, 'color'));
+
+        $existingSectorsForNotif = array_values(array_filter(
+            $registeredBees,
+            fn($being) => in_array($being->color, $colorsToIncrement)
+        ));
+
+        foreach ($colorsToIncrement as $color) {
+            $this->game->beingService->incrementBeesByColor($playerId, $color);
+        }
+
+        foreach ($newSectors as $newSector) {
+            $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $newSector['cells']);
+            $this->game->beingService->addBeing(new Being(
+                playerId: $playerId,
+                type: 'bee',
+                cells: $cells,
+                count: 1,
+                color: $newSector['color'],
+            ));
+        }
+
+        $transformedNew = array_map(function ($sector) {
+            $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $sector['cells']);
+            usort($cells, fn($a, $b) => $a[1] !== $b[1] ? $b[1] - $a[1] : $a[0] - $b[0]);
+            return ['color' => $sector['color'], 'cells' => $cells];
+        }, $newSectors);
+
+        $transformedExisting = array_map(fn($being) => [
+            'color' => $being->color,
+            'cells' => $being->cells,
+        ], $existingSectorsForNotif);
 
         $this->game->notify->all('arrivalBee', Messages::$ArrivalBeing, [
             'player_name' => $this->game->getPlayerNameById($playerId),
             'playerId' => $playerId,
-            'count_beings' => count($newlySectors),
-            'sectors' => $newlySectors,
+            'count_beings' => count($newSectors) + count($existingSectorsForNotif),
+            'sectors' => array_merge($transformedNew, $transformedExisting),
             'being_icon' => 'bee',
         ]);
+        $this->game->notify->all('simplePause', '', ['time' => 1000]);
     }
 
-    private function updateGrowthSectors(int $playerId, array $beforeSectors, array $allSectors): void
+    private function findBeingsContainedInSector(array $registeredBees, string $color, array $sectorCells): array
     {
-        foreach ($allSectors as $color => $currentSectors) {
-            if (!isset($beforeSectors[$color])) {
-                continue;
-            }
-
-            foreach ($currentSectors as $currentSector) {
-                foreach ($beforeSectors[$color] as $beforeSector) {
-                    if ($this->game->beingService->areSectorsSame($currentSector, $beforeSector)) {
-                        continue 2;
-                    }
-
-                    if ($this->isSectorGrowth($beforeSector, $currentSector)) {
-                        $this->game->beingService->updateBeingCells($playerId, 'bee', $beforeSector, $currentSector, $color);
-                        continue 2;
-                    }
-                }
-            }
-        }
+        return array_values(array_filter($registeredBees, function ($being) use ($color, $sectorCells) {
+            if ($being->color !== $color) return false;
+            $beingCellKeys = array_map(fn($coord) => SectorService::coordinatesToCellKey($coord), $being->cells);
+            return $this->isContained($beingCellKeys, $sectorCells);
+        }));
     }
 
-    private function isSectorGrowth(array $beforeSector, array $currentSector): bool
+    private function sectorMatchesExistingBeing(array $registeredBees, string $color, array $sectorCells): bool
     {
-        if (count($currentSector) <= count($beforeSector)) {
-            return false;
+        foreach ($registeredBees as $being) {
+            if ($being->color !== $color) continue;
+            $beingCellKeys = array_map(fn($coord) => SectorService::coordinatesToCellKey($coord), $being->cells);
+            if ($this->game->beingService->areSectorsSame($beingCellKeys, $sectorCells)) return true;
         }
+        return false;
+    }
 
-        $beforeSorted = $beforeSector;
-        sort($beforeSorted);
+    private function processMergedSector(int $playerId, array $beingsInSector, array $sectorCells, array $registeredBees): array
+    {
+        $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $sectorCells);
+        $primaryBeing = $beingsInSector[0];
+        $beingsToMerge = array_slice($beingsInSector, 1);
 
-        $currentSorted = $currentSector;
-        sort($currentSorted);
+        $mergedBeing = $this->game->beingService->mergeBeing(
+            $primaryBeing->copyWith(cells: $cells),
+            $beingsToMerge
+        );
 
-        foreach ($beforeSorted as $cell) {
-            if (!in_array($cell, $currentSorted)) {
+        $mergedIds = array_map(fn($b) => $b->id, $beingsToMerge);
+        $updatedBeings = array_values(array_filter($registeredBees, fn($b) => !in_array($b->id, $mergedIds)));
+        $updatedBeings = array_map(fn($b) => $b->id === $primaryBeing->id ? $mergedBeing : $b, $updatedBeings);
+
+        $this->game->notify->all('mergeBee', '', [
+            'playerId' => $playerId,
+            'mergedBeing' => ['cells' => $mergedBeing->cells, 'count' => $mergedBeing->count, 'color' => $mergedBeing->color],
+            'oldBeings' => array_map(fn($b) => ['cells' => $b->cells], $beingsInSector),
+        ]);
+        $this->game->notify->all('simplePause', '', ['time' => 500]);
+
+        return $updatedBeings;
+    }
+
+    private function isContained(array $subset, array $superset): bool
+    {
+        foreach ($subset as $cell) {
+            if (!in_array($cell, $superset)) {
                 return false;
             }
         }

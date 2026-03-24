@@ -11,9 +11,11 @@ class BeingService
 {
     public function __construct(public Game $game) {}
 
-    public function addBeing(int $playerId, string $type, array $cellKeys, ?string $color = null, int $count = 1): void
+    public function addBeing(Being $being): void
     {
-        $cellsJson = json_encode(array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $cellKeys));
+        $cells = $being->cells;
+        usort($cells, fn($a, $b) => $a[1] !== $b[1] ? $b[1] - $a[1] : $a[0] - $b[0]);
+        $cellsJson = json_encode($cells);
 
         $sql = "INSERT INTO beings (being_player_id, being_type, being_color, being_cells, being_count)
                 VALUES ('%s', '%s', %s, '%s', '%s')
@@ -21,12 +23,12 @@ class BeingService
 
         $this->game->DbQuery(sprintf(
             $sql,
-            $playerId,
-            $type,
-            $color ? "'{$color}'" : "NULL",
+            $being->playerId,
+            $being->type,
+            $being->color ? "'{$being->color}'" : "NULL",
             addslashes($cellsJson),
-            $count,
-            $count
+            $being->count,
+            $being->count
         ));
     }
 
@@ -51,29 +53,16 @@ class BeingService
         return !empty($result) && $result[0]['cnt'] > 0;
     }
 
-    public function updateBeingCells(int $playerId, string $type, array $oldCells, array $newCells, ?string $color = null): void
+    public function updateBeingCells(Being $being): void
     {
-        $oldCellsJson = json_encode(array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $oldCells));
-        $newCellsJson = json_encode(array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $newCells));
+        $cells = $being->cells;
+        usort($cells, fn($a, $b) => $a[1] !== $b[1] ? $b[1] - $a[1] : $a[0] - $b[0]);
+        $cellsJson = json_encode($cells);
+        $sql = "UPDATE beings
+                SET being_cells = '%s'
+                WHERE being_id = '%s'";
 
-        $sql = "UPDATE beings SET being_cells = '%s'
-                WHERE being_player_id = '%s'
-                AND being_type = '%s'
-                AND being_cells = '%s'";
-
-        $params = [
-            addslashes($newCellsJson),
-            $playerId,
-            $type,
-            addslashes($oldCellsJson),
-        ];
-
-        if ($color) {
-            $sql .= " AND being_color = '%s'";
-            $params[] = $color;
-        }
-
-        $this->game->DbQuery(sprintf($sql, ...$params));
+        $this->game->DbQuery(sprintf($sql, addslashes($cellsJson), $being->id));
     }
 
     public function getBeingsForPlayer(int $playerId): array
@@ -81,18 +70,7 @@ class BeingService
         $sql = "SELECT * FROM beings WHERE being_player_id = '%s'";
         $rows = $this->game->getObjectListFromDB(sprintf($sql, $playerId));
 
-        return array_map(
-            fn($row) => new Being(
-                playerId: (int)$row['being_player_id'],
-                type: $row['being_type'],
-                cells: json_decode($row['being_cells']),
-                count: (int)$row['being_count'],
-                color: $row['being_color'] ?? null,
-                x: isset($row['being_x']) ? (int)$row['being_x'] : null,
-                y: isset($row['being_y']) ? (int)$row['being_y'] : null,
-            ),
-            $rows
-        );
+        return array_map(fn($row) => $this->formatBeing($row), $rows);
     }
 
     public function getAllBeings(): array
@@ -105,6 +83,65 @@ class BeingService
         }
 
         return $result;
+    }
+
+    public function getBeingsBySector(int $playerId, string $type): array
+    {
+        $sql = "SELECT * FROM beings 
+                WHERE being_player_id = '%s' 
+                AND being_type = '%s'";
+
+        $rows = $this->game->getObjectListFromDB(sprintf($sql, $playerId, $type));
+
+        return array_map(fn($row) => $this->formatBeing($row), $rows);
+    }
+
+    public function mergeBeing(Being $primary, array $secondaries): Being
+    {
+        $totalCount = $primary->count + array_sum(array_map(fn($b) => $b->count, $secondaries));
+
+        $cells = $primary->cells;
+        usort($cells, fn($a, $b) => $a[1] !== $b[1] ? $b[1] - $a[1] : $a[0] - $b[0]);
+        $cellsJson = json_encode($cells);
+
+        $sql = "UPDATE beings SET being_cells = '%s', being_count = '%s' WHERE being_id = '%s'";
+        $this->game->DbQuery(sprintf($sql, addslashes($cellsJson), $totalCount, $primary->id));
+
+        foreach ($secondaries as $secondary) {
+            $this->deleteBeing($secondary->id);
+        }
+
+        return $primary->copyWith(cells: $cells, count: $totalCount);
+    }
+
+    public function deleteBeing(int $id): void
+    {
+        $this->game->DbQuery(sprintf("DELETE FROM beings WHERE being_id = '%s'", $id));
+    }
+
+    public function incrementBeesByColor(int $playerId, string $color, int $increment = 1): void
+    {
+        $sql = "UPDATE beings 
+                SET being_count = being_count + '%s' 
+                WHERE being_player_id = '%s' 
+                AND being_type = 'bee' 
+                AND being_color = '%s'";
+
+        $this->game->DbQuery(sprintf($sql, $increment, $playerId, $color));
+    }
+
+    public function formatBeing(array $row): Being
+    {
+        return new Being(
+            playerId: (int)$row['being_player_id'],
+            type: $row['being_type'],
+            cells: json_decode($row['being_cells'], true),
+            count: (int)$row['being_count'],
+            color: $row['being_color'] ?? null,
+            x: isset($row['being_x']) ? (int)$row['being_x'] : null,
+            y: isset($row['being_y']) ? (int)$row['being_y'] : null,
+            id: (int)$row['being_id'],
+        );
     }
 
     public function areSectorsSame(array $sector1, array $sector2): bool

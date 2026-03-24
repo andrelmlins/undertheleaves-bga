@@ -79,7 +79,9 @@ class PlaceTile implements Game {
     const playerId = this.game.bga.players.getCurrentPlayerId();
     const gridBoxDiv = this.game.games.tileManager.getGridBoxDiv(playerId);
 
-    this.game.games.tileManager.createGridTiles(tiles, playerId);
+    gridBoxDiv.querySelectorAll<HTMLElement>('.undertheleaves-player-cell').forEach((cell) => {
+      if (cell.childNodes.length === 0) cell.remove();
+    });
 
     tiles.forEach((tile) => {
       dirs.forEach(([dx, dy]) => {
@@ -272,6 +274,11 @@ class PlaceTile implements Game {
     animation.setOptions(tileElement, externalElement, 700);
 
     await animation.call();
+
+    tileElement.insertAdjacentHTML(
+      'beforeend',
+      this.game.games.tileManager.formatBeingPositions(notif.args.gridTile.x, notif.args.gridTile.y),
+    );
 
     externalElement.classList.remove('selectable');
   }

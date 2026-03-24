@@ -91,7 +91,13 @@ interface BeingsAddedNotif {
   newSectors: number;
 }
 
-interface ArrivalBee {
+interface ArrivalBeeNotif {
   playerId: number;
   sectors: { cells: number[][] }[];
+}
+
+interface MergeBeeNotif {
+  playerId: number;
+  mergedBeing: { cells: number[][]; count: number; color: string };
+  oldBeings: { cells: number[][] }[];
 }

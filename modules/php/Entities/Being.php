@@ -12,6 +12,7 @@ class Being
         public ?string $color = null,
         public ?int $x = null,
         public ?int $y = null,
+        public ?int $id = null,
     ) {}
 
     public function copyWith(
@@ -22,6 +23,7 @@ class Being
         ?string $color = null,
         ?int $x = null,
         ?int $y = null,
+        ?int $id = null,
     ): Being {
         return new Being(
             playerId: $playerId ?? $this->playerId,
@@ -31,6 +33,7 @@ class Being
             color: $color ?? $this->color,
             x: $x ?? $this->x,
             y: $y ?? $this->y,
+            id: $id ?? $this->id,
         );
     }
 }
