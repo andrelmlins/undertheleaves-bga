@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bga\Games\undertheleaves\Being;
 
 use Bga\Games\undertheleaves\Entities\Messages;
+use Bga\Games\undertheleaves\Entities\TerrainType;
 use Bga\Games\undertheleaves\Services\SectorService;
 use Bga\Games\undertheleaves\Game;
 
@@ -15,7 +16,7 @@ class HummingbirdBeing
     public function process(int $playerId): void
     {
         $sectorService = new SectorService($this->game);
-        $sectorService->buildTerrainGrid($playerId);
+        $sectorService->buildGrid($playerId, fn($t) => $t->type !== TerrainType::Puddle ? $t->type->value : false);
 
         $allTerrainGroups = $sectorService->getAllTerrainGroups(3);
 
@@ -63,27 +64,33 @@ class HummingbirdBeing
 
             $leftKey = ($tx - 1) . "_{$ty}";
             $rightKey = ($tx + 1) . "_{$ty}";
-            if (isset($tileTargets[$leftKey]) && $tileTargets[$leftKey] === 1 &&
-                isset($tileTargets[$rightKey]) && $tileTargets[$rightKey] === 1) {
+            if (
+                isset($tileTargets[$leftKey]) && $tileTargets[$leftKey] === 1 &&
+                isset($tileTargets[$rightKey]) && $tileTargets[$rightKey] === 1
+            ) {
                 $tileTargets[$key]++;
             }
 
             $downKey = "{$tx}_" . ($ty - 1);
             $upKey = "{$tx}_" . ($ty + 1);
-            if (isset($tileTargets[$downKey]) && $tileTargets[$downKey] === 1 &&
-                isset($tileTargets[$upKey]) && $tileTargets[$upKey] === 1) {
+            if (
+                isset($tileTargets[$downKey]) && $tileTargets[$downKey] === 1 &&
+                isset($tileTargets[$upKey]) && $tileTargets[$upKey] === 1
+            ) {
                 $tileTargets[$key]++;
             }
         }
 
         $existingHummingbirds = $this->game->beingService->getBeingsByType($playerId, 'hummingbird');
         $existingByTile = [];
+
         foreach ($existingHummingbirds as $being) {
             $key = "{$being->x}_{$being->y}";
             $existingByTile[$key] = $being->count;
         }
 
         $newHummingbirds = [];
+
         foreach ($tileTargets as $key => $targetCount) {
             if ($targetCount === 0) {
                 continue;

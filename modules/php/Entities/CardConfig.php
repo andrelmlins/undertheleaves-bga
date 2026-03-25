@@ -9,6 +9,7 @@ class CardConfig
         public CardType $type,
         public string $name,
         public string $description,
-        public bool $firstGame = false
+        public bool $firstGame = false,
+        public ?DwellerBeing $dweller = null,
     ) {}
 }

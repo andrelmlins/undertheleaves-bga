@@ -2,6 +2,7 @@
 
 namespace Bga\Games\undertheleaves;
 
+use Bga\Games\undertheleaves\Being\DiverPuddleBeing;
 use Bga\Games\undertheleaves\Entities\CardConfig;
 use Bga\Games\undertheleaves\Entities\CardType;
 use Bga\Games\undertheleaves\Entities\Position;
@@ -573,7 +574,8 @@ trait Constants
                 CardType::Puddle,
                 clienttranslate('Diver'),
                 clienttranslate('If you create a puddle of 2 or more spaces, it will attract a puddle dweller. No new dwellers will be attracted if the puddle grows in later turns.'),
-                true
+                firstGame: true,
+                dweller: new DiverPuddleBeing(),
             ),
             new CardConfig(
                 new Position(2, 1),

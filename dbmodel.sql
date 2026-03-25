@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS `beings` (
     `being_id` int(11) NOT NULL AUTO_INCREMENT,
     `being_player_id` int(11) NOT NULL,
     `being_type` varchar(32) NOT NULL COMMENT 'bee | hummingbird | leaf | puddle | mushroom',
+    `being_subtype` varchar(32) NULL COMMENT 'Specific dweller subtype, e.g. diver for puddle',
     `being_color` varchar(20) COMMENT 'For bees and hummingbirds - the terrain color',
     `being_cells` varchar(2000) NOT NULL COMMENT 'JSON array of [x, y] coordinates for sector cells',
     `being_count` int(11) NOT NULL DEFAULT 1 COMMENT 'How many of this being in this sector',
@@ -37,6 +38,7 @@ CREATE TABLE IF NOT EXISTS `beings` (
     UNIQUE KEY `unique_being_sector` (
         `being_player_id`,
         `being_type`,
+        `being_subtype`,
         `being_color`,
         `being_cells`(200)
     )

@@ -589,6 +589,9 @@ var BeingsManager = /** @class */ (function () {
                     if (being.type === 'hummingbird') {
                         this.renderHummingbird(being);
                     }
+                    else if (being.subtype === 'diver') {
+                        this.renderDiverPuddle(being);
+                    }
                     else {
                         this.renderBeing(being);
                     }
@@ -617,18 +620,68 @@ var BeingsManager = /** @class */ (function () {
         dojo.subscribe('arrivalBee', this, function (notif) { return _this.arrivalBeeNotif(notif); });
         dojo.subscribe('mergeBee', this, function (notif) { return _this.mergeBeeNotif(notif); });
         dojo.subscribe('arrivalHummingbird', this, function (notif) { return _this.arrivalHummingbirdNotif(notif); });
+        dojo.subscribe('arrivalDiverPuddle', this, function (notif) { return _this.arrivalDiverPuddleNotif(notif); });
         dojo.subscribe('majorityBonus', this, function (notif) { return _this.majorityBonusNotif(notif); });
     };
-    BeingsManager.prototype.renderBeing = function (being) {
+    BeingsManager.prototype.renderDiverPuddle = function (being) {
+        var _a;
         var gridBox = this.game.games.tileManager.getGridBoxDiv(being.playerId);
         for (var i = 0; i < being.count; i++) {
             var cell = being.cells[i % being.cells.length];
-            var cellBox = gridBox.querySelector(".undertheleaves-being-position[data-x='".concat(cell[0], "'][data-y='").concat(cell[1], "']"));
-            cellBox.insertAdjacentHTML('beforeend', this.formatPiece('bee'));
+            (_a = this.getCellDiv(gridBox, cell)) === null || _a === void 0 ? void 0 : _a.insertAdjacentHTML('beforeend', this.formatPiece('puddle'));
+        }
+    };
+    BeingsManager.prototype.renderBeing = function (being) {
+        var _a;
+        var gridBox = this.game.games.tileManager.getGridBoxDiv(being.playerId);
+        for (var i = 0; i < being.count; i++) {
+            var cell = being.cells[i % being.cells.length];
+            (_a = this.getCellDiv(gridBox, cell)) === null || _a === void 0 ? void 0 : _a.insertAdjacentHTML('beforeend', this.formatPiece(being.type));
+        }
+    };
+    BeingsManager.prototype.renderHummingbird = function (being) {
+        var gridBox = this.game.games.tileManager.getGridBoxDiv(being.playerId);
+        for (var i = 0; i < being.count; i++) {
+            var nestBox = gridBox.querySelector(".undertheleaves-being-center-position[data-x='".concat(being.x, "'][data-y='").concat(being.y, "']"));
+            nestBox === null || nestBox === void 0 ? void 0 : nestBox.insertAdjacentHTML('beforeend', this.formatPiece('hummingbird'));
         }
     };
     BeingsManager.prototype.formatPiece = function (piece, id) {
         return "<div ".concat(id ? "id=".concat(id) : '', " class=\"undertheleaves-piece\" piece=\"").concat(piece, "\"></div>");
+    };
+    BeingsManager.prototype.getCellDiv = function (gridBox, cell) {
+        return gridBox.querySelector(".undertheleaves-being-position[data-x='".concat(cell[0], "'][data-y='").concat(cell[1], "']"));
+    };
+    BeingsManager.prototype.countPiecesInSector = function (gridBox, cells, pieceType) {
+        var _this = this;
+        return cells.reduce(function (acc, cell) {
+            var _a, _b;
+            var items = (_b = (_a = _this.getCellDiv(gridBox, cell)) === null || _a === void 0 ? void 0 : _a.querySelectorAll(".undertheleaves-piece[piece=\"".concat(pieceType, "\"]"))) !== null && _b !== void 0 ? _b : [];
+            return acc + items.length;
+        }, 0);
+    };
+    BeingsManager.prototype.animatePieceFromVoid = function (pieceType_1, destElement_1) {
+        return __awaiter(this, arguments, void 0, function (pieceType, destElement, duration) {
+            var id, beingElement, animation;
+            if (duration === void 0) { duration = 500; }
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        id = generateId();
+                        document
+                            .getElementById('undertheleaves-general-void-stock')
+                            .insertAdjacentHTML('beforeend', this.formatPiece(pieceType, id));
+                        beingElement = document.getElementById(id);
+                        animation = new BgaLocalAnimation(this.game);
+                        animation.setWhere('afterbegin');
+                        animation.setOptions(beingElement, destElement, duration);
+                        return [4 /*yield*/, animation.call()];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
     };
     BeingsManager.prototype.mergeBeeNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
@@ -639,15 +692,14 @@ var BeingsManager = /** @class */ (function () {
                 existingPieces = [];
                 notif.args.oldBeings.forEach(function (being) {
                     being.cells.forEach(function (cell) {
-                        gridBox
-                            .querySelectorAll(".undertheleaves-being-position[data-x='".concat(cell[0], "'][data-y='").concat(cell[1], "'] .undertheleaves-piece[piece=\"bee\"]"))
-                            .forEach(function (el) { return existingPieces.push(el); });
+                        var _a;
+                        (_a = _this.getCellDiv(gridBox, cell)) === null || _a === void 0 ? void 0 : _a.querySelectorAll('.undertheleaves-piece[piece="bee"]').forEach(function (el) { return existingPieces.push(el); });
                     });
                 });
                 cells = notif.args.mergedBeing.cells;
                 existingPieces.forEach(function (piece, i) {
                     var cell = cells[i % cells.length];
-                    var beingPositionElement = gridBox.querySelector(".undertheleaves-being-position[data-x='".concat(cell[0], "'][data-y='").concat(cell[1], "']"));
+                    var beingPositionElement = _this.getCellDiv(gridBox, cell);
                     var animation = new BgaLocalAnimation(_this.game);
                     animation.setWhere('afterbegin');
                     animation.setOptions(piece, beingPositionElement, 300);
@@ -657,17 +709,56 @@ var BeingsManager = /** @class */ (function () {
             });
         });
     };
-    BeingsManager.prototype.renderHummingbird = function (being) {
-        var gridBox = this.game.games.tileManager.getGridBoxDiv(being.playerId);
-        for (var i = 0; i < being.count; i++) {
-            var nestBox = gridBox.querySelector(".undertheleaves-being-center-position[data-x='".concat(being.x, "'][data-y='").concat(being.y, "']"));
-            nestBox === null || nestBox === void 0 ? void 0 : nestBox.insertAdjacentHTML('beforeend', this.formatPiece('hummingbird'));
-        }
+    BeingsManager.prototype.arrivalDiverPuddleNotif = function (notif) {
+        return __awaiter(this, void 0, void 0, function () {
+            var gridBox, _a, _b, sector, countBeings, cellDestination, destElement, e_2_1;
+            var e_2, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
+                        _d.label = 1;
+                    case 1:
+                        _d.trys.push([1, 6, 7, 8]);
+                        _a = __values(notif.args.sectors), _b = _a.next();
+                        _d.label = 2;
+                    case 2:
+                        if (!!_b.done) return [3 /*break*/, 5];
+                        sector = _b.value;
+                        countBeings = this.countPiecesInSector(gridBox, sector.cells, 'puddle');
+                        cellDestination = sector.cells[countBeings % sector.cells.length];
+                        destElement = this.getCellDiv(gridBox, cellDestination);
+                        if (!destElement)
+                            return [3 /*break*/, 4];
+                        return [4 /*yield*/, this.animatePieceFromVoid('puddle', destElement)];
+                    case 3:
+                        _d.sent();
+                        _d.label = 4;
+                    case 4:
+                        _b = _a.next();
+                        return [3 /*break*/, 2];
+                    case 5: return [3 /*break*/, 8];
+                    case 6:
+                        e_2_1 = _d.sent();
+                        e_2 = { error: e_2_1 };
+                        return [3 /*break*/, 8];
+                    case 7:
+                        try {
+                            if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+                        }
+                        finally { if (e_2) throw e_2.error; }
+                        return [7 /*endfinally*/];
+                    case 8:
+                        this.game.games.playerManager.incCounter(notif.args.playerId, 'puddle', notif.args.count_beings);
+                        return [2 /*return*/];
+                }
+            });
+        });
     };
     BeingsManager.prototype.arrivalHummingbirdNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var gridBox, _a, _b, tile, i, id, nestBox, beingElement, animation, e_2_1;
-            var e_2, _c;
+            var gridBox, _a, _b, tile, nestBox, i, e_3_1;
+            var e_3, _c;
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0:
@@ -680,24 +771,14 @@ var BeingsManager = /** @class */ (function () {
                     case 2:
                         if (!!_b.done) return [3 /*break*/, 7];
                         tile = _b.value;
+                        nestBox = gridBox.querySelector(".undertheleaves-being-center-position[data-x='".concat(tile.x, "'][data-y='").concat(tile.y, "']"));
                         i = 0;
                         _d.label = 3;
                     case 3:
                         if (!(i < tile.delta)) return [3 /*break*/, 6];
-                        id = generateId();
-                        document
-                            .getElementById('undertheleaves-general-void-stock')
-                            .insertAdjacentHTML('beforeend', this.formatPiece('hummingbird', id));
-                        nestBox = gridBox.querySelector(".undertheleaves-being-center-position[data-x='".concat(tile.x, "'][data-y='").concat(tile.y, "']"));
-                        beingElement = document.getElementById(id);
-                        if (!nestBox) {
-                            beingElement === null || beingElement === void 0 ? void 0 : beingElement.remove();
+                        if (!nestBox)
                             return [3 /*break*/, 5];
-                        }
-                        animation = new BgaLocalAnimation(this.game);
-                        animation.setWhere('afterbegin');
-                        animation.setOptions(beingElement, nestBox, 500);
-                        return [4 /*yield*/, animation.call()];
+                        return [4 /*yield*/, this.animatePieceFromVoid('hummingbird', nestBox)];
                     case 4:
                         _d.sent();
                         _d.label = 5;
@@ -709,14 +790,14 @@ var BeingsManager = /** @class */ (function () {
                         return [3 /*break*/, 2];
                     case 7: return [3 /*break*/, 10];
                     case 8:
-                        e_2_1 = _d.sent();
-                        e_2 = { error: e_2_1 };
+                        e_3_1 = _d.sent();
+                        e_3 = { error: e_3_1 };
                         return [3 /*break*/, 10];
                     case 9:
                         try {
                             if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
                         }
-                        finally { if (e_2) throw e_2.error; }
+                        finally { if (e_3) throw e_3.error; }
                         return [7 /*endfinally*/];
                     case 10:
                         this.game.games.playerManager.incCounter(notif.args.playerId, 'hummingbird', notif.args.count_beings);
@@ -727,37 +808,53 @@ var BeingsManager = /** @class */ (function () {
     };
     BeingsManager.prototype.arrivalBeeNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var gridBox;
-            var _this = this;
-            return __generator(this, function (_a) {
-                gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
-                notif.args.sectors.map(function (sector) {
-                    var id = generateId();
-                    document
-                        .getElementById('undertheleaves-general-void-stock')
-                        .insertAdjacentHTML('beforeend', _this.formatPiece('bee', id));
-                    var countBeings = sector.cells.reduce(function (acc, cell) {
-                        var itens = gridBox
-                            .querySelector(".undertheleaves-being-position[data-x='".concat(cell[0], "'][data-y='").concat(cell[1], "']"))
-                            .querySelectorAll('.undertheleaves-piece[piece="bee"]');
-                        return __spreadArray(__spreadArray([], __read(acc), false), __read(Array.from(itens)), false);
-                    }, []).length;
-                    var cellDestination = sector.cells[countBeings % sector.cells.length];
-                    var beingElement = document.getElementById(id);
-                    var beingPositionElement = gridBox.querySelector(".undertheleaves-being-position[data-x='".concat(cellDestination[0], "'][data-y='").concat(cellDestination[1], "']"));
-                    var animation = new BgaLocalAnimation(_this.game);
-                    animation.setWhere('afterbegin');
-                    animation.setOptions(beingElement, beingPositionElement, 500);
-                    animation.call();
-                });
-                this.game.games.playerManager.incCounter(notif.args.playerId, 'bee', notif.args.sectors.length);
-                return [2 /*return*/];
+            var gridBox, _a, _b, sector, countBeings, cellDestination, destElement, e_4_1;
+            var e_4, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
+                        _d.label = 1;
+                    case 1:
+                        _d.trys.push([1, 6, 7, 8]);
+                        _a = __values(notif.args.sectors), _b = _a.next();
+                        _d.label = 2;
+                    case 2:
+                        if (!!_b.done) return [3 /*break*/, 5];
+                        sector = _b.value;
+                        countBeings = this.countPiecesInSector(gridBox, sector.cells, 'bee');
+                        cellDestination = sector.cells[countBeings % sector.cells.length];
+                        destElement = this.getCellDiv(gridBox, cellDestination);
+                        if (!destElement)
+                            return [3 /*break*/, 4];
+                        return [4 /*yield*/, this.animatePieceFromVoid('bee', destElement)];
+                    case 3:
+                        _d.sent();
+                        _d.label = 4;
+                    case 4:
+                        _b = _a.next();
+                        return [3 /*break*/, 2];
+                    case 5: return [3 /*break*/, 8];
+                    case 6:
+                        e_4_1 = _d.sent();
+                        e_4 = { error: e_4_1 };
+                        return [3 /*break*/, 8];
+                    case 7:
+                        try {
+                            if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+                        }
+                        finally { if (e_4) throw e_4.error; }
+                        return [7 /*endfinally*/];
+                    case 8:
+                        this.game.games.playerManager.incCounter(notif.args.playerId, 'bee', notif.args.sectors.length);
+                        return [2 /*return*/];
+                }
             });
         });
     };
     BeingsManager.prototype.majorityBonusNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var pieceType, gridBox, i, cell, id, destBox, beingElement, animation;
+            var pieceType, gridBox, i, cell, destBox;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -768,20 +865,10 @@ var BeingsManager = /** @class */ (function () {
                     case 1:
                         if (!(i < notif.args.count)) return [3 /*break*/, 4];
                         cell = notif.args.cells[i % notif.args.cells.length];
-                        id = generateId();
-                        document
-                            .getElementById('undertheleaves-general-void-stock')
-                            .insertAdjacentHTML('beforeend', this.formatPiece(pieceType, id));
-                        destBox = gridBox === null || gridBox === void 0 ? void 0 : gridBox.querySelector(".undertheleaves-being-position[data-x='".concat(cell[0], "'][data-y='").concat(cell[1], "']"));
-                        beingElement = document.getElementById(id);
-                        if (!destBox) {
-                            beingElement === null || beingElement === void 0 ? void 0 : beingElement.remove();
+                        destBox = this.getCellDiv(gridBox, cell);
+                        if (!destBox)
                             return [3 /*break*/, 3];
-                        }
-                        animation = new BgaLocalAnimation(this.game);
-                        animation.setWhere('afterbegin');
-                        animation.setOptions(beingElement, destBox, 500);
-                        return [4 /*yield*/, animation.call()];
+                        return [4 /*yield*/, this.animatePieceFromVoid(pieceType, destBox)];
                     case 2:
                         _a.sent();
                         _a.label = 3;

@@ -3,7 +3,6 @@
 namespace Bga\Games\undertheleaves\Services;
 
 use Bga\Games\undertheleaves\Entities\GridTile;
-use Bga\Games\undertheleaves\Entities\TerrainType;
 use Bga\Games\undertheleaves\Game;
 
 class SectorService
@@ -12,34 +11,13 @@ class SectorService
 
     public function __construct(public Game $game) {}
 
-    public function buildTerrainGrid(int $playerId, ?array $includeTiles = null, ?GridTile $excludeTile = null): self
+    public function buildGrid(int $playerId, callable $terrainFilter, ?array $includeTiles = null, ?GridTile $excludeTile = null): self
     {
         $this->terrainGrid = [];
 
         if ($includeTiles === null) {
             $includeTiles = $this->game->tileService->listPlayerTiles($playerId);
         }
-
-        foreach ($includeTiles as $gridTile) {
-            if ($excludeTile && $gridTile->x === $excludeTile->x && $gridTile->y === $excludeTile->y) {
-                continue;
-            }
-
-            $this->addTileToGrid($gridTile);
-        }
-
-        return $this;
-    }
-
-    private function addTileToGrid(GridTile $gridTile): void
-    {
-        $tileConfig = $this->game->tileService->getTileConfigFromCard($gridTile->tile);
-        if ($tileConfig === null) {
-            return;
-        }
-        $terrains = $tileConfig->getTerrains($gridTile->side === 1);
-
-        $terrains = $this->rotateTerrains($terrains, $gridTile->rotation);
 
         $positions = [
             0 => [0, 0],
@@ -48,21 +26,34 @@ class SectorService
             3 => [1, -1],
         ];
 
-        foreach ($positions as $index => $coords) {
-            list($x, $y) = $coords;
-            $terrain = $terrains[$index];
-
-            if ($terrain->type === TerrainType::Puddle) {
+        foreach ($includeTiles as $gridTile) {
+            if ($excludeTile && $gridTile->x === $excludeTile->x && $gridTile->y === $excludeTile->y) {
                 continue;
             }
 
-            $globalX = $gridTile->x * 2 + $x;
-            $globalY = $gridTile->y * 2 + $y;
-            $key = "{$globalX}_{$globalY}";
+            $tileConfig = $this->game->tileService->getTileConfigFromCard($gridTile->tile);
+            if ($tileConfig === null) {
+                continue;
+            }
 
-            $this->terrainGrid[$key] = $terrain->type;
+            $terrains = $tileConfig->getTerrains($gridTile->side === 1);
+            $terrains = $this->rotateTerrains($terrains, $gridTile->rotation);
+
+            foreach ($positions as $index => $coords) {
+                $groupKey = $terrainFilter($terrains[$index]);
+                if ($groupKey === false) {
+                    continue;
+                }
+
+                $globalX = $gridTile->x * 2 + $coords[0];
+                $globalY = $gridTile->y * 2 + $coords[1];
+                $this->terrainGrid["{$globalX}_{$globalY}"] = $groupKey;
+            }
         }
+
+        return $this;
     }
+
 
     private function rotateTerrains(array $terrains, int $rotation): array
     {
@@ -74,6 +65,7 @@ class SectorService
         ];
 
         $mapping = $rotationMappings[$rotation];
+
         return [$terrains[$mapping[0]], $terrains[$mapping[1]], $terrains[$mapping[2]], $terrains[$mapping[3]]];
     }
 
@@ -82,16 +74,15 @@ class SectorService
         $groups = [];
         $visited = [];
 
-        foreach ($this->terrainGrid as $cellKey => $terrainType) {
+        foreach ($this->terrainGrid as $cellKey => $groupKey) {
             if (!isset($visited[$cellKey])) {
-                $group = $this->dfs($cellKey, $terrainType, $visited);
+                $group = $this->dfs($cellKey, $groupKey, $visited);
 
                 if (count($group) >= $minSize) {
-                    $colorKey = $terrainType->value;
-                    if (!isset($groups[$colorKey])) {
-                        $groups[$colorKey] = [];
+                    if (!isset($groups[$groupKey])) {
+                        $groups[$groupKey] = [];
                     }
-                    $groups[$colorKey][] = $group;
+                    $groups[$groupKey][] = $group;
                 }
             }
         }
@@ -99,7 +90,7 @@ class SectorService
         return $groups;
     }
 
-    private function dfs(string $startKey, TerrainType $color, array &$visited): array
+    private function dfs(string $startKey, string $color, array &$visited): array
     {
         $stack = [$startKey];
         $sector = [];
@@ -146,34 +137,6 @@ class SectorService
         ];
     }
 
-    public function findNewlySectors(array $beforeSectors, array $afterSectors): array
-    {
-        $newlySectors = [];
-
-        foreach ($afterSectors as $color => $sectors) {
-            foreach ($sectors as $afterSector) {
-                $isNew = true;
-
-                if (isset($beforeSectors[$color])) {
-                    foreach ($beforeSectors[$color] as $beforeSector) {
-                        if ($this->game->beingService->areSectorsSame($beforeSector, $afterSector)) {
-                            $isNew = false;
-                            break;
-                        }
-                    }
-                }
-
-                if ($isNew) {
-                    $newlySectors[] = [
-                        'color' => $color,
-                        'cells' => $afterSector
-                    ];
-                }
-            }
-        }
-
-        return $newlySectors;
-    }
 
     public function getTerrainKeys(): array
     {

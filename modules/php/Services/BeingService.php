@@ -17,14 +17,15 @@ class BeingService
         usort($cells, fn($a, $b) => $a[1] !== $b[1] ? $b[1] - $a[1] : $a[0] - $b[0]);
         $cellsJson = json_encode($cells);
 
-        $sql = "INSERT INTO beings (being_player_id, being_type, being_color, being_cells, being_count)
-                VALUES ('%s', '%s', %s, '%s', '%s')
+        $sql = "INSERT INTO beings (being_player_id, being_type, being_subtype, being_color, being_cells, being_count)
+                VALUES ('%s', '%s', %s, %s, '%s', '%s')
                 ON DUPLICATE KEY UPDATE being_count = being_count + '%s'";
 
         $this->game->DbQuery(sprintf(
             $sql,
             $being->playerId,
             $being->type,
+            $being->subtype ? "'{$being->subtype}'" : "NULL",
             $being->color ? "'{$being->color}'" : "NULL",
             addslashes($cellsJson),
             $being->count,
@@ -85,13 +86,19 @@ class BeingService
         return $result;
     }
 
-    public function getBeingsBySector(int $playerId, string $type): array
+    public function getBeingsBySector(int $playerId, string $type, ?string $subtype = null): array
     {
-        $sql = "SELECT * FROM beings 
-                WHERE being_player_id = '%s' 
+        $sql = "SELECT * FROM beings
+                WHERE being_player_id = '%s'
                 AND being_type = '%s'";
+        $params = [$playerId, $type];
 
-        $rows = $this->game->getObjectListFromDB(sprintf($sql, $playerId, $type));
+        if ($subtype !== null) {
+            $sql .= " AND being_subtype = '%s'";
+            $params[] = $subtype;
+        }
+
+        $rows = $this->game->getObjectListFromDB(sprintf($sql, ...$params));
 
         return array_map(fn($row) => $this->formatBeing($row), $rows);
     }
@@ -137,6 +144,7 @@ class BeingService
             type: $row['being_type'],
             cells: json_decode($row['being_cells'], true),
             count: (int)$row['being_count'],
+            subtype: $row['being_subtype'] ?? null,
             color: $row['being_color'] ?? null,
             x: isset($row['being_x']) ? (int)$row['being_x'] : null,
             y: isset($row['being_y']) ? (int)$row['being_y'] : null,

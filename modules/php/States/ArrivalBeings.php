@@ -27,15 +27,14 @@ class ArrivalBeings extends GameState
     {
         $playerId = (int)$this->game->getActivePlayerId();
 
-        $currentGridTile = $this->game->globals->get('placeTile:gridTile', null, GridTile::class);
-
-        (new BeeBeing($this->game))->process($playerId, $currentGridTile);
+        (new BeeBeing($this->game))->process($playerId);
         (new HummingbirdBeing($this->game))->process($playerId);
 
-        $this->game->globals->delete('placeTile:gridTile');
+        $puddleCard = $this->game->cardService->list()['puddle'];
+        $puddleCard->dweller?->setGame($this->game)->process($playerId);
 
         if ($this->game->getGameStateValue('visibleScore') == 2) {
-            (new EndScore($this->game))->computeAndUpdateScores(withMajority: false);
+            (new EndScore($this->game))->computeAndUpdateScores();
         }
 
         return NextPlayer::class;

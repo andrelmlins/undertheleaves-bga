@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\undertheleaves\States;
 
+use Bga\GameFramework\NotificationMessage;
 use Bga\GameFramework\StateType;
 use Bga\Games\undertheleaves\Entities\Being;
 use Bga\Games\undertheleaves\Game;
@@ -25,6 +26,16 @@ class EndScore extends \Bga\GameFramework\States\GameState
     public function onEnteringState()
     {
         $this->computeAndUpdateScores(withMajority: true);
+
+        if ($this->game->getGameStateValue('visibleScore') == 1) {
+            $players = $this->game->loadPlayersBasicInfos();
+            foreach ($players as $player) {
+                $this->game->notify->all('score', '', [
+                    'player_id' => (int)$player['player_id'],
+                    'player_score' => (int)$player['player_score'],
+                ]);
+            }
+        }
 
         return ST_END_GAME;
     }
@@ -93,12 +104,9 @@ class EndScore extends \Bga\GameFramework\States\GameState
             $score = $bees + $hummingbirds + $leaf + $mushroom + $puddle;
             $scoreAux = $hummingbirds * 10000 + $bees;
 
-            $currentScore = (int)($player['player_score'] ?? 0);
-            $delta = $score - $currentScore;
+            $message = $this->game->getGameStateValue('visibleScore') == 2 ? new NotificationMessage() : null;
 
-            if ($delta !== 0) {
-                $this->game->bga->playerScore->inc($playerId, $delta);
-            }
+            $this->game->bga->playerScore->set($playerId, $score, $message);
             $this->game->bga->playerScoreAux->set($playerId, $scoreAux);
         }
     }

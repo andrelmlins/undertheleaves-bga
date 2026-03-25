@@ -420,10 +420,10 @@
 .undertheleaves-piece[piece=leaf] {
   background-position-x: 50%;
 }
-.undertheleaves-piece[piece=mushroom] {
+.undertheleaves-piece[piece=puddle] {
   background-position-x: 75%;
 }
-.undertheleaves-piece[piece=puddle] {
+.undertheleaves-piece[piece=mushroom] {
   background-position-x: 100%;
 }
 .undertheleaves-piece.notif {

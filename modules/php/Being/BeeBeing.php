@@ -6,6 +6,7 @@ namespace Bga\Games\undertheleaves\Being;
 
 use Bga\Games\undertheleaves\Entities\Being;
 use Bga\Games\undertheleaves\Entities\Messages;
+use Bga\Games\undertheleaves\Entities\TerrainType;
 use Bga\Games\undertheleaves\Services\SectorService;
 use Bga\Games\undertheleaves\Game;
 
@@ -16,7 +17,7 @@ class BeeBeing
     public function process(int $playerId): void
     {
         $sectorService = new SectorService($this->game);
-        $sectorService->buildTerrainGrid($playerId);
+        $sectorService->buildGrid($playerId, fn($t) => $t->type !== TerrainType::Puddle ? $t->type->value : false);
         $allTerrainGroups = $sectorService->getAllTerrainGroups(3);
 
         if (empty($allTerrainGroups)) {

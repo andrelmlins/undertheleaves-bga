@@ -71,8 +71,6 @@ class PlaceTile extends GameState
         ]);
         $this->game->notify->all('simplePause', '', ['time' => 1200]);
 
-        $this->game->globals->set('placeTile:gridTile', $gridTile);
-
         return ArrivalBeings::class;
     }
 

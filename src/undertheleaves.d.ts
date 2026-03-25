@@ -79,6 +79,7 @@ type BeingType = 'bee' | 'hummingbird' | 'leaf' | 'mushroom' | 'puddle';
 interface Being {
   playerId: number;
   type: BeingType;
+  subtype?: string;
   color?: string;
   cells: number[][];
   count: number;
@@ -108,6 +109,12 @@ interface MergeBeeNotif {
   playerId: number;
   mergedBeing: { cells: number[][]; count: number; color: string };
   oldBeings: { cells: number[][] }[];
+}
+
+interface ArrivalDiverPuddleNotif {
+  playerId: number;
+  count_beings: number;
+  sectors: { cells: number[][] }[];
 }
 
 interface MajorityBonusNotif {

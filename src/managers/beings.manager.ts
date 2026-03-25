@@ -8,6 +8,8 @@ class BeingsManager implements Game {
       for (const being of playerBeings) {
         if (being.type === 'hummingbird') {
           this.renderHummingbird(being);
+        } else if (being.subtype === 'diver') {
+          this.renderDiverPuddle(being);
         } else {
           this.renderBeing(being);
         }
@@ -31,7 +33,17 @@ class BeingsManager implements Game {
     dojo.subscribe('arrivalBee', this, (notif) => this.arrivalBeeNotif(notif));
     dojo.subscribe('mergeBee', this, (notif) => this.mergeBeeNotif(notif));
     dojo.subscribe('arrivalHummingbird', this, (notif) => this.arrivalHummingbirdNotif(notif));
+    dojo.subscribe('arrivalDiverPuddle', this, (notif) => this.arrivalDiverPuddleNotif(notif));
     dojo.subscribe('majorityBonus', this, (notif) => this.majorityBonusNotif(notif));
+  }
+
+  public renderDiverPuddle(being: Being) {
+    const gridBox = this.game.games.tileManager.getGridBoxDiv(being.playerId);
+
+    for (let i = 0; i < being.count; i++) {
+      const cell = being.cells[i % being.cells.length];
+      this.getCellDiv(gridBox, cell)?.insertAdjacentHTML('beforeend', this.formatPiece('puddle'));
+    }
   }
 
   public renderBeing(being: Being) {
@@ -39,43 +51,8 @@ class BeingsManager implements Game {
 
     for (let i = 0; i < being.count; i++) {
       const cell = being.cells[i % being.cells.length];
-      const cellBox = gridBox.querySelector(`.undertheleaves-being-position[data-x='${cell[0]}'][data-y='${cell[1]}']`);
-
-      cellBox.insertAdjacentHTML('beforeend', this.formatPiece('bee'));
+      this.getCellDiv(gridBox, cell)?.insertAdjacentHTML('beforeend', this.formatPiece(being.type));
     }
-  }
-
-  public formatPiece(piece: string, id?: string) {
-    return `<div ${id ? `id=${id}` : ''} class="undertheleaves-piece" piece="${piece}"></div>`;
-  }
-
-  private async mergeBeeNotif(notif: Notif<MergeBeeNotif>) {
-    const gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
-
-    const existingPieces: HTMLElement[] = [];
-    notif.args.oldBeings.forEach((being) => {
-      being.cells.forEach((cell) => {
-        gridBox
-          .querySelectorAll<HTMLElement>(
-            `.undertheleaves-being-position[data-x='${cell[0]}'][data-y='${cell[1]}'] .undertheleaves-piece[piece="bee"]`,
-          )
-          .forEach((el) => existingPieces.push(el));
-      });
-    });
-
-    const { cells } = notif.args.mergedBeing;
-
-    existingPieces.forEach((piece, i) => {
-      const cell = cells[i % cells.length];
-      const beingPositionElement = gridBox.querySelector<HTMLElement>(
-        `.undertheleaves-being-position[data-x='${cell[0]}'][data-y='${cell[1]}']`,
-      );
-
-      const animation = new BgaLocalAnimation(this.game);
-      animation.setWhere('afterbegin');
-      animation.setOptions(piece, beingPositionElement, 300);
-      animation.call();
-    });
   }
 
   public renderHummingbird(being: Being) {
@@ -89,31 +66,88 @@ class BeingsManager implements Game {
     }
   }
 
+  public formatPiece(piece: string, id?: string) {
+    return `<div ${id ? `id=${id}` : ''} class="undertheleaves-piece" piece="${piece}"></div>`;
+  }
+
+  private getCellDiv(gridBox: HTMLElement, cell: number[]): HTMLElement | null {
+    return gridBox.querySelector(`.undertheleaves-being-position[data-x='${cell[0]}'][data-y='${cell[1]}']`);
+  }
+
+  private countPiecesInSector(gridBox: HTMLElement, cells: number[][], pieceType: BeingType): number {
+    return cells.reduce((acc, cell) => {
+      const items =
+        this.getCellDiv(gridBox, cell)?.querySelectorAll<HTMLElement>(`.undertheleaves-piece[piece="${pieceType}"]`) ??
+        [];
+      return acc + items.length;
+    }, 0);
+  }
+
+  private async animatePieceFromVoid(pieceType: BeingType, destElement: HTMLElement, duration = 500): Promise<void> {
+    const id = generateId();
+    document
+      .getElementById('undertheleaves-general-void-stock')
+      .insertAdjacentHTML('beforeend', this.formatPiece(pieceType, id));
+
+    const beingElement = document.getElementById(id);
+    const animation = new BgaLocalAnimation(this.game);
+    animation.setWhere('afterbegin');
+    animation.setOptions(beingElement, destElement, duration);
+    await animation.call();
+  }
+
+  private async mergeBeeNotif(notif: Notif<MergeBeeNotif>) {
+    const gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
+
+    const existingPieces: HTMLElement[] = [];
+    notif.args.oldBeings.forEach((being) => {
+      being.cells.forEach((cell) => {
+        this.getCellDiv(gridBox, cell)
+          ?.querySelectorAll<HTMLElement>('.undertheleaves-piece[piece="bee"]')
+          .forEach((el) => existingPieces.push(el));
+      });
+    });
+
+    const { cells } = notif.args.mergedBeing;
+
+    existingPieces.forEach((piece, i) => {
+      const cell = cells[i % cells.length];
+      const beingPositionElement = this.getCellDiv(gridBox, cell);
+
+      const animation = new BgaLocalAnimation(this.game);
+      animation.setWhere('afterbegin');
+      animation.setOptions(piece, beingPositionElement, 300);
+      animation.call();
+    });
+  }
+
+  private async arrivalDiverPuddleNotif(notif: Notif<ArrivalDiverPuddleNotif>) {
+    const gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
+
+    for (const sector of notif.args.sectors) {
+      const countBeings = this.countPiecesInSector(gridBox, sector.cells, 'puddle');
+      const cellDestination = sector.cells[countBeings % sector.cells.length];
+      const destElement = this.getCellDiv(gridBox, cellDestination);
+
+      if (!destElement) continue;
+
+      await this.animatePieceFromVoid('puddle', destElement);
+    }
+
+    this.game.games.playerManager.incCounter(notif.args.playerId, 'puddle', notif.args.count_beings);
+  }
+
   private async arrivalHummingbirdNotif(notif: Notif<ArrivalHummingbirdNotif>) {
     const gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
 
     for (const tile of notif.args.tiles) {
+      const nestBox = gridBox.querySelector<HTMLElement>(
+        `.undertheleaves-being-center-position[data-x='${tile.x}'][data-y='${tile.y}']`,
+      );
+
       for (let i = 0; i < tile.delta; i++) {
-        const id = generateId();
-        document
-          .getElementById('undertheleaves-general-void-stock')
-          .insertAdjacentHTML('beforeend', this.formatPiece('hummingbird', id));
-
-        const nestBox = gridBox.querySelector<HTMLElement>(
-          `.undertheleaves-being-center-position[data-x='${tile.x}'][data-y='${tile.y}']`,
-        );
-
-        const beingElement = document.getElementById(id);
-
-        if (!nestBox) {
-          beingElement?.remove();
-          continue;
-        }
-
-        const animation = new BgaLocalAnimation(this.game);
-        animation.setWhere('afterbegin');
-        animation.setOptions(beingElement, nestBox, 500);
-        await animation.call();
+        if (!nestBox) continue;
+        await this.animatePieceFromVoid('hummingbird', nestBox);
       }
     }
 
@@ -123,62 +157,30 @@ class BeingsManager implements Game {
   private async arrivalBeeNotif(notif: Notif<ArrivalBeeNotif>) {
     const gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
 
-    notif.args.sectors.map((sector) => {
-      const id = generateId();
-      document
-        .getElementById('undertheleaves-general-void-stock')
-        .insertAdjacentHTML('beforeend', this.formatPiece('bee', id));
-
-      const countBeings = sector.cells.reduce((acc, cell) => {
-        const itens = gridBox
-          .querySelector(`.undertheleaves-being-position[data-x='${cell[0]}'][data-y='${cell[1]}']`)
-          .querySelectorAll<HTMLElement>('.undertheleaves-piece[piece="bee"]');
-
-        return [...acc, ...Array.from(itens)];
-      }, []).length;
-
+    for (const sector of notif.args.sectors) {
+      const countBeings = this.countPiecesInSector(gridBox, sector.cells, 'bee');
       const cellDestination = sector.cells[countBeings % sector.cells.length];
+      const destElement = this.getCellDiv(gridBox, cellDestination);
 
-      const beingElement = document.getElementById(id);
-      const beingPositionElement = gridBox.querySelector<HTMLElement>(
-        `.undertheleaves-being-position[data-x='${cellDestination[0]}'][data-y='${cellDestination[1]}']`,
-      );
+      if (!destElement) continue;
 
-      const animation = new BgaLocalAnimation(this.game);
-      animation.setWhere('afterbegin');
-      animation.setOptions(beingElement, beingPositionElement, 500);
-
-      animation.call();
-    });
+      await this.animatePieceFromVoid('bee', destElement);
+    }
 
     this.game.games.playerManager.incCounter(notif.args.playerId, 'bee', notif.args.sectors.length);
   }
 
   private async majorityBonusNotif(notif: Notif<MajorityBonusNotif>) {
-    const pieceType = notif.args.type.replace('_dweller', '');
+    const pieceType = notif.args.type.replace('_dweller', '') as BeingType;
     const gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.player_id);
 
     for (let i = 0; i < notif.args.count; i++) {
       const cell = notif.args.cells[i % notif.args.cells.length];
-      const id = generateId();
-      document
-        .getElementById('undertheleaves-general-void-stock')
-        .insertAdjacentHTML('beforeend', this.formatPiece(pieceType, id));
+      const destBox = this.getCellDiv(gridBox, cell);
 
-      const destBox = gridBox?.querySelector<HTMLElement>(
-        `.undertheleaves-being-position[data-x='${cell[0]}'][data-y='${cell[1]}']`,
-      );
-      const beingElement = document.getElementById(id);
+      if (!destBox) continue;
 
-      if (!destBox) {
-        beingElement?.remove();
-        continue;
-      }
-
-      const animation = new BgaLocalAnimation(this.game);
-      animation.setWhere('afterbegin');
-      animation.setOptions(beingElement, destBox, 500);
-      await animation.call();
+      await this.animatePieceFromVoid(pieceType, destBox);
     }
 
     this.game.games.playerManager.incCounter(notif.args.player_id, notif.args.type, notif.args.count);
