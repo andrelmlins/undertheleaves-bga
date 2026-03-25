@@ -93,14 +93,13 @@ class EndScore extends \Bga\GameFramework\States\GameState
             $score = $bees + $hummingbirds + $leaf + $mushroom + $puddle;
             $scoreAux = $hummingbirds * 10000 + $bees;
 
-            $sql = "UPDATE player SET player_score = '%s', player_score_aux = '%s' WHERE player_id = '%s'";
+            $currentScore = (int)($player['player_score'] ?? 0);
+            $delta = $score - $currentScore;
 
-            $this->game->DbQuery(sprintf($sql, $score, $scoreAux,  $playerId));
-
-            $this->game->notify->all('score', '', [
-                'player_id' => $playerId,
-                'player_score' => $score,
-            ]);
+            if ($delta !== 0) {
+                $this->game->bga->playerScore->inc($playerId, $delta);
+            }
+            $this->game->bga->playerScoreAux->set($playerId, $scoreAux);
         }
     }
 }

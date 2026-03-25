@@ -38,7 +38,7 @@ class PlayerManager implements Game {
         </div>
       `;
 
-      document.getElementById(`overall_player_board_${playerId}`).insertAdjacentHTML('beforeend', playerBoardHtml);
+      this.game.bga.playerPanels.getElement(Number(playerId)).insertAdjacentHTML('beforeend', playerBoardHtml);
 
       this.counters[playerId].leaf.create(`undertheleaves-leaf-count-${playerId}`);
       this.counters[playerId].puddle.create(`undertheleaves-puddle-count-${playerId}`);
