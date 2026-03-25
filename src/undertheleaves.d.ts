@@ -117,6 +117,12 @@ interface ArrivalPuddleDwellerNotif {
   sectors: { cells: number[][] }[];
 }
 
+interface ArrivalMushroomDwellerNotif {
+  playerId: number;
+  count_beings: number;
+  sectors: { cells: number[][] }[];
+}
+
 interface MajorityBonusNotif {
   player_id: number;
   type: BeingType;

@@ -33,6 +33,9 @@ class ArrivalBeings extends GameState
         $puddleCard = $this->game->cardService->list()['puddle'];
         $puddleCard->dweller?->setGame($this->game)->process($playerId);
 
+        $mushroomCard = $this->game->cardService->list()['mushroom'];
+        $mushroomCard->dweller?->setGame($this->game)->process($playerId);
+
         if ($this->game->getGameStateValue('visibleScore') == 2) {
             (new EndScore($this->game))->computeAndUpdateScores();
         }

@@ -3,6 +3,7 @@
 namespace Bga\Games\undertheleaves;
 
 use Bga\Games\undertheleaves\Being\DiverPuddleBeing;
+use Bga\Games\undertheleaves\Being\HostMushroomBeing;
 use Bga\Games\undertheleaves\Being\ShyPuddleBeing;
 use Bga\Games\undertheleaves\Being\SkipperPuddleBeing;
 use Bga\Games\undertheleaves\Entities\CardConfig;
@@ -551,7 +552,8 @@ trait Constants
                 CardType::Mushroom,
                 clienttranslate('Host'),
                 clienttranslate('If a sector has at least 2 mushrooms, it attracts a mushroom dweller. The sector does not need to be pollinized. Place its piece anywhere on the sector.'),
-                true
+                true,
+                dweller: new HostMushroomBeing(),
             ),
             new CardConfig(
                 new Position(1, 1),
