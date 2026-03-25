@@ -124,10 +124,6 @@ html {
           position: absolute;
           width: 50%;
           height: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-direction: column;
 
           &[data-local-x='0'][data-local-y='0'] {
             top: 25%;
@@ -154,14 +150,30 @@ html {
           }
 
           .undertheleaves-piece {
+            position: absolute;
+            top: 50%;
+            left: 50%;
             width: 35px;
             height: 35px;
             min-width: 35px;
             min-height: 35px;
             filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.55));
 
-            &:not(:first-child) {
-              margin-top: -65px;
+            &:nth-child(1) {
+              transform: translate(-50%, -50%);
+              z-index: 1;
+            }
+            &:nth-child(2) {
+              transform: translate(calc(-50% + 12px), calc(-50% - 10px));
+            }
+            &:nth-child(3) {
+              transform: translate(calc(-50% - 14px), calc(-50% + 8px));
+            }
+            &:nth-child(4) {
+              transform: translate(calc(-50% + 6px), calc(-50% + 14px));
+            }
+            &:nth-child(5) {
+              transform: translate(calc(-50% - 8px), calc(-50% - 14px));
             }
           }
         }

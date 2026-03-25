@@ -111,13 +111,7 @@ interface MergeBeeNotif {
   oldBeings: { cells: number[][] }[];
 }
 
-interface ArrivalDiverPuddleNotif {
-  playerId: number;
-  count_beings: number;
-  sectors: { cells: number[][] }[];
-}
-
-interface ArrivalSkipperPuddleNotif {
+interface ArrivalPuddleDwellerNotif {
   playerId: number;
   count_beings: number;
   sectors: { cells: number[][] }[];

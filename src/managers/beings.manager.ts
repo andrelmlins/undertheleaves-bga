@@ -8,10 +8,6 @@ class BeingsManager implements Game {
       for (const being of playerBeings) {
         if (being.type === 'hummingbird') {
           this.renderHummingbird(being);
-        } else if (being.subtype === 'diver') {
-          this.renderDiverPuddle(being);
-        } else if (being.subtype === 'skipper') {
-          this.renderSkipperPuddle(being);
         } else {
           this.renderBeing(being);
         }
@@ -35,27 +31,10 @@ class BeingsManager implements Game {
     dojo.subscribe('arrivalBee', this, (notif) => this.arrivalBeeNotif(notif));
     dojo.subscribe('mergeBee', this, (notif) => this.mergeBeeNotif(notif));
     dojo.subscribe('arrivalHummingbird', this, (notif) => this.arrivalHummingbirdNotif(notif));
-    dojo.subscribe('arrivalDiverPuddle', this, (notif) => this.arrivalDiverPuddleNotif(notif));
-    dojo.subscribe('arrivalSkipperPuddle', this, (notif) => this.arrivalSkipperPuddleNotif(notif));
+    dojo.subscribe('arrivalDiverPuddle',   this, (notif) => this.arrivalPuddleDwellerNotif(notif));
+    dojo.subscribe('arrivalSkipperPuddle', this, (notif) => this.arrivalPuddleDwellerNotif(notif));
+    dojo.subscribe('arrivalShyPuddle',     this, (notif) => this.arrivalPuddleDwellerNotif(notif));
     dojo.subscribe('majorityBonus', this, (notif) => this.majorityBonusNotif(notif));
-  }
-
-  public renderSkipperPuddle(being: Being) {
-    const gridBox = this.game.games.tileManager.getGridBoxDiv(being.playerId);
-
-    for (let i = 0; i < being.count; i++) {
-      const cell = being.cells[i % being.cells.length];
-      this.getCellDiv(gridBox, cell)?.insertAdjacentHTML('beforeend', this.formatPiece('puddle'));
-    }
-  }
-
-  public renderDiverPuddle(being: Being) {
-    const gridBox = this.game.games.tileManager.getGridBoxDiv(being.playerId);
-
-    for (let i = 0; i < being.count; i++) {
-      const cell = being.cells[i % being.cells.length];
-      this.getCellDiv(gridBox, cell)?.insertAdjacentHTML('beforeend', this.formatPiece('puddle'));
-    }
   }
 
   public renderBeing(being: Being) {
@@ -133,23 +112,7 @@ class BeingsManager implements Game {
     });
   }
 
-  private async arrivalSkipperPuddleNotif(notif: Notif<ArrivalSkipperPuddleNotif>) {
-    const gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
-
-    for (const sector of notif.args.sectors) {
-      const countBeings = this.countPiecesInSector(gridBox, sector.cells, 'puddle');
-      const cellDestination = sector.cells[countBeings % sector.cells.length];
-      const destElement = this.getCellDiv(gridBox, cellDestination);
-
-      if (!destElement) continue;
-
-      await this.animatePieceFromVoid('puddle', destElement);
-    }
-
-    this.game.games.playerManager.incCounter(notif.args.playerId, 'puddle', notif.args.count_beings);
-  }
-
-  private async arrivalDiverPuddleNotif(notif: Notif<ArrivalDiverPuddleNotif>) {
+  private async arrivalPuddleDwellerNotif(notif: Notif<ArrivalPuddleDwellerNotif>) {
     const gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
 
     for (const sector of notif.args.sectors) {

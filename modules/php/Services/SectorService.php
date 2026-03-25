@@ -152,4 +152,21 @@ class SectorService
     {
         return $coordinates[0] . '_' . $coordinates[1];
     }
+
+    public static function getAllNeighbors(string $cellKey): array
+    {
+        [$x, $y] = array_map('intval', explode('_', $cellKey));
+        $neighbors = [];
+
+        foreach ([-1, 0, 1] as $dx) {
+            foreach ([-1, 0, 1] as $dy) {
+                if ($dx === 0 && $dy === 0) {
+                    continue;
+                }
+                $neighbors[] = ($x + $dx) . '_' . ($y + $dy);
+            }
+        }
+
+        return $neighbors;
+    }
 }

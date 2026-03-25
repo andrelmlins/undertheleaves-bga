@@ -3,6 +3,7 @@
 namespace Bga\Games\undertheleaves;
 
 use Bga\Games\undertheleaves\Being\DiverPuddleBeing;
+use Bga\Games\undertheleaves\Being\ShyPuddleBeing;
 use Bga\Games\undertheleaves\Being\SkipperPuddleBeing;
 use Bga\Games\undertheleaves\Entities\CardConfig;
 use Bga\Games\undertheleaves\Entities\CardType;
@@ -595,7 +596,8 @@ trait Constants
                 new Position(2, 3),
                 CardType::Puddle,
                 clienttranslate('Shy'),
-                clienttranslate('If you surround a puddle space with eight terrain spaces of any type (not puddles), it will attract a puddle dweller. Place the dweller piece on the puddle.')
+                clienttranslate('If you surround a puddle space with eight terrain spaces of any type (not puddles), it will attract a puddle dweller. Place the dweller piece on the puddle.'),
+                dweller: new ShyPuddleBeing(),
             ),
         ];
 
