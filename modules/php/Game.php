@@ -55,7 +55,13 @@ class Game extends \Bga\GameFramework\Table
 
     public function getGameProgression()
     {
-        return 0;
+        $players = $this->loadPlayersBasicInfos();
+        $playerCount = count($players);
+
+        $current = $this->tiles->countCardsInLocation(CardLocation::Grid->value) - $playerCount;
+        $total = 12 * $playerCount;
+
+        return round((100 * $current) / $total);
     }
 
     /**

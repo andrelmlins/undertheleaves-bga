@@ -45,7 +45,30 @@ class PlayerManager implements Game {
       this.counters[playerId].mushroom.create(`undertheleaves-mushroom-count-${playerId}`);
       this.counters[playerId].hummingbird.create(`undertheleaves-hummingbird-count-${playerId}`);
       this.counters[playerId].bee.create(`undertheleaves-bee-count-${playerId}`);
+
+      const playerBeings = this.game.gamedatas.beings[playerId] ?? [];
+      const totals = playerBeings.reduce(
+        (acc, b) => {
+          acc[b.type] = (acc[b.type] ?? 0) + b.count;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+
+      this.counters[playerId].bee.setValue(totals['bee'] ?? 0);
+      this.counters[playerId].hummingbird.setValue(totals['hummingbird'] ?? 0);
+      this.counters[playerId].leaf.setValue(totals['leaf_dweller'] ?? 0);
+      this.counters[playerId].mushroom.setValue(totals['mushroom_dweller'] ?? 0);
+      this.counters[playerId].puddle.setValue(totals['puddle_dweller'] ?? 0);
     }
+  }
+
+  public incCounter(
+    playerId: string | number,
+    type: 'bee' | 'hummingbird' | 'leaf' | 'mushroom' | 'puddle',
+    by: number,
+  ) {
+    this.counters[String(playerId)]?.[type]?.incValue(by);
   }
 
   public onEnteringState(stateName: string, notif: Notif<any>) {

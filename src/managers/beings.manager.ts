@@ -115,6 +115,8 @@ class BeingsManager implements Game {
         await animation.call();
       }
     }
+
+    this.game.games.playerManager.incCounter(notif.args.playerId, 'hummingbird', notif.args.count_beings);
   }
 
   private async arrivalBeeNotif(notif: Notif<ArrivalBeeNotif>) {
@@ -147,5 +149,7 @@ class BeingsManager implements Game {
 
       animation.call();
     });
+
+    this.game.games.playerManager.incCounter(notif.args.playerId, 'bee', notif.args.sectors.length);
   }
 }

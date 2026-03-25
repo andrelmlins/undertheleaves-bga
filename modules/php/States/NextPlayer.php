@@ -29,6 +29,10 @@ class NextPlayer extends GameState
 
         $tile = $this->game->tiles->pickCardForLocation(CardLocation::Deck->value, CardLocation::Table->value);
 
+        if (is_null($tile)) {
+            return EndScore::class;
+        }
+
         $this->game->notify->all('revealTile', Messages::$RevealTile, [
             'player_name' => $this->game->getPlayerNameById($activePlayerId),
             'tile_image' => $tile,
@@ -39,11 +43,6 @@ class NextPlayer extends GameState
 
         $this->game->activeNextPlayer();
 
-        $gameEnd = false;
-        if ($gameEnd) {
-            return EndScore::class;
-        } else {
-            return PlaceTile::class;
-        }
+        return PlaceTile::class;
     }
 }

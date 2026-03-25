@@ -517,6 +517,7 @@ var PlayerManager = /** @class */ (function () {
         this.counters = {};
     }
     PlayerManager.prototype.setup = function () {
+        var _a, _b, _c, _d, _e, _f;
         for (var playerId in this.game.gamedatas.players) {
             this.counters[playerId] = {
                 leaf: new ebg.counter(),
@@ -532,7 +533,22 @@ var PlayerManager = /** @class */ (function () {
             this.counters[playerId].mushroom.create("undertheleaves-mushroom-count-".concat(playerId));
             this.counters[playerId].hummingbird.create("undertheleaves-hummingbird-count-".concat(playerId));
             this.counters[playerId].bee.create("undertheleaves-bee-count-".concat(playerId));
+            var playerBeings = (_a = this.game.gamedatas.beings[playerId]) !== null && _a !== void 0 ? _a : [];
+            var totals = playerBeings.reduce(function (acc, b) {
+                var _a;
+                acc[b.type] = ((_a = acc[b.type]) !== null && _a !== void 0 ? _a : 0) + b.count;
+                return acc;
+            }, {});
+            this.counters[playerId].bee.setValue((_b = totals['bee']) !== null && _b !== void 0 ? _b : 0);
+            this.counters[playerId].hummingbird.setValue((_c = totals['hummingbird']) !== null && _c !== void 0 ? _c : 0);
+            this.counters[playerId].leaf.setValue((_d = totals['leaf_dweller']) !== null && _d !== void 0 ? _d : 0);
+            this.counters[playerId].mushroom.setValue((_e = totals['mushroom_dweller']) !== null && _e !== void 0 ? _e : 0);
+            this.counters[playerId].puddle.setValue((_f = totals['puddle_dweller']) !== null && _f !== void 0 ? _f : 0);
         }
+    };
+    PlayerManager.prototype.incCounter = function (playerId, type, by) {
+        var _a, _b;
+        (_b = (_a = this.counters[String(playerId)]) === null || _a === void 0 ? void 0 : _a[type]) === null || _b === void 0 ? void 0 : _b.incValue(by);
     };
     PlayerManager.prototype.onEnteringState = function (stateName, notif) {
         //
@@ -701,7 +717,9 @@ var BeingsManager = /** @class */ (function () {
                         }
                         finally { if (e_2) throw e_2.error; }
                         return [7 /*endfinally*/];
-                    case 10: return [2 /*return*/];
+                    case 10:
+                        this.game.games.playerManager.incCounter(notif.args.playerId, 'hummingbird', notif.args.count_beings);
+                        return [2 /*return*/];
                 }
             });
         });
@@ -731,6 +749,7 @@ var BeingsManager = /** @class */ (function () {
                     animation.setOptions(beingElement, beingPositionElement, 500);
                     animation.call();
                 });
+                this.game.games.playerManager.incCounter(notif.args.playerId, 'bee', notif.args.sectors.length);
                 return [2 /*return*/];
             });
         });
