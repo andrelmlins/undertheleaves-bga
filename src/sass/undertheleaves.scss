@@ -96,6 +96,30 @@ html {
           }
         }
 
+        .undertheleaves-being-center-position {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          z-index: 1;
+
+          .undertheleaves-piece {
+            width: 50px;
+            height: 50px;
+            min-width: 50px;
+            min-height: 50px;
+            filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.55));
+
+            &:not(:first-child) {
+              margin-top: -65px;
+            }
+          }
+        }
+
         .undertheleaves-being-position {
           position: absolute;
           width: 50%;

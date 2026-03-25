@@ -96,6 +96,12 @@ interface ArrivalBeeNotif {
   sectors: { cells: number[][] }[];
 }
 
+interface ArrivalHummingbirdNotif {
+  playerId: number;
+  count_beings: number;
+  tiles: { x: number; y: number; delta: number }[];
+}
+
 interface MergeBeeNotif {
   playerId: number;
   mergedBeing: { cells: number[][]; count: number; color: string };

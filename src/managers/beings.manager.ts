@@ -6,7 +6,11 @@ class BeingsManager implements Game {
       const playerBeings = this.game.gamedatas.beings[playerId];
 
       for (const being of playerBeings) {
-        this.renderBeing(being);
+        if (being.type === 'hummingbird') {
+          this.renderHummingbird(being);
+        } else {
+          this.renderBeing(being);
+        }
       }
     }
   }
@@ -26,15 +30,14 @@ class BeingsManager implements Game {
   public setupNotifications() {
     dojo.subscribe('arrivalBee', this, (notif) => this.arrivalBeeNotif(notif));
     dojo.subscribe('mergeBee', this, (notif) => this.mergeBeeNotif(notif));
+    dojo.subscribe('arrivalHummingbird', this, (notif) => this.arrivalHummingbirdNotif(notif));
   }
 
   public renderBeing(being: Being) {
     const gridBox = this.game.games.tileManager.getGridBoxDiv(being.playerId);
 
-    for (let i = 1; i <= being.count; i++) {
-      const cellIndex = i % being.cells.length;
-
-      const cell = being.cells[cellIndex - 1];
+    for (let i = 0; i < being.count; i++) {
+      const cell = being.cells[i % being.cells.length];
       const cellBox = gridBox.querySelector(`.undertheleaves-being-position[data-x='${cell[0]}'][data-y='${cell[1]}']`);
 
       cellBox.insertAdjacentHTML('beforeend', this.formatPiece('bee'));
@@ -72,6 +75,46 @@ class BeingsManager implements Game {
       animation.setOptions(piece, beingPositionElement, 300);
       animation.call();
     });
+  }
+
+  public renderHummingbird(being: Being) {
+    const gridBox = this.game.games.tileManager.getGridBoxDiv(being.playerId);
+
+    for (let i = 0; i < being.count; i++) {
+      const nestBox = gridBox.querySelector(
+        `.undertheleaves-being-center-position[data-x='${being.x}'][data-y='${being.y}']`,
+      );
+      nestBox?.insertAdjacentHTML('beforeend', this.formatPiece('hummingbird'));
+    }
+  }
+
+  private async arrivalHummingbirdNotif(notif: Notif<ArrivalHummingbirdNotif>) {
+    const gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
+
+    for (const tile of notif.args.tiles) {
+      for (let i = 0; i < tile.delta; i++) {
+        const id = generateId();
+        document
+          .getElementById('undertheleaves-general-void-stock')
+          .insertAdjacentHTML('beforeend', this.formatPiece('hummingbird', id));
+
+        const nestBox = gridBox.querySelector<HTMLElement>(
+          `.undertheleaves-being-center-position[data-x='${tile.x}'][data-y='${tile.y}']`,
+        );
+
+        const beingElement = document.getElementById(id);
+
+        if (!nestBox) {
+          beingElement?.remove();
+          continue;
+        }
+
+        const animation = new BgaLocalAnimation(this.game);
+        animation.setWhere('afterbegin');
+        animation.setOptions(beingElement, nestBox, 500);
+        await animation.call();
+      }
+    }
   }
 
   private async arrivalBeeNotif(notif: Notif<ArrivalBeeNotif>) {

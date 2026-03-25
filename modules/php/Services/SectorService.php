@@ -175,6 +175,11 @@ class SectorService
         return $newlySectors;
     }
 
+    public function getTerrainKeys(): array
+    {
+        return array_keys($this->terrainGrid);
+    }
+
     public static function cellKeyToCoordinates(string $cellKey): array
     {
         return array_map('intval', explode('_', $cellKey));

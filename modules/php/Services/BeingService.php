@@ -144,6 +144,35 @@ class BeingService
         );
     }
 
+    public function getBeingsByType(int $playerId, string $type): array
+    {
+        $sql = "SELECT * FROM beings WHERE being_player_id = '%s' AND being_type = '%s'";
+        $rows = $this->game->getObjectListFromDB(sprintf($sql, $playerId, $type));
+        return array_map(fn($row) => $this->formatBeing($row), $rows);
+    }
+
+    public function upsertHummingbird(int $playerId, int $tileX, int $tileY, int $delta): void
+    {
+        $existing = $this->game->getObjectFromDB(sprintf(
+            "SELECT * FROM beings WHERE being_player_id = '%s' AND being_type = 'hummingbird' AND being_x = '%s' AND being_y = '%s'",
+            $playerId, $tileX, $tileY
+        ));
+
+        $cellsJson = json_encode([[$tileX, $tileY]]);
+
+        if ($existing) {
+            $this->game->DbQuery(sprintf(
+                "UPDATE beings SET being_count = being_count + '%s' WHERE being_id = '%s'",
+                $delta, $existing['being_id']
+            ));
+        } else {
+            $this->game->DbQuery(sprintf(
+                "INSERT INTO beings (being_player_id, being_type, being_cells, being_count, being_x, being_y) VALUES ('%s', 'hummingbird', '%s', '%s', '%s', '%s')",
+                $playerId, addslashes($cellsJson), $delta, $tileX, $tileY
+            ));
+        }
+    }
+
     public function areSectorsSame(array $sector1, array $sector2): bool
     {
         if (count($sector1) !== count($sector2)) {

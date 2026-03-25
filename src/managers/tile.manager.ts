@@ -171,17 +171,22 @@ class TileManager implements Game {
       y: y * 2 + pos.localY,
     }));
 
-    return positions
-      .map((pos) => {
-        const div = document.createElement('div');
-        div.className = 'undertheleaves-being-position';
-        div.dataset.localX = String(pos.localX);
-        div.dataset.localY = String(pos.localY);
-        div.dataset.x = String(pos.x);
-        div.dataset.y = String(pos.y);
-        return div.outerHTML;
-      })
-      .join('');
+    const html = `<div class="undertheleaves-being-center-position" data-x="${x}" data-y="${y}"></div>`;
+
+    return (
+      html +
+      positions
+        .map((pos) => {
+          const div = document.createElement('div');
+          div.className = 'undertheleaves-being-position';
+          div.dataset.localX = String(pos.localX);
+          div.dataset.localY = String(pos.localY);
+          div.dataset.x = String(pos.x);
+          div.dataset.y = String(pos.y);
+          return div.outerHTML;
+        })
+        .join('')
+    );
   }
 
   public createBeingPositionDivs(cellElement: HTMLElement, x: number, y: number, rotation: number, side: number) {}

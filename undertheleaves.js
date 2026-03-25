@@ -360,17 +360,19 @@ var TileManager = /** @class */ (function () {
             x: x * 2 + pos.localX,
             y: y * 2 + pos.localY,
         }); });
-        return positions
-            .map(function (pos) {
-            var div = document.createElement('div');
-            div.className = 'undertheleaves-being-position';
-            div.dataset.localX = String(pos.localX);
-            div.dataset.localY = String(pos.localY);
-            div.dataset.x = String(pos.x);
-            div.dataset.y = String(pos.y);
-            return div.outerHTML;
-        })
-            .join('');
+        var html = "<div class=\"undertheleaves-being-center-position\" data-x=\"".concat(x, "\" data-y=\"").concat(y, "\"></div>");
+        return (html +
+            positions
+                .map(function (pos) {
+                var div = document.createElement('div');
+                div.className = 'undertheleaves-being-position';
+                div.dataset.localX = String(pos.localX);
+                div.dataset.localY = String(pos.localY);
+                div.dataset.x = String(pos.x);
+                div.dataset.y = String(pos.y);
+                return div.outerHTML;
+            })
+                .join(''));
     };
     TileManager.prototype.createBeingPositionDivs = function (cellElement, x, y, rotation, side) { };
     TileManager.prototype.getTileConfig = function (tile) {
@@ -568,7 +570,12 @@ var BeingsManager = /** @class */ (function () {
             try {
                 for (var playerBeings_1 = (e_1 = void 0, __values(playerBeings)), playerBeings_1_1 = playerBeings_1.next(); !playerBeings_1_1.done; playerBeings_1_1 = playerBeings_1.next()) {
                     var being = playerBeings_1_1.value;
-                    this.renderBeing(being);
+                    if (being.type === 'hummingbird') {
+                        this.renderHummingbird(being);
+                    }
+                    else {
+                        this.renderBeing(being);
+                    }
                 }
             }
             catch (e_1_1) { e_1 = { error: e_1_1 }; }
@@ -593,12 +600,12 @@ var BeingsManager = /** @class */ (function () {
         var _this = this;
         dojo.subscribe('arrivalBee', this, function (notif) { return _this.arrivalBeeNotif(notif); });
         dojo.subscribe('mergeBee', this, function (notif) { return _this.mergeBeeNotif(notif); });
+        dojo.subscribe('arrivalHummingbird', this, function (notif) { return _this.arrivalHummingbirdNotif(notif); });
     };
     BeingsManager.prototype.renderBeing = function (being) {
         var gridBox = this.game.games.tileManager.getGridBoxDiv(being.playerId);
-        for (var i = 1; i <= being.count; i++) {
-            var cellIndex = i % being.cells.length;
-            var cell = being.cells[cellIndex - 1];
+        for (var i = 0; i < being.count; i++) {
+            var cell = being.cells[i % being.cells.length];
             var cellBox = gridBox.querySelector(".undertheleaves-being-position[data-x='".concat(cell[0], "'][data-y='").concat(cell[1], "']"));
             cellBox.insertAdjacentHTML('beforeend', this.formatPiece('bee'));
         }
@@ -630,6 +637,72 @@ var BeingsManager = /** @class */ (function () {
                     animation.call();
                 });
                 return [2 /*return*/];
+            });
+        });
+    };
+    BeingsManager.prototype.renderHummingbird = function (being) {
+        var gridBox = this.game.games.tileManager.getGridBoxDiv(being.playerId);
+        for (var i = 0; i < being.count; i++) {
+            var nestBox = gridBox.querySelector(".undertheleaves-being-center-position[data-x='".concat(being.x, "'][data-y='").concat(being.y, "']"));
+            nestBox === null || nestBox === void 0 ? void 0 : nestBox.insertAdjacentHTML('beforeend', this.formatPiece('hummingbird'));
+        }
+    };
+    BeingsManager.prototype.arrivalHummingbirdNotif = function (notif) {
+        return __awaiter(this, void 0, void 0, function () {
+            var gridBox, _a, _b, tile, i, id, nestBox, beingElement, animation, e_2_1;
+            var e_2, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
+                        _d.label = 1;
+                    case 1:
+                        _d.trys.push([1, 8, 9, 10]);
+                        _a = __values(notif.args.tiles), _b = _a.next();
+                        _d.label = 2;
+                    case 2:
+                        if (!!_b.done) return [3 /*break*/, 7];
+                        tile = _b.value;
+                        i = 0;
+                        _d.label = 3;
+                    case 3:
+                        if (!(i < tile.delta)) return [3 /*break*/, 6];
+                        id = generateId();
+                        document
+                            .getElementById('undertheleaves-general-void-stock')
+                            .insertAdjacentHTML('beforeend', this.formatPiece('hummingbird', id));
+                        nestBox = gridBox.querySelector(".undertheleaves-being-center-position[data-x='".concat(tile.x, "'][data-y='").concat(tile.y, "']"));
+                        beingElement = document.getElementById(id);
+                        if (!nestBox) {
+                            beingElement === null || beingElement === void 0 ? void 0 : beingElement.remove();
+                            return [3 /*break*/, 5];
+                        }
+                        animation = new BgaLocalAnimation(this.game);
+                        animation.setWhere('afterbegin');
+                        animation.setOptions(beingElement, nestBox, 500);
+                        return [4 /*yield*/, animation.call()];
+                    case 4:
+                        _d.sent();
+                        _d.label = 5;
+                    case 5:
+                        i++;
+                        return [3 /*break*/, 3];
+                    case 6:
+                        _b = _a.next();
+                        return [3 /*break*/, 2];
+                    case 7: return [3 /*break*/, 10];
+                    case 8:
+                        e_2_1 = _d.sent();
+                        e_2 = { error: e_2_1 };
+                        return [3 /*break*/, 10];
+                    case 9:
+                        try {
+                            if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+                        }
+                        finally { if (e_2) throw e_2.error; }
+                        return [7 /*endfinally*/];
+                    case 10: return [2 /*return*/];
+                }
             });
         });
     };
