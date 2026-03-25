@@ -541,9 +541,9 @@ var PlayerManager = /** @class */ (function () {
             }, {});
             this.counters[playerId].bee.setValue((_b = totals['bee']) !== null && _b !== void 0 ? _b : 0);
             this.counters[playerId].hummingbird.setValue((_c = totals['hummingbird']) !== null && _c !== void 0 ? _c : 0);
-            this.counters[playerId].leaf.setValue((_d = totals['leaf_dweller']) !== null && _d !== void 0 ? _d : 0);
-            this.counters[playerId].mushroom.setValue((_e = totals['mushroom_dweller']) !== null && _e !== void 0 ? _e : 0);
-            this.counters[playerId].puddle.setValue((_f = totals['puddle_dweller']) !== null && _f !== void 0 ? _f : 0);
+            this.counters[playerId].leaf.setValue((_d = totals['leaf']) !== null && _d !== void 0 ? _d : 0);
+            this.counters[playerId].mushroom.setValue((_e = totals['mushroom']) !== null && _e !== void 0 ? _e : 0);
+            this.counters[playerId].puddle.setValue((_f = totals['puddle']) !== null && _f !== void 0 ? _f : 0);
         }
     };
     PlayerManager.prototype.incCounter = function (playerId, type, by) {
@@ -617,6 +617,7 @@ var BeingsManager = /** @class */ (function () {
         dojo.subscribe('arrivalBee', this, function (notif) { return _this.arrivalBeeNotif(notif); });
         dojo.subscribe('mergeBee', this, function (notif) { return _this.mergeBeeNotif(notif); });
         dojo.subscribe('arrivalHummingbird', this, function (notif) { return _this.arrivalHummingbirdNotif(notif); });
+        dojo.subscribe('majorityBonus', this, function (notif) { return _this.majorityBonusNotif(notif); });
     };
     BeingsManager.prototype.renderBeing = function (being) {
         var gridBox = this.game.games.tileManager.getGridBoxDiv(being.playerId);
@@ -751,6 +752,46 @@ var BeingsManager = /** @class */ (function () {
                 });
                 this.game.games.playerManager.incCounter(notif.args.playerId, 'bee', notif.args.sectors.length);
                 return [2 /*return*/];
+            });
+        });
+    };
+    BeingsManager.prototype.majorityBonusNotif = function (notif) {
+        return __awaiter(this, void 0, void 0, function () {
+            var pieceType, gridBox, i, cell, id, destBox, beingElement, animation;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        pieceType = notif.args.type.replace('_dweller', '');
+                        gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.player_id);
+                        i = 0;
+                        _a.label = 1;
+                    case 1:
+                        if (!(i < notif.args.count)) return [3 /*break*/, 4];
+                        cell = notif.args.cells[i % notif.args.cells.length];
+                        id = generateId();
+                        document
+                            .getElementById('undertheleaves-general-void-stock')
+                            .insertAdjacentHTML('beforeend', this.formatPiece(pieceType, id));
+                        destBox = gridBox === null || gridBox === void 0 ? void 0 : gridBox.querySelector(".undertheleaves-being-position[data-x='".concat(cell[0], "'][data-y='").concat(cell[1], "']"));
+                        beingElement = document.getElementById(id);
+                        if (!destBox) {
+                            beingElement === null || beingElement === void 0 ? void 0 : beingElement.remove();
+                            return [3 /*break*/, 3];
+                        }
+                        animation = new BgaLocalAnimation(this.game);
+                        animation.setWhere('afterbegin');
+                        animation.setOptions(beingElement, destBox, 500);
+                        return [4 /*yield*/, animation.call()];
+                    case 2:
+                        _a.sent();
+                        _a.label = 3;
+                    case 3:
+                        i++;
+                        return [3 /*break*/, 1];
+                    case 4:
+                        this.game.games.playerManager.incCounter(notif.args.player_id, notif.args.type, notif.args.count);
+                        return [2 /*return*/];
+                }
             });
         });
     };

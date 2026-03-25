@@ -155,7 +155,9 @@ class BeingService
     {
         $existing = $this->game->getObjectFromDB(sprintf(
             "SELECT * FROM beings WHERE being_player_id = '%s' AND being_type = 'hummingbird' AND being_x = '%s' AND being_y = '%s'",
-            $playerId, $tileX, $tileY
+            $playerId,
+            $tileX,
+            $tileY
         ));
 
         $cellsJson = json_encode([[$tileX, $tileY]]);
@@ -163,14 +165,32 @@ class BeingService
         if ($existing) {
             $this->game->DbQuery(sprintf(
                 "UPDATE beings SET being_count = being_count + '%s' WHERE being_id = '%s'",
-                $delta, $existing['being_id']
+                $delta,
+                $existing['being_id']
             ));
         } else {
             $this->game->DbQuery(sprintf(
                 "INSERT INTO beings (being_player_id, being_type, being_cells, being_count, being_x, being_y) VALUES ('%s', 'hummingbird', '%s', '%s', '%s', '%s')",
-                $playerId, addslashes($cellsJson), $delta, $tileX, $tileY
+                $playerId,
+                addslashes($cellsJson),
+                $delta,
+                $tileX,
+                $tileY
             ));
         }
+    }
+
+    public function getTotalsByPlayer(): array
+    {
+        $sql = "SELECT being_player_id, being_type, SUM(being_count) as total FROM beings GROUP BY being_player_id, being_type";
+        $rows = $this->game->getObjectListFromDB($sql);
+        $result = [];
+
+        foreach ($rows as $row) {
+            $result[$row['being_player_id']][$row['being_type']] = (int)$row['total'];
+        }
+
+        return $result;
     }
 
     public function areSectorsSame(array $sector1, array $sector2): bool

@@ -31,6 +31,7 @@ class BeingsManager implements Game {
     dojo.subscribe('arrivalBee', this, (notif) => this.arrivalBeeNotif(notif));
     dojo.subscribe('mergeBee', this, (notif) => this.mergeBeeNotif(notif));
     dojo.subscribe('arrivalHummingbird', this, (notif) => this.arrivalHummingbirdNotif(notif));
+    dojo.subscribe('majorityBonus', this, (notif) => this.majorityBonusNotif(notif));
   }
 
   public renderBeing(being: Being) {
@@ -151,5 +152,35 @@ class BeingsManager implements Game {
     });
 
     this.game.games.playerManager.incCounter(notif.args.playerId, 'bee', notif.args.sectors.length);
+  }
+
+  private async majorityBonusNotif(notif: Notif<MajorityBonusNotif>) {
+    const pieceType = notif.args.type.replace('_dweller', '');
+    const gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.player_id);
+
+    for (let i = 0; i < notif.args.count; i++) {
+      const cell = notif.args.cells[i % notif.args.cells.length];
+      const id = generateId();
+      document
+        .getElementById('undertheleaves-general-void-stock')
+        .insertAdjacentHTML('beforeend', this.formatPiece(pieceType, id));
+
+      const destBox = gridBox?.querySelector<HTMLElement>(
+        `.undertheleaves-being-position[data-x='${cell[0]}'][data-y='${cell[1]}']`,
+      );
+      const beingElement = document.getElementById(id);
+
+      if (!destBox) {
+        beingElement?.remove();
+        continue;
+      }
+
+      const animation = new BgaLocalAnimation(this.game);
+      animation.setWhere('afterbegin');
+      animation.setOptions(beingElement, destBox, 500);
+      await animation.call();
+    }
+
+    this.game.games.playerManager.incCounter(notif.args.player_id, notif.args.type, notif.args.count);
   }
 }

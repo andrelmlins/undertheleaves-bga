@@ -34,6 +34,10 @@ class ArrivalBeings extends GameState
 
         $this->game->globals->delete('placeTile:gridTile');
 
+        if ($this->game->getGameStateValue('visibleScore') == 2) {
+            (new EndScore($this->game))->computeAndUpdateScores(withMajority: false);
+        }
+
         return NextPlayer::class;
     }
 }

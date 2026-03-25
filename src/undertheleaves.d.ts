@@ -74,9 +74,11 @@ interface PlaceTileNotif {
   playerId: number;
 }
 
+type BeingType = 'bee' | 'hummingbird' | 'leaf' | 'mushroom' | 'puddle';
+
 interface Being {
   playerId: number;
-  type: 'bee' | 'hummingbird' | 'leaf_dweller' | 'puddle_dweller' | 'mushroom_dweller';
+  type: BeingType;
   color?: string;
   cells: number[][];
   count: number;
@@ -106,4 +108,11 @@ interface MergeBeeNotif {
   playerId: number;
   mergedBeing: { cells: number[][]; count: number; color: string };
   oldBeings: { cells: number[][] }[];
+}
+
+interface MajorityBonusNotif {
+  player_id: number;
+  type: BeingType;
+  count: number;
+  cells: number[][];
 }

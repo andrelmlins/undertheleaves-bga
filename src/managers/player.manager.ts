@@ -57,17 +57,13 @@ class PlayerManager implements Game {
 
       this.counters[playerId].bee.setValue(totals['bee'] ?? 0);
       this.counters[playerId].hummingbird.setValue(totals['hummingbird'] ?? 0);
-      this.counters[playerId].leaf.setValue(totals['leaf_dweller'] ?? 0);
-      this.counters[playerId].mushroom.setValue(totals['mushroom_dweller'] ?? 0);
-      this.counters[playerId].puddle.setValue(totals['puddle_dweller'] ?? 0);
+      this.counters[playerId].leaf.setValue(totals['leaf'] ?? 0);
+      this.counters[playerId].mushroom.setValue(totals['mushroom'] ?? 0);
+      this.counters[playerId].puddle.setValue(totals['puddle'] ?? 0);
     }
   }
 
-  public incCounter(
-    playerId: string | number,
-    type: 'bee' | 'hummingbird' | 'leaf' | 'mushroom' | 'puddle',
-    by: number,
-  ) {
+  public incCounter(playerId: string | number, type: BeingType, by: number) {
     this.counters[String(playerId)]?.[type]?.incValue(by);
   }
 
