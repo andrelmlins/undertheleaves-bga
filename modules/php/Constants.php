@@ -3,6 +3,7 @@
 namespace Bga\Games\undertheleaves;
 
 use Bga\Games\undertheleaves\Being\DiverPuddleBeing;
+use Bga\Games\undertheleaves\Being\SkipperPuddleBeing;
 use Bga\Games\undertheleaves\Entities\CardConfig;
 use Bga\Games\undertheleaves\Entities\CardType;
 use Bga\Games\undertheleaves\Entities\Position;
@@ -581,7 +582,8 @@ trait Constants
                 new Position(2, 1),
                 CardType::Puddle,
                 clienttranslate('Skipper'),
-                clienttranslate('If you align 2 puddles with one terrain space (not puddle) between them, it will attract a puddle dweller. Place its piece in that terrain space. You can attract more dwellers using the existing puddles if the condition is fulfilled again by adding a new tile.')
+                clienttranslate('If you align 2 puddles with one terrain space (not puddle) between them, it will attract a puddle dweller. Place its piece in that terrain space. You can attract more dwellers using the existing puddles if the condition is fulfilled again by adding a new tile.'),
+                dweller: new SkipperPuddleBeing(),
             ),
             new CardConfig(
                 new Position(2, 2),

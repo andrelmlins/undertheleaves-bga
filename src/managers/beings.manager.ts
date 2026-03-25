@@ -10,6 +10,8 @@ class BeingsManager implements Game {
           this.renderHummingbird(being);
         } else if (being.subtype === 'diver') {
           this.renderDiverPuddle(being);
+        } else if (being.subtype === 'skipper') {
+          this.renderSkipperPuddle(being);
         } else {
           this.renderBeing(being);
         }
@@ -34,7 +36,17 @@ class BeingsManager implements Game {
     dojo.subscribe('mergeBee', this, (notif) => this.mergeBeeNotif(notif));
     dojo.subscribe('arrivalHummingbird', this, (notif) => this.arrivalHummingbirdNotif(notif));
     dojo.subscribe('arrivalDiverPuddle', this, (notif) => this.arrivalDiverPuddleNotif(notif));
+    dojo.subscribe('arrivalSkipperPuddle', this, (notif) => this.arrivalSkipperPuddleNotif(notif));
     dojo.subscribe('majorityBonus', this, (notif) => this.majorityBonusNotif(notif));
+  }
+
+  public renderSkipperPuddle(being: Being) {
+    const gridBox = this.game.games.tileManager.getGridBoxDiv(being.playerId);
+
+    for (let i = 0; i < being.count; i++) {
+      const cell = being.cells[i % being.cells.length];
+      this.getCellDiv(gridBox, cell)?.insertAdjacentHTML('beforeend', this.formatPiece('puddle'));
+    }
   }
 
   public renderDiverPuddle(being: Being) {
@@ -83,7 +95,7 @@ class BeingsManager implements Game {
     }, 0);
   }
 
-  private async animatePieceFromVoid(pieceType: BeingType, destElement: HTMLElement, duration = 500): Promise<void> {
+  private async animatePieceFromVoid(pieceType: BeingType, destElement: HTMLElement): Promise<void> {
     const id = generateId();
     document
       .getElementById('undertheleaves-general-void-stock')
@@ -92,7 +104,7 @@ class BeingsManager implements Game {
     const beingElement = document.getElementById(id);
     const animation = new BgaLocalAnimation(this.game);
     animation.setWhere('afterbegin');
-    animation.setOptions(beingElement, destElement, duration);
+    animation.setOptions(beingElement, destElement, 500);
     await animation.call();
   }
 
@@ -119,6 +131,22 @@ class BeingsManager implements Game {
       animation.setOptions(piece, beingPositionElement, 300);
       animation.call();
     });
+  }
+
+  private async arrivalSkipperPuddleNotif(notif: Notif<ArrivalSkipperPuddleNotif>) {
+    const gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
+
+    for (const sector of notif.args.sectors) {
+      const countBeings = this.countPiecesInSector(gridBox, sector.cells, 'puddle');
+      const cellDestination = sector.cells[countBeings % sector.cells.length];
+      const destElement = this.getCellDiv(gridBox, cellDestination);
+
+      if (!destElement) continue;
+
+      await this.animatePieceFromVoid('puddle', destElement);
+    }
+
+    this.game.games.playerManager.incCounter(notif.args.playerId, 'puddle', notif.args.count_beings);
   }
 
   private async arrivalDiverPuddleNotif(notif: Notif<ArrivalDiverPuddleNotif>) {

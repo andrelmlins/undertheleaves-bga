@@ -117,6 +117,12 @@ interface ArrivalDiverPuddleNotif {
   sectors: { cells: number[][] }[];
 }
 
+interface ArrivalSkipperPuddleNotif {
+  playerId: number;
+  count_beings: number;
+  sectors: { cells: number[][] }[];
+}
+
 interface MajorityBonusNotif {
   player_id: number;
   type: BeingType;
