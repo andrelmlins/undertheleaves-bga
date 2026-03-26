@@ -34,7 +34,8 @@ class BeingsManager implements Game {
     dojo.subscribe('arrivalDiverPuddle',   this, (notif) => this.arrivalPuddleDwellerNotif(notif));
     dojo.subscribe('arrivalSkipperPuddle', this, (notif) => this.arrivalPuddleDwellerNotif(notif));
     dojo.subscribe('arrivalShyPuddle',     this, (notif) => this.arrivalPuddleDwellerNotif(notif));
-    dojo.subscribe('arrivalHostMushroom',  this, (notif) => this.arrivalMushroomDwellerNotif(notif));
+    dojo.subscribe('arrivalHostMushroom',     this, (notif) => this.arrivalMushroomDwellerNotif(notif));
+    dojo.subscribe('arrivalExplorerMushroom', this, (notif) => this.arrivalMushroomDwellerNotif(notif));
     dojo.subscribe('majorityBonus', this, (notif) => this.majorityBonusNotif(notif));
   }
 

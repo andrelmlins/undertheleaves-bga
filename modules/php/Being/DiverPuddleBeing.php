@@ -63,7 +63,7 @@ class DiverPuddleBeing extends DwellerBeing
             'sectors' => $transformedGroups,
             'being_icon' => 'puddle',
         ]);
-        $this->game->notify->all('simplePause', '', ['time' => 1000]);
+        $this->game->beingService->notifyBeingArrivalPause(count($newGroups));
     }
 
     private function hasExistingDiver(array $registeredDivers, array $groupCells): bool

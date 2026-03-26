@@ -535,7 +535,7 @@ html {
   filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.55));
 }
 .undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-center-position .undertheleaves-piece:not(:first-child) {
-  margin-top: -65px;
+  margin-top: -50px;
 }
 .undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-position {
   position: absolute;

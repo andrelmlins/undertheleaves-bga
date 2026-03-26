@@ -82,14 +82,16 @@ class BeeBeing
             'cells' => $being->cells,
         ], $existingSectorsForNotif);
 
+        $countBeings = count($newSectors) + count($existingSectorsForNotif);
+
         $this->game->notify->all('arrivalBee', Messages::$ArrivalBeing, [
             'player_name' => $this->game->getPlayerNameById($playerId),
             'playerId' => $playerId,
-            'count_beings' => count($newSectors) + count($existingSectorsForNotif),
+            'count_beings' => $countBeings,
             'sectors' => array_merge($transformedNew, $transformedExisting),
             'being_icon' => 'bee',
         ]);
-        $this->game->notify->all('simplePause', '', ['time' => 1000]);
+        $this->game->beingService->notifyBeingArrivalPause($countBeings);
     }
 
     private function findBeingsContainedInSector(array $registeredBees, string $color, array $sectorCells): array

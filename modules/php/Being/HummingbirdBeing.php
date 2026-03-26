@@ -118,6 +118,6 @@ class HummingbirdBeing
             'tiles' => $newHummingbirds,
             'being_icon' => 'hummingbird',
         ]);
-        $this->game->notify->all('simplePause', '', ['time' => 1000]);
+        $this->game->beingService->notifyBeingArrivalPause($totalCount);
     }
 }

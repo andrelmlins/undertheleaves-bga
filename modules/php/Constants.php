@@ -3,6 +3,7 @@
 namespace Bga\Games\undertheleaves;
 
 use Bga\Games\undertheleaves\Being\DiverPuddleBeing;
+use Bga\Games\undertheleaves\Being\ExplorerMushroomBeing;
 use Bga\Games\undertheleaves\Being\HostMushroomBeing;
 use Bga\Games\undertheleaves\Being\ShyPuddleBeing;
 use Bga\Games\undertheleaves\Being\SkipperPuddleBeing;
@@ -559,7 +560,8 @@ trait Constants
                 new Position(1, 1),
                 CardType::Mushroom,
                 clienttranslate('Explorer'),
-                clienttranslate('If you make a line that contains 3 mushrooms, regardless of the distance between each of them, it will attract a mushroom dweller. Put the mushroom dweller piece on the mushroom in the middle. The mushrooms can be on any type of terrain and at any distance from one another. You can attract another mushroom dweller with the mushrooms that do not have a mushroom dweller piece on them if you again fulfil this requirement with the placement of a new garden tile.')
+                clienttranslate('If you make a line that contains 3 mushrooms, regardless of the distance between each of them, it will attract a mushroom dweller. Put the mushroom dweller piece on the mushroom in the middle. The mushrooms can be on any type of terrain and at any distance from one another. You can attract another mushroom dweller with the mushrooms that do not have a mushroom dweller piece on them if you again fulfil this requirement with the placement of a new garden tile.'),
+                dweller: new ExplorerMushroomBeing(),
             ),
             new CardConfig(
                 new Position(1, 2),

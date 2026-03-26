@@ -214,4 +214,9 @@ class BeingService
 
         return $sorted1 === $sorted2;
     }
+
+    public function notifyBeingArrivalPause(int $count): void
+    {
+        $this->game->notify->all('simplePause', '', ['time' => $count * 500 + 200]);
+    }
 }

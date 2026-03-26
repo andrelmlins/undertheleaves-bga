@@ -84,7 +84,7 @@ class HostMushroomBeing extends DwellerBeing
             'sectors' => $transformedSectors,
             'being_icon' => 'mushroom',
         ]);
-        $this->game->notify->all('simplePause', '', ['time' => 1000]);
+        $this->game->beingService->notifyBeingArrivalPause(count($newSectors));
     }
 
     private function hasExistingHost(array $registeredHosts, array $sectorCells): bool

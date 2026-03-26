@@ -88,6 +88,6 @@ class ShyPuddleBeing extends DwellerBeing
             'sectors' => $transformedSectors,
             'being_icon' => 'puddle',
         ]);
-        $this->game->notify->all('simplePause', '', ['time' => 1000]);
+        $this->game->beingService->notifyBeingArrivalPause(count($newCells));
     }
 }
