@@ -5,6 +5,7 @@ namespace Bga\Games\undertheleaves;
 use Bga\Games\undertheleaves\Being\DiverPuddleBeing;
 use Bga\Games\undertheleaves\Being\ExplorerMushroomBeing;
 use Bga\Games\undertheleaves\Being\HostMushroomBeing;
+use Bga\Games\undertheleaves\Being\LonerMushroomBeing;
 use Bga\Games\undertheleaves\Being\ShyPuddleBeing;
 use Bga\Games\undertheleaves\Being\SkipperPuddleBeing;
 use Bga\Games\undertheleaves\Entities\CardConfig;
@@ -573,7 +574,8 @@ trait Constants
                 new Position(1, 3),
                 CardType::Mushroom,
                 clienttranslate('Loner'),
-                clienttranslate('If you surround a terrain space that contains a mushroom with eight spaces of any type that do not have any mushrooms in them, it will attract a mushroom dweller. Place the dweller piece on the mushroom.')
+                clienttranslate('If you surround a terrain space that contains a mushroom with eight spaces of any type that do not have any mushrooms in them, it will attract a mushroom dweller. Place the dweller piece on the mushroom.'),
+                dweller: new LonerMushroomBeing(),
             ),
             new CardConfig(
                 new Position(2, 0),
