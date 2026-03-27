@@ -2,8 +2,10 @@
 
 namespace Bga\Games\undertheleaves;
 
+use Bga\Games\undertheleaves\Being\CollectorMushroomBeing;
 use Bga\Games\undertheleaves\Being\DiverPuddleBeing;
 use Bga\Games\undertheleaves\Being\ExplorerMushroomBeing;
+use Bga\Games\undertheleaves\Being\FriendlyPuddleBeing;
 use Bga\Games\undertheleaves\Being\HostMushroomBeing;
 use Bga\Games\undertheleaves\Being\LonerMushroomBeing;
 use Bga\Games\undertheleaves\Being\ShyPuddleBeing;
@@ -568,7 +570,8 @@ trait Constants
                 new Position(1, 2),
                 CardType::Mushroom,
                 clienttranslate('Collector'),
-                clienttranslate('If you form a diagonal of 2 spaces that contain mushrooms, it will attract a mushroom dweller. Place the dweller piece on one of the two the mushrooms. The mushroom that doesn’t have the dweller piece can be used again to atract a new dweller if you again fulfil this requirement with the placement of a new garden tile.')
+                clienttranslate('If you form a diagonal of 2 spaces that contain mushrooms, it will attract a mushroom dweller. Place the dweller piece on one of the two the mushrooms. The mushroom that doesn’t have the dweller piece can be used again to atract a new dweller if you again fulfil this requirement with the placement of a new garden tile.'),
+                dweller: new CollectorMushroomBeing(),
             ),
             new CardConfig(
                 new Position(1, 3),
@@ -596,7 +599,8 @@ trait Constants
                 new Position(2, 2),
                 CardType::Puddle,
                 clienttranslate('Friendly'),
-                clienttranslate('If you create a diagonal using 2 puddles, it will attract a puddle dweller. Place its piece in one of the two puddle spaces. The puddle that remains empty can be used to attract another dweller if the condition is fulfilled again with the placement of a new tile in a later turn.')
+                clienttranslate('If you create a diagonal using 2 puddles, it will attract a puddle dweller. Place its piece in one of the two puddle spaces. The puddle that remains empty can be used to attract another dweller if the condition is fulfilled again with the placement of a new tile in a later turn.'),
+                dweller: new FriendlyPuddleBeing(),
             ),
             new CardConfig(
                 new Position(2, 3),

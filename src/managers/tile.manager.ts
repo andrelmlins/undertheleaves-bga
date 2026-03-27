@@ -178,7 +178,7 @@ class TileManager implements Game {
       positions
         .map((pos) => {
           const div = document.createElement('div');
-          div.className = 'undertheleaves-being-position';
+          div.className = 'undertheleaves-terrain';
           div.dataset.localX = String(pos.localX);
           div.dataset.localY = String(pos.localY);
           div.dataset.x = String(pos.x);

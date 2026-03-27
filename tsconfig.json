@@ -22,6 +22,7 @@
     "src/managers/player.manager.ts",
     "src/managers/beings.manager.ts",
     "src/states/place.tile.ts",
+    "src/states/choose.being.ts",
     "node_modules/bga-animations/src/framework.d.ts",
     "node_modules/bga-animations/src/animations.ts",
     "node_modules/bga-animations/src/animations/attach-with-animation.ts",

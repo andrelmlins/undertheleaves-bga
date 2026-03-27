@@ -13,7 +13,6 @@ const ST_END_GAME = 99;
 
 class EndScore extends \Bga\GameFramework\States\GameState
 {
-
     function __construct(protected Game $game)
     {
         parent::__construct(
@@ -76,7 +75,7 @@ class EndScore extends \Bga\GameFramework\States\GameState
                             $this->game->beingService->addBeing($bonus);
                             $this->game->notify->all('majorityBonus', '${player_name} receives 2 ${being_icon} for majority', [
                                 'player_name' => $this->game->getPlayerNameById($playerId),
-                                'player_id' => $playerId,
+                                'playerId' => $playerId,
                                 'type' => $type,
                                 'count' => 2,
                                 'being_icon' => str_replace('_dweller', '', $type),

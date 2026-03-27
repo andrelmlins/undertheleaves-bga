@@ -433,6 +433,14 @@
   margin-bottom: -4px;
 }
 
+#page-title .undertheleaves-piece {
+  width: 30px !important;
+  height: 30px !important;
+}
+#page-title .undertheleaves-piece.notif {
+  margin-bottom: -7px !important;
+}
+
 html {
   background-image: url(img/background.png);
   background-size: auto;
@@ -505,11 +513,13 @@ html {
   width: 180px;
   height: 180px;
   position: relative;
+  box-sizing: border-box;
 }
 .undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell.selectable {
   background: rgba(255, 0, 0, 0.3137254902);
-  box-sizing: border-box;
   cursor: pointer;
+  border: 1px solid red;
+  box-sizing: border-box;
 }
 .undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-tile .undertheleaves-tile-box .undertheleaves-tile-front,
 .undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-tile .undertheleaves-tile-box .undertheleaves-tile-back {
@@ -537,32 +547,48 @@ html {
 .undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-center-position .undertheleaves-piece:not(:first-child) {
   margin-top: -50px;
 }
-.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-position {
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain {
   position: absolute;
   width: 50%;
   height: 50%;
+  box-sizing: border-box;
 }
-.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-position[data-local-x="0"][data-local-y="0"] {
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain.selectable::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 0, 0, 0.3137254902);
+  border: 1px solid red;
+  cursor: pointer;
+  transition: 0.1s ease-in-out;
+  box-sizing: border-box;
+}
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain.selectable.selected::before {
+  background: rgba(0, 0, 255, 0.3137254902);
+  border: 1px solid blue;
+}
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain[data-local-x="0"][data-local-y="0"] {
   top: 25%;
   left: 25%;
   transform: translate(-50%, -50%);
 }
-.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-position[data-local-x="1"][data-local-y="0"] {
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain[data-local-x="1"][data-local-y="0"] {
   top: 25%;
   left: 75%;
   transform: translate(-50%, -50%);
 }
-.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-position[data-local-x="0"][data-local-y="-1"] {
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain[data-local-x="0"][data-local-y="-1"] {
   top: 75%;
   left: 25%;
   transform: translate(-50%, -50%);
 }
-.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-position[data-local-x="1"][data-local-y="-1"] {
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain[data-local-x="1"][data-local-y="-1"] {
   top: 75%;
   left: 75%;
   transform: translate(-50%, -50%);
 }
-.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-position .undertheleaves-piece {
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain .undertheleaves-piece {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -572,20 +598,20 @@ html {
   min-height: 35px;
   filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.55));
 }
-.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-position .undertheleaves-piece:nth-child(1) {
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain .undertheleaves-piece:nth-child(1) {
   transform: translate(-50%, -50%);
   z-index: 1;
 }
-.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-position .undertheleaves-piece:nth-child(2) {
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain .undertheleaves-piece:nth-child(2) {
   transform: translate(calc(-50% + 12px), calc(-50% - 10px));
 }
-.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-position .undertheleaves-piece:nth-child(3) {
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain .undertheleaves-piece:nth-child(3) {
   transform: translate(calc(-50% - 14px), calc(-50% + 8px));
 }
-.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-position .undertheleaves-piece:nth-child(4) {
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain .undertheleaves-piece:nth-child(4) {
   transform: translate(calc(-50% + 6px), calc(-50% + 14px));
 }
-.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-being-position .undertheleaves-piece:nth-child(5) {
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain .undertheleaves-piece:nth-child(5) {
   transform: translate(calc(-50% - 8px), calc(-50% - 14px));
 }
 

@@ -31,21 +31,21 @@ class BeingsManager implements Game {
     dojo.subscribe('arrivalBee', this, (notif) => this.arrivalBeeNotif(notif));
     dojo.subscribe('mergeBee', this, (notif) => this.mergeBeeNotif(notif));
     dojo.subscribe('arrivalHummingbird', this, (notif) => this.arrivalHummingbirdNotif(notif));
-    dojo.subscribe('arrivalDiverPuddle',   this, (notif) => this.arrivalPuddleDwellerNotif(notif));
+    dojo.subscribe('arrivalDiverPuddle', this, (notif) => this.arrivalPuddleDwellerNotif(notif));
     dojo.subscribe('arrivalSkipperPuddle', this, (notif) => this.arrivalPuddleDwellerNotif(notif));
-    dojo.subscribe('arrivalShyPuddle',     this, (notif) => this.arrivalPuddleDwellerNotif(notif));
-    dojo.subscribe('arrivalHostMushroom',     this, (notif) => this.arrivalMushroomDwellerNotif(notif));
+    dojo.subscribe('arrivalShyPuddle', this, (notif) => this.arrivalPuddleDwellerNotif(notif));
+    dojo.subscribe('arrivalFriendlyPuddle', this, (notif) => this.arrivalPuddleDwellerNotif(notif));
+    dojo.subscribe('arrivalHostMushroom', this, (notif) => this.arrivalMushroomDwellerNotif(notif));
     dojo.subscribe('arrivalExplorerMushroom', this, (notif) => this.arrivalMushroomDwellerNotif(notif));
-    dojo.subscribe('arrivalLonerMushroom',    this, (notif) => this.arrivalMushroomDwellerNotif(notif));
+    dojo.subscribe('arrivalLonerMushroom', this, (notif) => this.arrivalMushroomDwellerNotif(notif));
+    dojo.subscribe('arrivalCollectorMushroom', this, (notif) => this.arrivalMushroomDwellerNotif(notif));
     dojo.subscribe('majorityBonus', this, (notif) => this.majorityBonusNotif(notif));
   }
 
   public renderBeing(being: Being) {
-    const gridBox = this.game.games.tileManager.getGridBoxDiv(being.playerId);
-
     for (let i = 0; i < being.count; i++) {
       const cell = being.cells[i % being.cells.length];
-      this.getCellDiv(gridBox, cell)?.insertAdjacentHTML('beforeend', this.formatPiece(being.type));
+      this.getTerrainDiv(being.playerId, cell)?.insertAdjacentHTML('beforeend', this.formatPiece(being.type));
     }
   }
 
@@ -64,15 +64,18 @@ class BeingsManager implements Game {
     return `<div ${id ? `id=${id}` : ''} class="undertheleaves-piece" piece="${piece}"></div>`;
   }
 
-  private getCellDiv(gridBox: HTMLElement, cell: number[]): HTMLElement | null {
-    return gridBox.querySelector(`.undertheleaves-being-position[data-x='${cell[0]}'][data-y='${cell[1]}']`);
+  public getTerrainDiv(playerId: number, cell: number[]): HTMLElement | null {
+    return document.querySelector(
+      `#undertheleaves-player-grid-${playerId} .undertheleaves-terrain[data-x='${cell[0]}'][data-y='${cell[1]}']`,
+    );
   }
 
-  private countPiecesInSector(gridBox: HTMLElement, cells: number[][], pieceType: BeingType): number {
+  private countPiecesInSector(playerId: number, cells: number[][], pieceType: BeingType): number {
     return cells.reduce((acc, cell) => {
       const items =
-        this.getCellDiv(gridBox, cell)?.querySelectorAll<HTMLElement>(`.undertheleaves-piece[piece="${pieceType}"]`) ??
-        [];
+        this.getTerrainDiv(playerId, cell)?.querySelectorAll<HTMLElement>(
+          `.undertheleaves-piece[piece="${pieceType}"]`,
+        ) ?? [];
       return acc + items.length;
     }, 0);
   }
@@ -91,12 +94,10 @@ class BeingsManager implements Game {
   }
 
   private async mergeBeeNotif(notif: Notif<MergeBeeNotif>) {
-    const gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
-
     const existingPieces: HTMLElement[] = [];
     notif.args.oldBeings.forEach((being) => {
       being.cells.forEach((cell) => {
-        this.getCellDiv(gridBox, cell)
+        this.getTerrainDiv(notif.args.playerId, cell)
           ?.querySelectorAll<HTMLElement>('.undertheleaves-piece[piece="bee"]')
           .forEach((el) => existingPieces.push(el));
       });
@@ -106,7 +107,7 @@ class BeingsManager implements Game {
 
     existingPieces.forEach((piece, i) => {
       const cell = cells[i % cells.length];
-      const beingPositionElement = this.getCellDiv(gridBox, cell);
+      const beingPositionElement = this.getTerrainDiv(notif.args.playerId, cell);
 
       const animation = new BgaLocalAnimation(this.game);
       animation.setWhere('afterbegin');
@@ -116,12 +117,10 @@ class BeingsManager implements Game {
   }
 
   private async arrivalMushroomDwellerNotif(notif: Notif<ArrivalMushroomDwellerNotif>) {
-    const gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
-
     for (const sector of notif.args.sectors) {
-      const countBeings = this.countPiecesInSector(gridBox, sector.cells, 'mushroom');
+      const countBeings = this.countPiecesInSector(notif.args.playerId, sector.cells, 'mushroom');
       const cellDestination = sector.cells[countBeings % sector.cells.length];
-      const destElement = this.getCellDiv(gridBox, cellDestination);
+      const destElement = this.getTerrainDiv(notif.args.playerId, cellDestination);
 
       if (!destElement) continue;
 
@@ -132,12 +131,10 @@ class BeingsManager implements Game {
   }
 
   private async arrivalPuddleDwellerNotif(notif: Notif<ArrivalPuddleDwellerNotif>) {
-    const gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
-
     for (const sector of notif.args.sectors) {
-      const countBeings = this.countPiecesInSector(gridBox, sector.cells, 'puddle');
+      const countBeings = this.countPiecesInSector(notif.args.playerId, sector.cells, 'puddle');
       const cellDestination = sector.cells[countBeings % sector.cells.length];
-      const destElement = this.getCellDiv(gridBox, cellDestination);
+      const destElement = this.getTerrainDiv(notif.args.playerId, cellDestination);
 
       if (!destElement) continue;
 
@@ -165,12 +162,10 @@ class BeingsManager implements Game {
   }
 
   private async arrivalBeeNotif(notif: Notif<ArrivalBeeNotif>) {
-    const gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
-
     for (const sector of notif.args.sectors) {
-      const countBeings = this.countPiecesInSector(gridBox, sector.cells, 'bee');
+      const countBeings = this.countPiecesInSector(notif.args.playerId, sector.cells, 'bee');
       const cellDestination = sector.cells[countBeings % sector.cells.length];
-      const destElement = this.getCellDiv(gridBox, cellDestination);
+      const destElement = this.getTerrainDiv(notif.args.playerId, cellDestination);
 
       if (!destElement) continue;
 
@@ -182,17 +177,16 @@ class BeingsManager implements Game {
 
   private async majorityBonusNotif(notif: Notif<MajorityBonusNotif>) {
     const pieceType = notif.args.type.replace('_dweller', '') as BeingType;
-    const gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.player_id);
 
     for (let i = 0; i < notif.args.count; i++) {
       const cell = notif.args.cells[i % notif.args.cells.length];
-      const destBox = this.getCellDiv(gridBox, cell);
+      const destBox = this.getTerrainDiv(notif.args.playerId, cell);
 
       if (!destBox) continue;
 
       await this.animatePieceFromVoid(pieceType, destBox);
     }
 
-    this.game.games.playerManager.incCounter(notif.args.player_id, notif.args.type, notif.args.count);
+    this.game.games.playerManager.incCounter(notif.args.playerId, notif.args.type, notif.args.count);
   }
 }

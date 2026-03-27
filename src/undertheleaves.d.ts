@@ -20,6 +20,7 @@ interface UndertheLeavesGames {
   playerManager: PlayerManager;
   beingsManager: BeingsManager;
   placeTile: PlaceTile;
+  chooseBeing: ChooseBeing;
 }
 
 interface Tile {
@@ -63,6 +64,12 @@ interface CardConfig {
 
 interface PlaceTileState {
   tableTiles: GridTile[];
+}
+
+interface ChooseBeingState {
+  beings: Record<BeingType, number[][][]>;
+  beingType: BeingType;
+  beingTerrains: number[][];
 }
 
 interface RevealTileNotif {
@@ -124,7 +131,7 @@ interface ArrivalMushroomDwellerNotif {
 }
 
 interface MajorityBonusNotif {
-  player_id: number;
+  playerId: number;
   type: BeingType;
   count: number;
   cells: number[][];

@@ -81,11 +81,13 @@ html {
         width: $TILE_SIZE;
         height: $TILE_SIZE;
         position: relative;
+        box-sizing: border-box;
 
         &.selectable {
           background: #ff000050;
-          box-sizing: border-box;
           cursor: pointer;
+          border: 1px solid red;
+          box-sizing: border-box;
         }
 
         .undertheleaves-tile .undertheleaves-tile-box {
@@ -120,10 +122,30 @@ html {
           }
         }
 
-        .undertheleaves-being-position {
+        .undertheleaves-terrain {
           position: absolute;
           width: 50%;
           height: 50%;
+          box-sizing: border-box;
+
+          &.selectable {
+            &::before {
+              content: '';
+              position: absolute;
+              width: 100%;
+              height: 100%;
+              background: #ff000050;
+              border: 1px solid red;
+              cursor: pointer;
+              transition: 0.1s ease-in-out;
+              box-sizing: border-box;
+            }
+
+            &.selected::before {
+              background: #0000ff50;
+              border: 1px solid blue;
+            }
+          }
 
           &[data-local-x='0'][data-local-y='0'] {
             top: 25%;

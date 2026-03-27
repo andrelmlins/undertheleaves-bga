@@ -124,7 +124,7 @@ class PlaceTile implements Game {
             await this.moveTileSelected(this.externalTileSelected.tileId);
 
             const tileElement = this.game.games.tileManager.getTileById(this.externalTileSelected.tileId);
-            tileElement.querySelectorAll('.undertheleaves-being-position').forEach((item) => item.remove());
+            tileElement.querySelectorAll('.undertheleaves-terrain').forEach((item) => item.remove());
             tileElement.insertAdjacentHTML('beforeend', this.game.games.tileManager.formatBeingPositions(pos.x, pos.y));
 
             this.game.bga.states.setClientState('client_MoveTile', {

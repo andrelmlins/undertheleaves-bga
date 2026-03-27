@@ -96,4 +96,6 @@ $gameinfos = [
 
     // Trigger an exception when PHP detect warnings.
     'exception_on_warning' => true,
+
+    'db_undo_support' => true,
 ];

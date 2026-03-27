@@ -33,3 +33,14 @@
     margin-bottom: -4px;
   }
 }
+
+#page-title {
+  .undertheleaves-piece {
+    width: 30px !important;
+    height: 30px !important;
+
+    &.notif {
+      margin-bottom: -7px !important;
+    }
+  }
+}

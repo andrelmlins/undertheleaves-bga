@@ -12,7 +12,6 @@ use Bga\Games\undertheleaves\Services\SectorService;
 
 class DiverPuddleBeing extends DwellerBeing
 {
-
     public function process(int $playerId): void
     {
         $sectorService = new SectorService($this->game);

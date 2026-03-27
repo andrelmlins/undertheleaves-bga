@@ -56,6 +56,7 @@ var UndertheLeavesGame = /** @class */ (function (_super) {
             playerManager: new PlayerManager(_this),
             placeTile: new PlaceTile(_this),
             beingsManager: new BeingsManager(_this),
+            chooseBeing: new ChooseBeing(_this),
         };
         return _this;
     }
@@ -365,7 +366,7 @@ var TileManager = /** @class */ (function () {
             positions
                 .map(function (pos) {
                 var div = document.createElement('div');
-                div.className = 'undertheleaves-being-position';
+                div.className = 'undertheleaves-terrain';
                 div.dataset.localX = String(pos.localX);
                 div.dataset.localY = String(pos.localY);
                 div.dataset.x = String(pos.x);
@@ -620,17 +621,18 @@ var BeingsManager = /** @class */ (function () {
         dojo.subscribe('arrivalDiverPuddle', this, function (notif) { return _this.arrivalPuddleDwellerNotif(notif); });
         dojo.subscribe('arrivalSkipperPuddle', this, function (notif) { return _this.arrivalPuddleDwellerNotif(notif); });
         dojo.subscribe('arrivalShyPuddle', this, function (notif) { return _this.arrivalPuddleDwellerNotif(notif); });
+        dojo.subscribe('arrivalFriendlyPuddle', this, function (notif) { return _this.arrivalPuddleDwellerNotif(notif); });
         dojo.subscribe('arrivalHostMushroom', this, function (notif) { return _this.arrivalMushroomDwellerNotif(notif); });
         dojo.subscribe('arrivalExplorerMushroom', this, function (notif) { return _this.arrivalMushroomDwellerNotif(notif); });
         dojo.subscribe('arrivalLonerMushroom', this, function (notif) { return _this.arrivalMushroomDwellerNotif(notif); });
+        dojo.subscribe('arrivalCollectorMushroom', this, function (notif) { return _this.arrivalMushroomDwellerNotif(notif); });
         dojo.subscribe('majorityBonus', this, function (notif) { return _this.majorityBonusNotif(notif); });
     };
     BeingsManager.prototype.renderBeing = function (being) {
         var _a;
-        var gridBox = this.game.games.tileManager.getGridBoxDiv(being.playerId);
         for (var i = 0; i < being.count; i++) {
             var cell = being.cells[i % being.cells.length];
-            (_a = this.getCellDiv(gridBox, cell)) === null || _a === void 0 ? void 0 : _a.insertAdjacentHTML('beforeend', this.formatPiece(being.type));
+            (_a = this.getTerrainDiv(being.playerId, cell)) === null || _a === void 0 ? void 0 : _a.insertAdjacentHTML('beforeend', this.formatPiece(being.type));
         }
     };
     BeingsManager.prototype.renderHummingbird = function (being) {
@@ -643,14 +645,14 @@ var BeingsManager = /** @class */ (function () {
     BeingsManager.prototype.formatPiece = function (piece, id) {
         return "<div ".concat(id ? "id=".concat(id) : '', " class=\"undertheleaves-piece\" piece=\"").concat(piece, "\"></div>");
     };
-    BeingsManager.prototype.getCellDiv = function (gridBox, cell) {
-        return gridBox.querySelector(".undertheleaves-being-position[data-x='".concat(cell[0], "'][data-y='").concat(cell[1], "']"));
+    BeingsManager.prototype.getTerrainDiv = function (playerId, cell) {
+        return document.querySelector("#undertheleaves-player-grid-".concat(playerId, " .undertheleaves-terrain[data-x='").concat(cell[0], "'][data-y='").concat(cell[1], "']"));
     };
-    BeingsManager.prototype.countPiecesInSector = function (gridBox, cells, pieceType) {
+    BeingsManager.prototype.countPiecesInSector = function (playerId, cells, pieceType) {
         var _this = this;
         return cells.reduce(function (acc, cell) {
             var _a, _b;
-            var items = (_b = (_a = _this.getCellDiv(gridBox, cell)) === null || _a === void 0 ? void 0 : _a.querySelectorAll(".undertheleaves-piece[piece=\"".concat(pieceType, "\"]"))) !== null && _b !== void 0 ? _b : [];
+            var items = (_b = (_a = _this.getTerrainDiv(playerId, cell)) === null || _a === void 0 ? void 0 : _a.querySelectorAll(".undertheleaves-piece[piece=\"".concat(pieceType, "\"]"))) !== null && _b !== void 0 ? _b : [];
             return acc + items.length;
         }, 0);
     };
@@ -678,21 +680,20 @@ var BeingsManager = /** @class */ (function () {
     };
     BeingsManager.prototype.mergeBeeNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var gridBox, existingPieces, cells;
+            var existingPieces, cells;
             var _this = this;
             return __generator(this, function (_a) {
-                gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
                 existingPieces = [];
                 notif.args.oldBeings.forEach(function (being) {
                     being.cells.forEach(function (cell) {
                         var _a;
-                        (_a = _this.getCellDiv(gridBox, cell)) === null || _a === void 0 ? void 0 : _a.querySelectorAll('.undertheleaves-piece[piece="bee"]').forEach(function (el) { return existingPieces.push(el); });
+                        (_a = _this.getTerrainDiv(notif.args.playerId, cell)) === null || _a === void 0 ? void 0 : _a.querySelectorAll('.undertheleaves-piece[piece="bee"]').forEach(function (el) { return existingPieces.push(el); });
                     });
                 });
                 cells = notif.args.mergedBeing.cells;
                 existingPieces.forEach(function (piece, i) {
                     var cell = cells[i % cells.length];
-                    var beingPositionElement = _this.getCellDiv(gridBox, cell);
+                    var beingPositionElement = _this.getTerrainDiv(notif.args.playerId, cell);
                     var animation = new BgaLocalAnimation(_this.game);
                     animation.setWhere('afterbegin');
                     animation.setOptions(piece, beingPositionElement, 300);
@@ -704,44 +705,41 @@ var BeingsManager = /** @class */ (function () {
     };
     BeingsManager.prototype.arrivalMushroomDwellerNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var gridBox, _a, _b, sector, countBeings, cellDestination, destElement, e_2_1;
+            var _a, _b, sector, countBeings, cellDestination, destElement, e_2_1;
             var e_2, _c;
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0:
-                        gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
+                        _d.trys.push([0, 5, 6, 7]);
+                        _a = __values(notif.args.sectors), _b = _a.next();
                         _d.label = 1;
                     case 1:
-                        _d.trys.push([1, 6, 7, 8]);
-                        _a = __values(notif.args.sectors), _b = _a.next();
-                        _d.label = 2;
-                    case 2:
-                        if (!!_b.done) return [3 /*break*/, 5];
+                        if (!!_b.done) return [3 /*break*/, 4];
                         sector = _b.value;
-                        countBeings = this.countPiecesInSector(gridBox, sector.cells, 'mushroom');
+                        countBeings = this.countPiecesInSector(notif.args.playerId, sector.cells, 'mushroom');
                         cellDestination = sector.cells[countBeings % sector.cells.length];
-                        destElement = this.getCellDiv(gridBox, cellDestination);
+                        destElement = this.getTerrainDiv(notif.args.playerId, cellDestination);
                         if (!destElement)
-                            return [3 /*break*/, 4];
+                            return [3 /*break*/, 3];
                         return [4 /*yield*/, this.animatePieceFromVoid('mushroom', destElement)];
-                    case 3:
+                    case 2:
                         _d.sent();
-                        _d.label = 4;
-                    case 4:
+                        _d.label = 3;
+                    case 3:
                         _b = _a.next();
-                        return [3 /*break*/, 2];
-                    case 5: return [3 /*break*/, 8];
-                    case 6:
+                        return [3 /*break*/, 1];
+                    case 4: return [3 /*break*/, 7];
+                    case 5:
                         e_2_1 = _d.sent();
                         e_2 = { error: e_2_1 };
-                        return [3 /*break*/, 8];
-                    case 7:
+                        return [3 /*break*/, 7];
+                    case 6:
                         try {
                             if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
                         }
                         finally { if (e_2) throw e_2.error; }
                         return [7 /*endfinally*/];
-                    case 8:
+                    case 7:
                         this.game.games.playerManager.incCounter(notif.args.playerId, 'mushroom', notif.args.count_beings);
                         return [2 /*return*/];
                 }
@@ -750,44 +748,41 @@ var BeingsManager = /** @class */ (function () {
     };
     BeingsManager.prototype.arrivalPuddleDwellerNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var gridBox, _a, _b, sector, countBeings, cellDestination, destElement, e_3_1;
+            var _a, _b, sector, countBeings, cellDestination, destElement, e_3_1;
             var e_3, _c;
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0:
-                        gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
+                        _d.trys.push([0, 5, 6, 7]);
+                        _a = __values(notif.args.sectors), _b = _a.next();
                         _d.label = 1;
                     case 1:
-                        _d.trys.push([1, 6, 7, 8]);
-                        _a = __values(notif.args.sectors), _b = _a.next();
-                        _d.label = 2;
-                    case 2:
-                        if (!!_b.done) return [3 /*break*/, 5];
+                        if (!!_b.done) return [3 /*break*/, 4];
                         sector = _b.value;
-                        countBeings = this.countPiecesInSector(gridBox, sector.cells, 'puddle');
+                        countBeings = this.countPiecesInSector(notif.args.playerId, sector.cells, 'puddle');
                         cellDestination = sector.cells[countBeings % sector.cells.length];
-                        destElement = this.getCellDiv(gridBox, cellDestination);
+                        destElement = this.getTerrainDiv(notif.args.playerId, cellDestination);
                         if (!destElement)
-                            return [3 /*break*/, 4];
+                            return [3 /*break*/, 3];
                         return [4 /*yield*/, this.animatePieceFromVoid('puddle', destElement)];
-                    case 3:
+                    case 2:
                         _d.sent();
-                        _d.label = 4;
-                    case 4:
+                        _d.label = 3;
+                    case 3:
                         _b = _a.next();
-                        return [3 /*break*/, 2];
-                    case 5: return [3 /*break*/, 8];
-                    case 6:
+                        return [3 /*break*/, 1];
+                    case 4: return [3 /*break*/, 7];
+                    case 5:
                         e_3_1 = _d.sent();
                         e_3 = { error: e_3_1 };
-                        return [3 /*break*/, 8];
-                    case 7:
+                        return [3 /*break*/, 7];
+                    case 6:
                         try {
                             if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
                         }
                         finally { if (e_3) throw e_3.error; }
                         return [7 /*endfinally*/];
-                    case 8:
+                    case 7:
                         this.game.games.playerManager.incCounter(notif.args.playerId, 'puddle', notif.args.count_beings);
                         return [2 /*return*/];
                 }
@@ -847,44 +842,41 @@ var BeingsManager = /** @class */ (function () {
     };
     BeingsManager.prototype.arrivalBeeNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var gridBox, _a, _b, sector, countBeings, cellDestination, destElement, e_5_1;
+            var _a, _b, sector, countBeings, cellDestination, destElement, e_5_1;
             var e_5, _c;
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0:
-                        gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
+                        _d.trys.push([0, 5, 6, 7]);
+                        _a = __values(notif.args.sectors), _b = _a.next();
                         _d.label = 1;
                     case 1:
-                        _d.trys.push([1, 6, 7, 8]);
-                        _a = __values(notif.args.sectors), _b = _a.next();
-                        _d.label = 2;
-                    case 2:
-                        if (!!_b.done) return [3 /*break*/, 5];
+                        if (!!_b.done) return [3 /*break*/, 4];
                         sector = _b.value;
-                        countBeings = this.countPiecesInSector(gridBox, sector.cells, 'bee');
+                        countBeings = this.countPiecesInSector(notif.args.playerId, sector.cells, 'bee');
                         cellDestination = sector.cells[countBeings % sector.cells.length];
-                        destElement = this.getCellDiv(gridBox, cellDestination);
+                        destElement = this.getTerrainDiv(notif.args.playerId, cellDestination);
                         if (!destElement)
-                            return [3 /*break*/, 4];
+                            return [3 /*break*/, 3];
                         return [4 /*yield*/, this.animatePieceFromVoid('bee', destElement)];
-                    case 3:
+                    case 2:
                         _d.sent();
-                        _d.label = 4;
-                    case 4:
+                        _d.label = 3;
+                    case 3:
                         _b = _a.next();
-                        return [3 /*break*/, 2];
-                    case 5: return [3 /*break*/, 8];
-                    case 6:
+                        return [3 /*break*/, 1];
+                    case 4: return [3 /*break*/, 7];
+                    case 5:
                         e_5_1 = _d.sent();
                         e_5 = { error: e_5_1 };
-                        return [3 /*break*/, 8];
-                    case 7:
+                        return [3 /*break*/, 7];
+                    case 6:
                         try {
                             if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
                         }
                         finally { if (e_5) throw e_5.error; }
                         return [7 /*endfinally*/];
-                    case 8:
+                    case 7:
                         this.game.games.playerManager.incCounter(notif.args.playerId, 'bee', notif.args.sectors.length);
                         return [2 /*return*/];
                 }
@@ -893,18 +885,17 @@ var BeingsManager = /** @class */ (function () {
     };
     BeingsManager.prototype.majorityBonusNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var pieceType, gridBox, i, cell, destBox;
+            var pieceType, i, cell, destBox;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         pieceType = notif.args.type.replace('_dweller', '');
-                        gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.player_id);
                         i = 0;
                         _a.label = 1;
                     case 1:
                         if (!(i < notif.args.count)) return [3 /*break*/, 4];
                         cell = notif.args.cells[i % notif.args.cells.length];
-                        destBox = this.getCellDiv(gridBox, cell);
+                        destBox = this.getTerrainDiv(notif.args.playerId, cell);
                         if (!destBox)
                             return [3 /*break*/, 3];
                         return [4 /*yield*/, this.animatePieceFromVoid(pieceType, destBox)];
@@ -915,7 +906,7 @@ var BeingsManager = /** @class */ (function () {
                         i++;
                         return [3 /*break*/, 1];
                     case 4:
-                        this.game.games.playerManager.incCounter(notif.args.player_id, notif.args.type, notif.args.count);
+                        this.game.games.playerManager.incCounter(notif.args.playerId, notif.args.type, notif.args.count);
                         return [2 /*return*/];
                 }
             });
@@ -1036,7 +1027,7 @@ var PlaceTile = /** @class */ (function () {
                         case 1:
                             _c.sent();
                             tileElement = this.game.games.tileManager.getTileById(this.externalTileSelected.tileId);
-                            tileElement.querySelectorAll('.undertheleaves-being-position').forEach(function (item) { return item.remove(); });
+                            tileElement.querySelectorAll('.undertheleaves-terrain').forEach(function (item) { return item.remove(); });
                             tileElement.insertAdjacentHTML('beforeend', this.game.games.tileManager.formatBeingPositions(pos.x, pos.y));
                             this.game.bga.states.setClientState('client_MoveTile', {
                                 descriptionmyturn: _('${you} must place a garden tile'),
@@ -1209,6 +1200,102 @@ var PlaceTile = /** @class */ (function () {
         });
     };
     return PlaceTile;
+}());
+var ChooseBeing = /** @class */ (function () {
+    function ChooseBeing(game) {
+        this.game = game;
+        this.handlers = [];
+    }
+    ChooseBeing.prototype.setup = function () {
+        //
+    };
+    ChooseBeing.prototype.onEnteringState = function (stateName, notif) {
+        var _this = this;
+        if (stateName === 'ChooseBeing' && this.game.bga.players.isCurrentPlayerActive()) {
+            this.game.bga.states.setClientState('client_ChooseBeing', {
+                descriptionmyturn: _('${you} must choose a dweller'),
+            });
+        }
+        else if (stateName === 'client_ChooseBeing') {
+            var beingTypes = Object.keys(notif.args.beings);
+            if (beingTypes.length == 1 && notif.args.beings[beingTypes[0]].length == 1) {
+                this.chooseTerrain(beingTypes[0], notif.args.beings[beingTypes[0]][0], notif.args);
+            }
+        }
+        else if (stateName === 'client_ChooseTerrain') {
+            var playerId_1 = this.game.bga.players.getCurrentPlayerId();
+            notif.args.beingTerrains.forEach(function (terrain) {
+                var terrainDiv = _this.game.games.beingsManager.getTerrainDiv(playerId_1, terrain);
+                terrainDiv.classList.add('selectable');
+                _this.handlers.push(dojo.connect(terrainDiv, 'onclick', function () {
+                    var _a, _b;
+                    if (_this.terrainSelected) {
+                        _this.terrainSelected.classList.remove('selected');
+                    }
+                    if (((_a = _this.terrainSelected) === null || _a === void 0 ? void 0 : _a.dataset.x) == terrainDiv.dataset.x &&
+                        ((_b = _this.terrainSelected) === null || _b === void 0 ? void 0 : _b.dataset.y) == terrainDiv.dataset.y) {
+                        _this.terrainSelected = null;
+                    }
+                    else {
+                        terrainDiv.classList.add('selected');
+                        _this.terrainSelected = terrainDiv;
+                    }
+                    _this.actionButton.disabled = !_this.terrainSelected;
+                }));
+            });
+        }
+    };
+    ChooseBeing.prototype.onLeavingState = function (stateName) {
+        if (stateName === 'ChooseBeing') {
+            this.cleanupTerrain();
+        }
+    };
+    ChooseBeing.prototype.cleanupTerrain = function () {
+        this.handlers.forEach(function (h) { return dojo.disconnect(h); });
+        this.handlers = [];
+        document
+            .querySelectorAll('.undertheleaves-terrain.selectable, .undertheleaves-terrain.selected')
+            .forEach(function (el) { return el.classList.remove('selectable', 'selected'); });
+        this.terrainSelected = null;
+        this.actionButton = null;
+    };
+    ChooseBeing.prototype.onUpdateActionButtons = function (stateName, args) {
+        var _this = this;
+        if (stateName === 'client_ChooseBeing') {
+            var _loop_1 = function (beingType) {
+                args.beings[beingType].forEach(function (terrains) {
+                    _this.game.statusBar.addActionButton(_this.game.games.beingsManager.formatPiece(beingType), function () { return _this.chooseTerrain(beingType, terrains, args); }, { color: 'secondary' });
+                });
+            };
+            for (var beingType in args.beings) {
+                _loop_1(beingType);
+            }
+            this.game.statusBar.addActionButton(_('Restart'), function () { return _this.onClickRestart(); }, { color: 'alert' });
+        }
+        else if (stateName === 'client_ChooseTerrain') {
+            this.actionButton = this.game.statusBar.addActionButton(_('Place the dweller'), function () { return _this.onClickTerrain(args.beingType); }, { disabled: true });
+            this.game.statusBar.addActionButton(_('Restart'), function () { return _this.onClickRestart(); }, { color: 'alert' });
+        }
+    };
+    ChooseBeing.prototype.setupNotifications = function () {
+        //
+    };
+    ChooseBeing.prototype.chooseTerrain = function (beingType, beingTerrains, args) {
+        this.game.bga.states.setClientState('client_ChooseTerrain', {
+            descriptionmyturn: _('${you} must choose a plot of land for ${being_icon}'),
+            args: __assign(__assign({}, args), { beingType: beingType, beingTerrains: beingTerrains, being_icon: beingType }),
+        });
+    };
+    ChooseBeing.prototype.onClickRestart = function () {
+        this.game.bga.actions.performAction('actChooseBeingRestart');
+    };
+    ChooseBeing.prototype.onClickTerrain = function (beingType) {
+        var _this = this;
+        var x = parseInt(this.terrainSelected.dataset.x);
+        var y = parseInt(this.terrainSelected.dataset.y);
+        this.game.bga.actions.performAction('actChooseBeing', { beingType: beingType, x: x, y: y }).then(function () { return _this.cleanupTerrain(); });
+    };
+    return ChooseBeing;
 }());
 var BgaAnimation = /** @class */ (function () {
     function BgaAnimation(animationFunction, settings) {
@@ -1639,7 +1726,7 @@ var AnimationManager = /** @class */ (function () {
             return __generator(this, function (_a) {
                 promise = new Promise(function (success) {
                     var promises = [];
-                    var _loop_1 = function (i) {
+                    var _loop_2 = function (i) {
                         setTimeout(function () {
                             promises.push(_this.play(animations[i]));
                             if (i == animations.length - 1) {
@@ -1650,7 +1737,7 @@ var AnimationManager = /** @class */ (function () {
                         }, i * delay);
                     };
                     for (var i = 0; i < animations.length; i++) {
-                        _loop_1(i);
+                        _loop_2(i);
                     }
                 });
                 return [2 /*return*/, promise];
