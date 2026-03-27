@@ -53,8 +53,8 @@ html {
         background-repeat: no-repeat;
         background-image: url('img/bag.png');
 
-        span {
-          font-size: 20px;
+        & span {
+          font-size: 16px;
           font-weight: bolder;
           user-select: none;
           position: absolute;
@@ -67,6 +67,9 @@ html {
           height: 25px;
           text-align: center;
           border-radius: 2px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
       }
     }
@@ -299,4 +302,8 @@ html {
       height: 30px;
     }
   }
+}
+
+.show_settings, .scrollmap_button_wrapper.info, .scrollmap_button_wrapper.toogle_buttons_visibility {
+  display: none !important;
 }

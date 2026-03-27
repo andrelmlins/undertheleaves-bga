@@ -91,7 +91,7 @@ class TileManager implements Game {
     //
   }
 
-  public applyZoom(playerId: number) {
+  public applyZoom(playerId: number, animate: boolean = true) {
     const playerGridBox = this.getGridBoxDiv(Number(playerId));
     const cells = Array.from(playerGridBox.children) as HTMLElement[];
 
@@ -126,7 +126,7 @@ class TileManager implements Game {
 
     container.style.height = `${mapHeight * zoom}px`;
 
-    map.scrollToCenter();
+    map.scrollToCenter(undefined, animate ? undefined : 0);
   }
 
   public formatTile(tile: Tile, notif: boolean = false) {

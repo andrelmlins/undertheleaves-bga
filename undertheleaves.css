@@ -403,6 +403,44 @@
   background-position: 125% 150% !important;
 }
 
+.undertheleaves-card-tooltip {
+  display: flex;
+  gap: 12px;
+  padding: 4px;
+  max-width: 320px;
+  align-items: center;
+  font-family: "Libre Baskerville";
+}
+.undertheleaves-card-tooltip .undertheleaves-card-tooltip-image {
+  width: 70px;
+  height: 105px;
+  min-width: 70px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 1px 8px rgba(0, 0, 0, 0.15);
+}
+.undertheleaves-card-tooltip .undertheleaves-card-tooltip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 4px;
+}
+.undertheleaves-card-tooltip .undertheleaves-card-tooltip-content .undertheleaves-card-tooltip-type {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #888;
+}
+.undertheleaves-card-tooltip .undertheleaves-card-tooltip-content .undertheleaves-card-tooltip-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2c2c2c;
+  line-height: 1.2;
+}
+.undertheleaves-card-tooltip .undertheleaves-card-tooltip-content .undertheleaves-card-tooltip-description {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #555;
+}
+
 .undertheleaves-piece {
   width: 40px;
   height: 40px;
@@ -491,7 +529,7 @@ html {
   background-image: url("img/bag.png");
 }
 .undertheleaves-box .undertheleaves-header .undertheleaves-offer .undertheleaves-bag span {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: bolder;
   user-select: none;
   position: absolute;
@@ -504,6 +542,9 @@ html {
   height: 25px;
   text-align: center;
   border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .undertheleaves-box .undertheleaves-player {
   position: relative;
@@ -698,4 +739,8 @@ html {
 .undertheleaves-player-board .undertheleaves-player-board-count .undertheleaves-piece {
   width: 30px;
   height: 30px;
+}
+
+.show_settings, .scrollmap_button_wrapper.info, .scrollmap_button_wrapper.toogle_buttons_visibility {
+  display: none !important;
 }

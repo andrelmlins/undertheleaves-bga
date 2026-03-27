@@ -317,7 +317,8 @@ var TileManager = /** @class */ (function () {
     TileManager.prototype.setupNotifications = function () {
         //
     };
-    TileManager.prototype.applyZoom = function (playerId) {
+    TileManager.prototype.applyZoom = function (playerId, animate) {
+        if (animate === void 0) { animate = true; }
         var playerGridBox = this.getGridBoxDiv(Number(playerId));
         var cells = Array.from(playerGridBox.children);
         if (!cells.length)
@@ -340,7 +341,7 @@ var TileManager = /** @class */ (function () {
         zoom = Math.min(zoom, 1);
         map.setMapZoom(zoom);
         container.style.height = "".concat(mapHeight * zoom, "px");
-        map.scrollToCenter();
+        map.scrollToCenter(undefined, animate ? undefined : 0);
     };
     TileManager.prototype.formatTile = function (tile, notif) {
         if (notif === void 0) { notif = false; }
@@ -494,9 +495,13 @@ var CardManager = /** @class */ (function () {
     }
     CardManager.prototype.setup = function () {
         var cardsBox = document.getElementById('undertheleaves-cards');
-        cardsBox.insertAdjacentHTML('beforeend', this.formatCard(this.game.gamedatas.cards.leaf));
-        cardsBox.insertAdjacentHTML('beforeend', this.formatCard(this.game.gamedatas.cards.mushroom));
-        cardsBox.insertAdjacentHTML('beforeend', this.formatCard(this.game.gamedatas.cards.puddle));
+        var _a = this.game.gamedatas.cards, leaf = _a.leaf, mushroom = _a.mushroom, puddle = _a.puddle;
+        cardsBox.insertAdjacentHTML('beforeend', this.formatCard(leaf));
+        cardsBox.insertAdjacentHTML('beforeend', this.formatCard(mushroom));
+        cardsBox.insertAdjacentHTML('beforeend', this.formatCard(puddle));
+        this.game.addTooltipHtml('undertheleaves-card-leaf', this.formatCardTooltip(leaf));
+        this.game.addTooltipHtml('undertheleaves-card-mushroom', this.formatCardTooltip(mushroom));
+        this.game.addTooltipHtml('undertheleaves-card-puddle', this.formatCardTooltip(puddle));
     };
     CardManager.prototype.onEnteringState = function (stateName, notif) {
         //
@@ -511,7 +516,15 @@ var CardManager = /** @class */ (function () {
         //
     };
     CardManager.prototype.formatCard = function (card) {
-        return "<div class=\"undertheleaves-card\" line=\"".concat(card.position.row, "\" column=\"").concat(card.position.column, "\"></div>");
+        return "<div id=\"undertheleaves-card-".concat(card.type, "\" class=\"undertheleaves-card\" line=\"").concat(card.position.row, "\" column=\"").concat(card.position.column, "\"></div>");
+    };
+    CardManager.prototype.formatCardTooltip = function (card) {
+        var typeName = {
+            leaf: _('Leaf Dweller'),
+            mushroom: _('Mushroom Dweller'),
+            puddle: _('Puddle Dweller'),
+        };
+        return "\n      <div class=\"undertheleaves-card-tooltip\">\n        <div class=\"undertheleaves-card undertheleaves-card-tooltip-image\" line=\"".concat(card.position.row, "\" column=\"").concat(card.position.column, "\"></div>\n        <div class=\"undertheleaves-card-tooltip-content\">\n          <span class=\"undertheleaves-card-tooltip-type\">").concat(typeName[card.type], "</span>\n          <span class=\"undertheleaves-card-tooltip-name\">").concat(_(card.name), "</span>\n          <span class=\"undertheleaves-card-tooltip-description\">").concat(_(card.description), "</span>\n        </div>\n      </div>\n    ");
     };
     return CardManager;
 }());
@@ -1042,7 +1055,7 @@ var PlaceTile = /** @class */ (function () {
             }); }));
         });
         this.game.games.tileManager.recalculateGrid(playerId);
-        this.game.games.tileManager.applyZoom(Number(playerId));
+        this.game.games.tileManager.applyZoom(Number(playerId), false);
     };
     PlaceTile.prototype.removeSelectExternals = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -1054,7 +1067,7 @@ var PlaceTile = /** @class */ (function () {
                     .querySelectorAll('.selectable')
                     .forEach(function (item) { return item.classList.remove('selectable'); });
                 this.game.games.tileManager.recalculateGrid(playerId);
-                this.game.games.tileManager.applyZoom(playerId);
+                this.game.games.tileManager.applyZoom(playerId, false);
                 return [2 /*return*/];
             });
         });

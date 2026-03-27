@@ -131,15 +131,15 @@ var ScrollmapWithZoomNS;
             if (!this.container_div)
                 return;
             if (!this._bEnableZooming) {
-                this.hideOnScreenZoomButtons();
+                // this.hideOnScreenZoomButtons();
                 SWZ.debug("bEnableZooming is false, hide zoom buttons");
             }
             var warning_touch = _("Use two fingers to begin moving the board. ");
             if (this._bEnableZooming)
                 warning_touch += _("Pinch fingers to zoom");
-            this.container_div.setAttribute("warning_touch", warning_touch);
-            var keysStr = this.getWheelZoomingOptionTranslated();
-            this.container_div.setAttribute("warning_scroll", dojo.string.substitute(_("Use ${keys} + Mouse Wheel to zoom the board"), { keys: keysStr }));
+            // this.container_div.setAttribute("warning_touch", warning_touch);
+            // var keysStr = this.getWheelZoomingOptionTranslated();
+            // this.container_div.setAttribute("warning_scroll", dojo.string.substitute(_("Use ${keys} + Mouse Wheel to zoom the board"), { keys: keysStr }));
         }
         get bRevertArrowsScroll() {
             return this._bRevertArrowsScroll;
@@ -1911,7 +1911,7 @@ var ScrollmapWithZoomNS;
                     e.preventDefault();
                 } else if (e.touches.length === 1 && !(this.bEnableScrolling && this.scrollingOptions.bOneFingerScrolling)) {
                     this._disableInteractions();
-                    this.container_div.classList.add("scrollmap_warning_touch");
+                    // this.container_div.classList.add("scrollmap_warning_touch");
                 } else {
                     if (this._gestureStart) {
                         this._gestureStart = false;
