@@ -3,6 +3,8 @@ class TileManager implements Game {
   public tileSelected: string;
   private mapContainerIds: string[];
 
+  public deckCounter: Counter;
+
   gridMap: Record<string, ScrollmapWithZoomNS.ScrollmapWithZoom>;
 
   constructor(public game: UndertheLeavesGame) {
@@ -67,6 +69,10 @@ class TileManager implements Game {
         });
       });
     });
+
+    this.deckCounter = new ebg.counter();
+    this.deckCounter.create('undertheleaves-deck-counter');
+    this.deckCounter.setValue(this.game.gamedatas.countDeckTiles);
   }
 
   public onEnteringState(stateName: string, notif: Notif<any>) {

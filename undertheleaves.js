@@ -64,7 +64,7 @@ var UndertheLeavesGame = /** @class */ (function (_super) {
         this.animationManager = new AnimationManager(this, {
             duration: 800,
         });
-        document.getElementById('game_play_area').insertAdjacentHTML('beforeend', "\n        <div id=\"undertheleaves-box\" class=\"undertheleaves-box\">\n          <div id=\"undertheleaves-cards\" class=\"undertheleaves-cards\"></div>\n          <div id=\"undertheleaves-offer\" class=\"undertheleaves-offer\"></div>\n        </div>\n      ");
+        document.getElementById('game_play_area').insertAdjacentHTML('beforeend', "\n        <div id=\"undertheleaves-box\" class=\"undertheleaves-box\">\n          <div class=\"undertheleaves-header\">\n            <div id=\"undertheleaves-offer\" class=\"undertheleaves-offer\">\n              <div id=\"undertheleaves-bag\" class=\"undertheleaves-bag\">\n                <span id=\"undertheleaves-deck-counter\">0</span>\n              </div>\n            </div>\n            <div id=\"undertheleaves-cards\" class=\"undertheleaves-cards\"></div>\n          </div>\n        </div>\n      ");
         document
             .getElementById('page-title')
             .insertAdjacentHTML('afterbegin', '<div id="undertheleaves-general-void-stock" class="undertheleaves-void-stock"></div>');
@@ -122,7 +122,7 @@ define([
 ], function (dojo, declare) {
     return declare('bgagame.undertheleaves', ebg.core.gamegui, new UndertheLeavesGame());
 });
-var TILE_SIZE = 180;
+var TILE_SIZE = 150;
 var delayTime = function (time) { return new Promise(function (resolve) { return setTimeout(function () { return resolve(); }, time); }); };
 var generateId = function () { return "".concat(Math.floor(Math.random() * 100000000)); };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -301,6 +301,9 @@ var TileManager = /** @class */ (function () {
                 });
             });
         });
+        this.deckCounter = new ebg.counter();
+        this.deckCounter.create('undertheleaves-deck-counter');
+        this.deckCounter.setValue(this.game.gamedatas.countDeckTiles);
     };
     TileManager.prototype.onEnteringState = function (stateName, notif) {
         //
@@ -1146,16 +1149,17 @@ var PlaceTile = /** @class */ (function () {
     PlaceTile.prototype.revealTileNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
             var offerElement, tileSelectedElement, animation;
+            var _this = this;
             return __generator(this, function (_a) {
                 document
-                    .getElementById('undertheleaves-general-void-stock')
+                    .getElementById('undertheleaves-bag')
                     .insertAdjacentHTML('beforeend', this.game.games.tileManager.formatTile(notif.args.tile));
                 offerElement = document.getElementById('undertheleaves-offer');
                 tileSelectedElement = this.game.games.tileManager.getTileById(notif.args.tile.id);
                 animation = new BgaLocalAnimation(this.game);
                 animation.setWhere('afterbegin');
                 animation.setOptions(tileSelectedElement, offerElement, 500);
-                animation.call();
+                animation.call().then(function () { return _this.game.games.tileManager.deckCounter.incValue(-1); });
                 return [2 /*return*/];
             });
         });

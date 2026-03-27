@@ -101,7 +101,10 @@ class HummingbirdBeing
                 [$tx, $ty] = $tilePositions[$key];
                 $delta = $targetCount - $existingCount;
                 $this->game->beingService->upsertHummingbird($playerId, $tx, $ty, $delta);
+
                 $newHummingbirds[] = ['x' => $tx, 'y' => $ty, 'delta' => $delta];
+
+                $this->game->statsService->incHummingbird($delta, $playerId);
             }
         }
 

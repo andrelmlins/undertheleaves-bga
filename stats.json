@@ -1,1 +1,34 @@
-{}
+{
+  "player": {
+    "beeArrived": {
+      "id": 10,
+      "name": "Arrival of bees",
+      "type": "int"
+    },
+    "beeArrivedSameTerrain": {
+      "id": 11,
+      "name": "Arrival of bees on the same sector",
+      "type": "int"
+    },
+    "hummingbirdArrived": {
+      "id": 12,
+      "name": "Arrival of hummingbird",
+      "type": "int"
+    },
+    "leafArrived": {
+      "id": 14,
+      "name": "Arrival of the Leaf Dwellers",
+      "type": "int"
+    },
+    "mushroomArrived": {
+      "id": 15,
+      "name": "Arrival of the Mushroom Dwellers",
+      "type": "int"
+    },
+    "puddleArrived": {
+      "id": 16,
+      "name": "Arrival of the Puddle Dwellers",
+      "type": "int"
+    }
+  }
+}

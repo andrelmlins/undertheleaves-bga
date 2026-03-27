@@ -33,8 +33,14 @@ class UndertheLeavesGame extends GameGui<Player, UndertheLeavesGamedatas> {
       'beforeend',
       `
         <div id="undertheleaves-box" class="undertheleaves-box">
-          <div id="undertheleaves-cards" class="undertheleaves-cards"></div>
-          <div id="undertheleaves-offer" class="undertheleaves-offer"></div>
+          <div class="undertheleaves-header">
+            <div id="undertheleaves-offer" class="undertheleaves-offer">
+              <div id="undertheleaves-bag" class="undertheleaves-bag">
+                <span id="undertheleaves-deck-counter">0</span>
+              </div>
+            </div>
+            <div id="undertheleaves-cards" class="undertheleaves-cards"></div>
+          </div>
         </div>
       `,
     );

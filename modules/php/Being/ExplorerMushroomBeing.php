@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bga\Games\undertheleaves\Being;
 
 use Bga\Games\undertheleaves\Entities\Being;
+use Bga\Games\undertheleaves\Entities\CardType;
 use Bga\Games\undertheleaves\Entities\DwellerBeing;
 use Bga\Games\undertheleaves\Entities\Messages;
 use Bga\Games\undertheleaves\Services\SectorService;
@@ -65,6 +66,8 @@ class ExplorerMushroomBeing extends DwellerBeing
                 cells: [$middleCoord],
                 count: 1,
             ));
+
+            $this->game->statsService->incDweller(CardType::Mushroom, 1, $playerId);
         }
 
         $sectors = array_map(fn($m) => ['cells' => [$m]], array_values($newMiddles));

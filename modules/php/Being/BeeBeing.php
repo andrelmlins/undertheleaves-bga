@@ -34,9 +34,9 @@ class BeeBeing
                 $sectorExistsUnchanged = $this->sectorMatchesExistingBeing($registeredBees, $color, $sectorCells);
 
                 if ($sectorExistsUnchanged) {
-                } elseif (count($beingsInSector) > 1) {
+                } else if (count($beingsInSector) > 1) {
                     $registeredBees = $this->processMergedSector($playerId, $beingsInSector, $sectorCells, $registeredBees);
-                } elseif (count($beingsInSector) === 1) {
+                } else if (count($beingsInSector) === 1) {
                     $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $sectorCells);
                     $this->game->beingService->updateBeingCells($beingsInSector[0]->copyWith(cells: $cells));
                 } else {
@@ -58,10 +58,12 @@ class BeeBeing
 
         foreach ($colorsToIncrement as $color) {
             $this->game->beingService->incrementBeesByColor($playerId, $color);
+            $this->game->statsService->incBee(1, $playerId, true);
         }
 
         foreach ($newSectors as $newSector) {
             $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $newSector['cells']);
+
             $this->game->beingService->addBeing(new Being(
                 playerId: $playerId,
                 type: 'bee',
@@ -69,11 +71,13 @@ class BeeBeing
                 count: 1,
                 color: $newSector['color'],
             ));
+            $this->game->statsService->incBee(1, $playerId, false);
         }
 
         $transformedNew = array_map(function ($sector) {
             $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $sector['cells']);
             usort($cells, fn($a, $b) => $a[1] !== $b[1] ? $b[1] - $a[1] : $a[0] - $b[0]);
+
             return ['color' => $sector['color'], 'cells' => $cells];
         }, $newSectors);
 
@@ -107,7 +111,9 @@ class BeeBeing
     {
         foreach ($registeredBees as $being) {
             if ($being->color !== $color) continue;
+
             $beingCellKeys = array_map(fn($coord) => SectorService::coordinatesToCellKey($coord), $being->cells);
+
             if ($this->game->beingService->areSectorsSame($beingCellKeys, $sectorCells)) return true;
         }
         return false;

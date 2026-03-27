@@ -220,7 +220,7 @@ class PlaceTile implements Game {
 
   private async revealTileNotif(notif: Notif<RevealTileNotif>) {
     document
-      .getElementById('undertheleaves-general-void-stock')
+      .getElementById('undertheleaves-bag')
       .insertAdjacentHTML('beforeend', this.game.games.tileManager.formatTile(notif.args.tile));
 
     const offerElement = document.getElementById('undertheleaves-offer');
@@ -230,7 +230,7 @@ class PlaceTile implements Game {
     animation.setWhere('afterbegin');
     animation.setOptions(tileSelectedElement, offerElement, 500);
 
-    animation.call();
+    animation.call().then(() => this.game.games.tileManager.deckCounter.incValue(-1));
   }
 
   private async placeTileNotif(notif: Notif<PlaceTileNotif>) {

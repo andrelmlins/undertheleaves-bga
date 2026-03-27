@@ -14,30 +14,67 @@ html {
   box-sizing: border-box;
   flex-direction: column;
   gap: 16px;
+  container: undertheleaves-box / inline-size;
 
-  .undertheleaves-cards {
-    width: 100%;
-    padding: 12px;
-    background-color: #ffffff99;
+  .undertheleaves-header {
     display: flex;
-    box-sizing: border-box;
+    flex-wrap: wrap;
     gap: 12px;
-    justify-content: center;
-  }
+    align-items: center;
+    padding: 0px 12px;
 
-  .undertheleaves-offer {
-    width: 100%;
-    padding: 12px;
-    background-color: #ffffff99;
-    display: flex;
-    box-sizing: border-box;
-    gap: 12px;
-    justify-content: center;
+    .undertheleaves-cards {
+      display: flex;
+      box-sizing: border-box;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .undertheleaves-offer {
+      flex: 1;
+      display: flex;
+      box-sizing: border-box;
+      gap: 12px;
+      justify-content: center;
+      position: relative;
+      align-items: center;
+
+      .undertheleaves-bag {
+        order: -1;
+        position: relative;
+        filter: drop-shadow(0 1.5px 1.5px rgba(0, 0, 0, 0.2)) drop-shadow(0 1px 0px rgba(0, 0, 0, 0.35));
+        background-size: 100% 100%;
+        width: 100px;
+        height: 120px;
+        transform: rotate(-20deg);
+        margin-left: -112px;
+        margin-right: 12px;
+        background-repeat: no-repeat;
+        background-image: url('img/bag.png');
+
+        span {
+          font-size: 20px;
+          font-weight: bolder;
+          user-select: none;
+          position: absolute;
+          bottom: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          font-family: 'Libre Baskerville';
+          background: #fdede4bb;
+          min-width: 25px;
+          height: 25px;
+          text-align: center;
+          border-radius: 2px;
+        }
+      }
+    }
   }
 
   .undertheleaves-player {
     position: relative;
-    background-color: #ffffff99;
+    background-color: #ffffff50;
     display: flex;
     padding: 12px;
     gap: 12px;
@@ -86,7 +123,6 @@ html {
         &.selectable {
           background: #ff000050;
           cursor: pointer;
-          border: 1px solid red;
           box-sizing: border-box;
         }
 
@@ -199,6 +235,29 @@ html {
             }
           }
         }
+      }
+    }
+  }
+}
+
+@container undertheleaves-box (width < 980px) {
+  .undertheleaves-box {
+    .undertheleaves-header {
+      flex: 1;
+      gap: 24px;
+
+      .undertheleaves-cards {
+        flex: 1;
+        order: -1;
+
+        .undertheleaves-card {
+          width: 100px;
+          height: 150px;
+        }
+      }
+
+      .undertheleaves-offer {
+        flex: 1;
       }
     }
   }

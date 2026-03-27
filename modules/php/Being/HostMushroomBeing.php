@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bga\Games\undertheleaves\Being;
 
 use Bga\Games\undertheleaves\Entities\Being;
+use Bga\Games\undertheleaves\Entities\CardType;
 use Bga\Games\undertheleaves\Entities\DwellerBeing;
 use Bga\Games\undertheleaves\Entities\Messages;
 use Bga\Games\undertheleaves\Entities\TerrainType;
@@ -62,6 +63,7 @@ class HostMushroomBeing extends DwellerBeing
 
         foreach ($newSectors as $sectorCells) {
             $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $sectorCells);
+
             $this->game->beingService->addBeing(new Being(
                 playerId: $playerId,
                 type: 'mushroom',
@@ -69,6 +71,8 @@ class HostMushroomBeing extends DwellerBeing
                 cells: $cells,
                 count: 1,
             ));
+
+            $this->game->statsService->incDweller(CardType::Mushroom, 1, $playerId);
         }
 
         $transformedSectors = array_map(function ($sectorCells) {

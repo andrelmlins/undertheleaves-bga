@@ -37,10 +37,7 @@ class BeingService
     {
         $cellsJson = json_encode(array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $cellKeys));
 
-        $sql = "SELECT COUNT(*) as cnt FROM beings
-                WHERE being_player_id = '%s'
-                AND being_type = '%s'
-                AND being_cells = '%s'";
+        $sql = "SELECT COUNT(*) as cnt FROM beings WHERE being_player_id = '%s' AND being_type = '%s' AND being_cells = '%s'";
 
         $params = [$playerId, $type, addslashes($cellsJson)];
 
@@ -59,9 +56,7 @@ class BeingService
         $cells = $being->cells;
         usort($cells, fn($a, $b) => $a[1] !== $b[1] ? $b[1] - $a[1] : $a[0] - $b[0]);
         $cellsJson = json_encode($cells);
-        $sql = "UPDATE beings
-                SET being_cells = '%s'
-                WHERE being_id = '%s'";
+        $sql = "UPDATE beings SET being_cells = '%s' WHERE being_id = '%s'";
 
         $this->game->DbQuery(sprintf($sql, addslashes($cellsJson), $being->id));
     }
@@ -88,9 +83,7 @@ class BeingService
 
     public function getBeingsBySector(int $playerId, string $type, ?string $subtype = null): array
     {
-        $sql = "SELECT * FROM beings
-                WHERE being_player_id = '%s'
-                AND being_type = '%s'";
+        $sql = "SELECT * FROM beings WHERE being_player_id = '%s' AND being_type = '%s'";
         $params = [$playerId, $type];
 
         if ($subtype !== null) {
@@ -128,11 +121,7 @@ class BeingService
 
     public function incrementBeesByColor(int $playerId, string $color, int $increment = 1): void
     {
-        $sql = "UPDATE beings 
-                SET being_count = being_count + '%s' 
-                WHERE being_player_id = '%s' 
-                AND being_type = 'bee' 
-                AND being_color = '%s'";
+        $sql = "UPDATE beings SET being_count = being_count + '%s' WHERE being_player_id = '%s' AND being_type = 'bee' AND being_color = '%s'";
 
         $this->game->DbQuery(sprintf($sql, $increment, $playerId, $color));
     }

@@ -26,6 +26,7 @@ use Bga\Games\undertheleaves\Entities\Messages;
 use Bga\Games\undertheleaves\Services\CardService;
 use Bga\Games\undertheleaves\Services\TileService;
 use Bga\Games\undertheleaves\Services\BeingService;
+use Bga\Games\undertheleaves\Services\StatsService;
 use Bga\Games\undertheleaves\States\PlaceTile;
 
 class Game extends \Bga\GameFramework\Table
@@ -35,6 +36,7 @@ class Game extends \Bga\GameFramework\Table
     public TileService $tileService;
     public CardService $cardService;
     public BeingService $beingService;
+    public StatsService $statsService;
 
     public Deck $tiles;
 
@@ -49,6 +51,7 @@ class Game extends \Bga\GameFramework\Table
         $this->tileService = new TileService($this);
         $this->cardService = new CardService($this);
         $this->beingService = new BeingService($this);
+        $this->statsService = new StatsService($this);
 
         $this->tiles = $this->deckFactory->createDeck('tile');
     }
@@ -135,6 +138,7 @@ class Game extends \Bga\GameFramework\Table
 
         $this->tileService->setup();
         $this->cardService->setup();
+        $this->statsService->setup();
 
         $this->activeNextPlayer();
 

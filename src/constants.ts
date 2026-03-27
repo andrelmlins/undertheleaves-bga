@@ -1,1 +1,1 @@
-const TILE_SIZE = 180;
+const TILE_SIZE = 150;

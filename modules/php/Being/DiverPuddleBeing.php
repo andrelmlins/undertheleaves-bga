@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bga\Games\undertheleaves\Being;
 
 use Bga\Games\undertheleaves\Entities\Being;
+use Bga\Games\undertheleaves\Entities\CardType;
 use Bga\Games\undertheleaves\Entities\DwellerBeing;
 use Bga\Games\undertheleaves\Entities\Messages;
 use Bga\Games\undertheleaves\Entities\TerrainType;
@@ -46,6 +47,8 @@ class DiverPuddleBeing extends DwellerBeing
                 cells: $cells,
                 count: 1,
             ));
+
+            $this->game->statsService->incDweller(CardType::Puddle, 1, $playerId);
         }
 
         $transformedGroups = array_map(function ($groupCells) {

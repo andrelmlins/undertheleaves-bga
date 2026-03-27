@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bga\Games\undertheleaves\Being;
 
 use Bga\Games\undertheleaves\Entities\Being;
+use Bga\Games\undertheleaves\Entities\CardType;
 use Bga\Games\undertheleaves\Entities\DwellerBeing;
 use Bga\Games\undertheleaves\Entities\Messages;
 use Bga\Games\undertheleaves\Entities\TerrainType;
@@ -68,6 +69,8 @@ class FriendlyPuddleBeing extends DwellerBeing
                 cells: [$coords],
                 count: 1,
             ));
+
+            $this->game->statsService->incDweller(CardType::Puddle, 1, $playerId);
         }
 
         $transformedSectors = array_map(fn($c) => ['cells' => [$c]], $placedCells);
