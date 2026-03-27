@@ -30,10 +30,10 @@ class ArrivalBeings extends GameState
         (new HummingbirdBeing($this->game))->process($activePlayerId);
 
         $puddleCard = $this->game->cardService->list()['puddle'];
-        $puddleCard->dweller?->setGame($this->game)->process($activePlayerId);
+        $puddleCard->dweller->setGame($this->game)->process($activePlayerId);
 
         $mushroomCard = $this->game->cardService->list()['mushroom'];
-        $mushroomCard->dweller?->setGame($this->game)->process($activePlayerId);
+        $mushroomCard->dweller->setGame($this->game)->process($activePlayerId);
 
         if ($this->game->getGameStateValue('visibleScore') == 2) {
             (new EndScore($this->game))->computeAndUpdateScores();

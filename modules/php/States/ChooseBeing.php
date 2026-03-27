@@ -63,7 +63,7 @@ class ChooseBeing extends GameState
 
         $this->game->globals->set('pending:beings', $pending);
 
-        $this->game->cardService->list()[$beingType]->dweller?->setGame($this->game)->endProcess($playerId, [[$x, $y]]);
+        $this->game->cardService->list()[$beingType]->dweller->setGame($this->game)->endProcess($playerId, [[$x, $y]]);
 
         $hasPending = !empty(array_filter($pending, fn($v) => !empty($v)));
 
