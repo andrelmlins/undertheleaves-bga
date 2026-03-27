@@ -18,7 +18,7 @@ class HostMushroomBeing extends DwellerBeing
         $sectorService = new SectorService($this->game);
         $sectorService->buildGrid(
             $playerId,
-            fn($t) => $t->type !== TerrainType::Puddle ? $t->type->value : false
+            fn($t) => $t->type !== TerrainType::Puddle ? 'sector' : false
         );
         $colorGroups = $sectorService->getAllTerrainGroups(1);
 
@@ -62,7 +62,8 @@ class HostMushroomBeing extends DwellerBeing
         }
 
         foreach ($newSectors as $sectorCells) {
-            $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $sectorCells);
+            $mushroomCells = array_values(array_filter($sectorCells, fn($key) => isset($mushroomKeySet[$key])));
+            $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $mushroomCells);
 
             $this->game->beingService->addBeing(new Being(
                 playerId: $playerId,
@@ -75,8 +76,9 @@ class HostMushroomBeing extends DwellerBeing
             $this->game->statsService->incDweller(CardType::Mushroom, 1, $playerId);
         }
 
-        $transformedSectors = array_map(function ($sectorCells) {
-            $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $sectorCells);
+        $transformedSectors = array_map(function ($sectorCells) use ($mushroomKeySet) {
+            $mushroomCells = array_values(array_filter($sectorCells, fn($key) => isset($mushroomKeySet[$key])));
+            $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $mushroomCells);
             usort($cells, fn($a, $b) => $a[1] !== $b[1] ? $b[1] - $a[1] : $a[0] - $b[0]);
             return ['cells' => $cells];
         }, $newSectors);

@@ -248,6 +248,7 @@ html {
     .undertheleaves-header {
       flex: 1;
       gap: 24px;
+      flex-direction: column;
 
       .undertheleaves-cards {
         flex: 1;
@@ -304,6 +305,8 @@ html {
   }
 }
 
-.show_settings, .scrollmap_button_wrapper.info, .scrollmap_button_wrapper.toogle_buttons_visibility {
+.show_settings,
+.scrollmap_button_wrapper.info,
+.scrollmap_button_wrapper.toogle_buttons_visibility {
   display: none !important;
 }
