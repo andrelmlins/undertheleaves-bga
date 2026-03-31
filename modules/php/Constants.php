@@ -11,6 +11,7 @@ use Bga\Games\undertheleaves\Being\LonerMushroomBeing;
 use Bga\Games\undertheleaves\Being\ShyPuddleBeing;
 use Bga\Games\undertheleaves\Being\SkipperPuddleBeing;
 use Bga\Games\undertheleaves\Being\RestlessLeafBeing;
+use Bga\Games\undertheleaves\Being\RunnerLeafBeing;
 use Bga\Games\undertheleaves\Being\ThoughtfulLeafBeing;
 use Bga\Games\undertheleaves\Entities\CardConfig;
 use Bga\Games\undertheleaves\Entities\CardType;
@@ -553,7 +554,8 @@ trait Constants
                 new Position(0, 3),
                 CardType::Leaf,
                 clienttranslate('Runner'),
-                clienttranslate('If you have a pollinized sector with 4 terrain spaces in a row vertically or horizontally, it will attract a leaf dweller. Place its piece anywhere on the sector.')
+                clienttranslate('If you have a pollinized sector with 4 terrain spaces in a row vertically or horizontally, it will attract a leaf dweller. Place its piece anywhere on the sector.'),
+                dweller: new RunnerLeafBeing(),
             ),
             new CardConfig(
                 new Position(1, 0),

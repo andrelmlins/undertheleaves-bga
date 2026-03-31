@@ -650,6 +650,7 @@ var BeingsManager = /** @class */ (function () {
         dojo.subscribe('arrivalCollectorMushroom', this, function (notif) { return _this.arrivalGenericNotif(notif); });
         dojo.subscribe('arrivalThoughtfulLeaf', this, function (notif) { return _this.arrivalLeafDwellerNotif(notif); });
         dojo.subscribe('arrivalRestlessLeaf', this, function (notif) { return _this.arrivalGenericNotif(notif); });
+        dojo.subscribe('arrivalRunnerLeaf', this, function (notif) { return _this.arrivalGenericNotif(notif); });
         dojo.subscribe('majorityBonus', this, function (notif) { return _this.majorityBonusNotif(notif); });
     };
     BeingsManager.prototype.renderBeing = function (being) {
