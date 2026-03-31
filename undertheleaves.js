@@ -637,18 +637,19 @@ var BeingsManager = /** @class */ (function () {
     };
     BeingsManager.prototype.setupNotifications = function () {
         var _this = this;
-        dojo.subscribe('arrivalBee', this, function (notif) { return _this.arrivalBeeNotif(notif); });
+        dojo.subscribe('arrivalBee', this, function (notif) { return _this.arrivalGenericNotif(notif); });
         dojo.subscribe('mergeBee', this, function (notif) { return _this.mergeBeeNotif(notif); });
         dojo.subscribe('arrivalHummingbird', this, function (notif) { return _this.arrivalHummingbirdNotif(notif); });
-        dojo.subscribe('arrivalDiverPuddle', this, function (notif) { return _this.arrivalPuddleDwellerNotif(notif); });
-        dojo.subscribe('arrivalSkipperPuddle', this, function (notif) { return _this.arrivalPuddleDwellerNotif(notif); });
-        dojo.subscribe('arrivalShyPuddle', this, function (notif) { return _this.arrivalPuddleDwellerNotif(notif); });
-        dojo.subscribe('arrivalFriendlyPuddle', this, function (notif) { return _this.arrivalPuddleDwellerNotif(notif); });
-        dojo.subscribe('arrivalHostMushroom', this, function (notif) { return _this.arrivalMushroomDwellerNotif(notif); });
-        dojo.subscribe('arrivalExplorerMushroom', this, function (notif) { return _this.arrivalMushroomDwellerNotif(notif); });
-        dojo.subscribe('arrivalLonerMushroom', this, function (notif) { return _this.arrivalMushroomDwellerNotif(notif); });
-        dojo.subscribe('arrivalCollectorMushroom', this, function (notif) { return _this.arrivalMushroomDwellerNotif(notif); });
+        dojo.subscribe('arrivalDiverPuddle', this, function (notif) { return _this.arrivalGenericNotif(notif); });
+        dojo.subscribe('arrivalSkipperPuddle', this, function (notif) { return _this.arrivalGenericNotif(notif); });
+        dojo.subscribe('arrivalShyPuddle', this, function (notif) { return _this.arrivalGenericNotif(notif); });
+        dojo.subscribe('arrivalFriendlyPuddle', this, function (notif) { return _this.arrivalGenericNotif(notif); });
+        dojo.subscribe('arrivalHostMushroom', this, function (notif) { return _this.arrivalGenericNotif(notif); });
+        dojo.subscribe('arrivalExplorerMushroom', this, function (notif) { return _this.arrivalGenericNotif(notif); });
+        dojo.subscribe('arrivalLonerMushroom', this, function (notif) { return _this.arrivalGenericNotif(notif); });
+        dojo.subscribe('arrivalCollectorMushroom', this, function (notif) { return _this.arrivalGenericNotif(notif); });
         dojo.subscribe('arrivalThoughtfulLeaf', this, function (notif) { return _this.arrivalLeafDwellerNotif(notif); });
+        dojo.subscribe('arrivalRestlessLeaf', this, function (notif) { return _this.arrivalGenericNotif(notif); });
         dojo.subscribe('majorityBonus', this, function (notif) { return _this.majorityBonusNotif(notif); });
     };
     BeingsManager.prototype.renderBeing = function (being) {
@@ -726,7 +727,7 @@ var BeingsManager = /** @class */ (function () {
             });
         });
     };
-    BeingsManager.prototype.arrivalMushroomDwellerNotif = function (notif) {
+    BeingsManager.prototype.arrivalGenericNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b, sector, countBeings, cellDestination, destElement, e_2_1;
             var e_2, _c;
@@ -744,7 +745,7 @@ var BeingsManager = /** @class */ (function () {
                         destElement = this.getTerrainDiv(notif.args.playerId, cellDestination);
                         if (!destElement)
                             return [3 /*break*/, 3];
-                        return [4 /*yield*/, this.animatePieceFromVoid('mushroom', destElement)];
+                        return [4 /*yield*/, this.animatePieceFromVoid(notif.args.being, destElement)];
                     case 2:
                         _d.sent();
                         _d.label = 3;
@@ -763,7 +764,7 @@ var BeingsManager = /** @class */ (function () {
                         finally { if (e_2) throw e_2.error; }
                         return [7 /*endfinally*/];
                     case 7:
-                        this.game.games.playerManager.incCounter(notif.args.playerId, 'mushroom', notif.args.count_beings);
+                        this.game.games.playerManager.incCounter(notif.args.playerId, 'mushroom', notif.args.sectors.length);
                         return [2 /*return*/];
                 }
             });
@@ -804,7 +805,7 @@ var BeingsManager = /** @class */ (function () {
                         finally { if (e_3) throw e_3.error; }
                         return [7 /*endfinally*/];
                     case 7:
-                        this.game.games.playerManager.incCounter(notif.args.playerId, 'leaf', notif.args.count_beings);
+                        this.game.games.playerManager.incCounter(notif.args.playerId, 'leaf', notif.args.sectors.length);
                         return [2 /*return*/];
                 }
             });
@@ -829,53 +830,10 @@ var BeingsManager = /** @class */ (function () {
         terrainDiv.appendChild(centerDiv);
         return centerDiv;
     };
-    BeingsManager.prototype.arrivalPuddleDwellerNotif = function (notif) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, _b, sector, countBeings, cellDestination, destElement, e_4_1;
-            var e_4, _c;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
-                    case 0:
-                        _d.trys.push([0, 5, 6, 7]);
-                        _a = __values(notif.args.sectors), _b = _a.next();
-                        _d.label = 1;
-                    case 1:
-                        if (!!_b.done) return [3 /*break*/, 4];
-                        sector = _b.value;
-                        countBeings = this.countPiecesInSector(notif.args.playerId, sector.cells, 'puddle');
-                        cellDestination = sector.cells[countBeings % sector.cells.length];
-                        destElement = this.getTerrainDiv(notif.args.playerId, cellDestination);
-                        if (!destElement)
-                            return [3 /*break*/, 3];
-                        return [4 /*yield*/, this.animatePieceFromVoid('puddle', destElement)];
-                    case 2:
-                        _d.sent();
-                        _d.label = 3;
-                    case 3:
-                        _b = _a.next();
-                        return [3 /*break*/, 1];
-                    case 4: return [3 /*break*/, 7];
-                    case 5:
-                        e_4_1 = _d.sent();
-                        e_4 = { error: e_4_1 };
-                        return [3 /*break*/, 7];
-                    case 6:
-                        try {
-                            if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
-                        }
-                        finally { if (e_4) throw e_4.error; }
-                        return [7 /*endfinally*/];
-                    case 7:
-                        this.game.games.playerManager.incCounter(notif.args.playerId, 'puddle', notif.args.count_beings);
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
     BeingsManager.prototype.arrivalHummingbirdNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var gridBox, _a, _b, tile, nestBox, i, e_5_1;
-            var e_5, _c;
+            var gridBox, _a, _b, tile, nestBox, i, e_4_1;
+            var e_4, _c;
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0:
@@ -907,60 +865,17 @@ var BeingsManager = /** @class */ (function () {
                         return [3 /*break*/, 2];
                     case 7: return [3 /*break*/, 10];
                     case 8:
-                        e_5_1 = _d.sent();
-                        e_5 = { error: e_5_1 };
+                        e_4_1 = _d.sent();
+                        e_4 = { error: e_4_1 };
                         return [3 /*break*/, 10];
                     case 9:
                         try {
                             if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
                         }
-                        finally { if (e_5) throw e_5.error; }
+                        finally { if (e_4) throw e_4.error; }
                         return [7 /*endfinally*/];
                     case 10:
-                        this.game.games.playerManager.incCounter(notif.args.playerId, 'hummingbird', notif.args.count_beings);
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    BeingsManager.prototype.arrivalBeeNotif = function (notif) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, _b, sector, countBeings, cellDestination, destElement, e_6_1;
-            var e_6, _c;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
-                    case 0:
-                        _d.trys.push([0, 5, 6, 7]);
-                        _a = __values(notif.args.sectors), _b = _a.next();
-                        _d.label = 1;
-                    case 1:
-                        if (!!_b.done) return [3 /*break*/, 4];
-                        sector = _b.value;
-                        countBeings = this.countPiecesInSector(notif.args.playerId, sector.cells, 'bee');
-                        cellDestination = sector.cells[countBeings % sector.cells.length];
-                        destElement = this.getTerrainDiv(notif.args.playerId, cellDestination);
-                        if (!destElement)
-                            return [3 /*break*/, 3];
-                        return [4 /*yield*/, this.animatePieceFromVoid('bee', destElement)];
-                    case 2:
-                        _d.sent();
-                        _d.label = 3;
-                    case 3:
-                        _b = _a.next();
-                        return [3 /*break*/, 1];
-                    case 4: return [3 /*break*/, 7];
-                    case 5:
-                        e_6_1 = _d.sent();
-                        e_6 = { error: e_6_1 };
-                        return [3 /*break*/, 7];
-                    case 6:
-                        try {
-                            if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
-                        }
-                        finally { if (e_6) throw e_6.error; }
-                        return [7 /*endfinally*/];
-                    case 7:
-                        this.game.games.playerManager.incCounter(notif.args.playerId, 'bee', notif.args.sectors.length);
+                        this.game.games.playerManager.incCounter(notif.args.playerId, 'leaf', notif.args.tiles.length);
                         return [2 /*return*/];
                 }
             });

@@ -33,18 +33,19 @@ class BeingsManager implements Game {
   }
 
   public setupNotifications() {
-    dojo.subscribe('arrivalBee', this, (notif) => this.arrivalBeeNotif(notif));
+    dojo.subscribe('arrivalBee', this, (notif) => this.arrivalGenericNotif(notif));
     dojo.subscribe('mergeBee', this, (notif) => this.mergeBeeNotif(notif));
     dojo.subscribe('arrivalHummingbird', this, (notif) => this.arrivalHummingbirdNotif(notif));
-    dojo.subscribe('arrivalDiverPuddle', this, (notif) => this.arrivalPuddleDwellerNotif(notif));
-    dojo.subscribe('arrivalSkipperPuddle', this, (notif) => this.arrivalPuddleDwellerNotif(notif));
-    dojo.subscribe('arrivalShyPuddle', this, (notif) => this.arrivalPuddleDwellerNotif(notif));
-    dojo.subscribe('arrivalFriendlyPuddle', this, (notif) => this.arrivalPuddleDwellerNotif(notif));
-    dojo.subscribe('arrivalHostMushroom', this, (notif) => this.arrivalMushroomDwellerNotif(notif));
-    dojo.subscribe('arrivalExplorerMushroom', this, (notif) => this.arrivalMushroomDwellerNotif(notif));
-    dojo.subscribe('arrivalLonerMushroom', this, (notif) => this.arrivalMushroomDwellerNotif(notif));
-    dojo.subscribe('arrivalCollectorMushroom', this, (notif) => this.arrivalMushroomDwellerNotif(notif));
+    dojo.subscribe('arrivalDiverPuddle', this, (notif) => this.arrivalGenericNotif(notif));
+    dojo.subscribe('arrivalSkipperPuddle', this, (notif) => this.arrivalGenericNotif(notif));
+    dojo.subscribe('arrivalShyPuddle', this, (notif) => this.arrivalGenericNotif(notif));
+    dojo.subscribe('arrivalFriendlyPuddle', this, (notif) => this.arrivalGenericNotif(notif));
+    dojo.subscribe('arrivalHostMushroom', this, (notif) => this.arrivalGenericNotif(notif));
+    dojo.subscribe('arrivalExplorerMushroom', this, (notif) => this.arrivalGenericNotif(notif));
+    dojo.subscribe('arrivalLonerMushroom', this, (notif) => this.arrivalGenericNotif(notif));
+    dojo.subscribe('arrivalCollectorMushroom', this, (notif) => this.arrivalGenericNotif(notif));
     dojo.subscribe('arrivalThoughtfulLeaf', this, (notif) => this.arrivalLeafDwellerNotif(notif));
+    dojo.subscribe('arrivalRestlessLeaf', this, (notif) => this.arrivalGenericNotif(notif));
     dojo.subscribe('majorityBonus', this, (notif) => this.majorityBonusNotif(notif));
   }
 
@@ -122,7 +123,7 @@ class BeingsManager implements Game {
     });
   }
 
-  private async arrivalMushroomDwellerNotif(notif: Notif<ArrivalMushroomDwellerNotif>) {
+  private async arrivalGenericNotif(notif: Notif<ArrivalGenericNotif>) {
     for (const sector of notif.args.sectors) {
       const countBeings = this.countPiecesInSector(notif.args.playerId, sector.cells, 'mushroom');
       const cellDestination = sector.cells[countBeings % sector.cells.length];
@@ -130,20 +131,20 @@ class BeingsManager implements Game {
 
       if (!destElement) continue;
 
-      await this.animatePieceFromVoid('mushroom', destElement);
+      await this.animatePieceFromVoid(notif.args.being, destElement);
     }
 
-    this.game.games.playerManager.incCounter(notif.args.playerId, 'mushroom', notif.args.count_beings);
+    this.game.games.playerManager.incCounter(notif.args.playerId, 'mushroom', notif.args.sectors.length);
   }
 
-  private async arrivalLeafDwellerNotif(notif: Notif<ArrivalLeafDwellerNotif>) {
+  private async arrivalLeafDwellerNotif(notif: Notif<ArrivalGenericNotif>) {
     for (const sector of notif.args.sectors) {
       const centerDiv = this.getOrCreateThoughtfulCenterDiv(notif.args.playerId, sector.cells);
       if (!centerDiv) continue;
       await this.animatePieceFromVoid('leaf', centerDiv);
     }
 
-    this.game.games.playerManager.incCounter(notif.args.playerId, 'leaf', notif.args.count_beings);
+    this.game.games.playerManager.incCounter(notif.args.playerId, 'leaf', notif.args.sectors.length);
   }
 
   private getOrCreateThoughtfulCenterDiv(playerId: number, cells: number[][]): HTMLElement | null {
@@ -169,20 +170,6 @@ class BeingsManager implements Game {
     return centerDiv;
   }
 
-  private async arrivalPuddleDwellerNotif(notif: Notif<ArrivalPuddleDwellerNotif>) {
-    for (const sector of notif.args.sectors) {
-      const countBeings = this.countPiecesInSector(notif.args.playerId, sector.cells, 'puddle');
-      const cellDestination = sector.cells[countBeings % sector.cells.length];
-      const destElement = this.getTerrainDiv(notif.args.playerId, cellDestination);
-
-      if (!destElement) continue;
-
-      await this.animatePieceFromVoid('puddle', destElement);
-    }
-
-    this.game.games.playerManager.incCounter(notif.args.playerId, 'puddle', notif.args.count_beings);
-  }
-
   private async arrivalHummingbirdNotif(notif: Notif<ArrivalHummingbirdNotif>) {
     const gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
 
@@ -197,21 +184,7 @@ class BeingsManager implements Game {
       }
     }
 
-    this.game.games.playerManager.incCounter(notif.args.playerId, 'hummingbird', notif.args.count_beings);
-  }
-
-  private async arrivalBeeNotif(notif: Notif<ArrivalBeeNotif>) {
-    for (const sector of notif.args.sectors) {
-      const countBeings = this.countPiecesInSector(notif.args.playerId, sector.cells, 'bee');
-      const cellDestination = sector.cells[countBeings % sector.cells.length];
-      const destElement = this.getTerrainDiv(notif.args.playerId, cellDestination);
-
-      if (!destElement) continue;
-
-      await this.animatePieceFromVoid('bee', destElement);
-    }
-
-    this.game.games.playerManager.incCounter(notif.args.playerId, 'bee', notif.args.sectors.length);
+    this.game.games.playerManager.incCounter(notif.args.playerId, 'leaf', notif.args.tiles.length);
   }
 
   private async majorityBonusNotif(notif: Notif<MajorityBonusNotif>) {

@@ -77,6 +77,7 @@ class ExplorerMushroomBeing extends DwellerBeing
             'playerId' => $playerId,
             'count_beings' => count($newMiddles),
             'sectors' => $sectors,
+            'being' => 'mushroom',
             'being_icon' => 'mushroom',
         ]);
         $this->game->beingService->notifyBeingArrivalPause(count($newMiddles));

@@ -63,6 +63,7 @@ class DiverPuddleBeing extends DwellerBeing
             'playerId' => $playerId,
             'count_beings' => count($newGroups),
             'sectors' => $transformedGroups,
+            'being' => 'puddle',
             'being_icon' => 'puddle',
         ]);
         $this->game->beingService->notifyBeingArrivalPause(count($newGroups));

@@ -93,6 +93,7 @@ class BeeBeing
             'playerId' => $playerId,
             'count_beings' => $countBeings,
             'sectors' => array_merge($transformedNew, $transformedExisting),
+            'being' => 'bee',
             'being_icon' => 'bee',
         ]);
         $this->game->beingService->notifyBeingArrivalPause($countBeings);

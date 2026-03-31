@@ -86,6 +86,7 @@ class SkipperPuddleBeing extends DwellerBeing
             'playerId' => $playerId,
             'count_beings' => count($newMiddleCells),
             'sectors' => $transformedSectors,
+            'being' => 'puddle',
             'being_icon' => 'puddle',
         ]);
         $this->game->notify->all('simplePause', '', ['time' => 1000]);

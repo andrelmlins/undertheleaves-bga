@@ -10,6 +10,7 @@ use Bga\Games\undertheleaves\Being\HostMushroomBeing;
 use Bga\Games\undertheleaves\Being\LonerMushroomBeing;
 use Bga\Games\undertheleaves\Being\ShyPuddleBeing;
 use Bga\Games\undertheleaves\Being\SkipperPuddleBeing;
+use Bga\Games\undertheleaves\Being\RestlessLeafBeing;
 use Bga\Games\undertheleaves\Being\ThoughtfulLeafBeing;
 use Bga\Games\undertheleaves\Entities\CardConfig;
 use Bga\Games\undertheleaves\Entities\CardType;
@@ -539,7 +540,8 @@ trait Constants
                 new Position(0, 1),
                 CardType::Leaf,
                 clienttranslate('Restless'),
-                clienttranslate('If you have a pollinized sector of at least 5 terrain spaces, it will attract a leaf dweller. Place its piece anywhere within the sector.')
+                clienttranslate('If you have a pollinized sector of at least 5 terrain spaces, it will attract a leaf dweller. Place its piece anywhere within the sector.'),
+                dweller: new RestlessLeafBeing(),
             ),
             new CardConfig(
                 new Position(0, 2),

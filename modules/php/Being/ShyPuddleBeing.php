@@ -89,6 +89,7 @@ class ShyPuddleBeing extends DwellerBeing
             'playerId' => $playerId,
             'count_beings' => count($newCells),
             'sectors' => $transformedSectors,
+            'being' => 'puddle',
             'being_icon' => 'puddle',
         ]);
         $this->game->beingService->notifyBeingArrivalPause(count($newCells));

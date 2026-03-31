@@ -102,14 +102,8 @@ interface BeingsAddedNotif {
   newSectors: number;
 }
 
-interface ArrivalBeeNotif {
-  playerId: number;
-  sectors: { cells: number[][] }[];
-}
-
 interface ArrivalHummingbirdNotif {
   playerId: number;
-  count_beings: number;
   tiles: { x: number; y: number; delta: number }[];
 }
 
@@ -119,21 +113,9 @@ interface MergeBeeNotif {
   oldBeings: { cells: number[][] }[];
 }
 
-interface ArrivalPuddleDwellerNotif {
+interface ArrivalGenericNotif {
   playerId: number;
-  count_beings: number;
-  sectors: { cells: number[][] }[];
-}
-
-interface ArrivalMushroomDwellerNotif {
-  playerId: number;
-  count_beings: number;
-  sectors: { cells: number[][] }[];
-}
-
-interface ArrivalLeafDwellerNotif {
-  playerId: number;
-  count_beings: number;
+  being: BeingType;
   sectors: { cells: number[][] }[];
 }
 

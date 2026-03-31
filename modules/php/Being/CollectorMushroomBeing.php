@@ -80,6 +80,7 @@ class CollectorMushroomBeing extends DwellerBeing
             'playerId' => $playerId,
             'count_beings' => count($placedCells),
             'sectors' => $transformedSectors,
+            'being' => 'mushroom',
             'being_icon' => 'mushroom',
         ]);
         $this->game->beingService->notifyBeingArrivalPause(count($placedCells));
