@@ -450,10 +450,10 @@
   background-clip: content-box;
 }
 .undertheleaves-piece[piece=bee] {
-  background-position-x: 0%;
+  background-position-x: 25%;
 }
 .undertheleaves-piece[piece=hummingbird] {
-  background-position-x: 25%;
+  background-position-x: 0%;
 }
 .undertheleaves-piece[piece=leaf] {
   background-position-x: 50%;
@@ -626,6 +626,27 @@ html {
   width: 50%;
   height: 50%;
   box-sizing: border-box;
+  overflow: visible;
+}
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain .undertheleaves-being-corner-position {
+  position: absolute;
+  left: 100%;
+  top: 100%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain .undertheleaves-being-corner-position .undertheleaves-piece {
+  width: 35px;
+  height: 35px;
+  min-width: 35px;
+  min-height: 35px;
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.55));
+}
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain .undertheleaves-being-corner-position .undertheleaves-piece:not(:first-child) {
+  margin-top: -50px;
 }
 .undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain.selectable::before {
   content: "";
@@ -745,5 +766,9 @@ html {
 .show_settings,
 .scrollmap_button_wrapper.info,
 .scrollmap_button_wrapper.toogle_buttons_visibility {
+  display: none !important;
+}
+
+.scrollmap_container::after {
   display: none !important;
 }

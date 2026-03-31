@@ -8,6 +8,11 @@ class BeingsManager implements Game {
       for (const being of playerBeings) {
         if (being.type === 'hummingbird') {
           this.renderHummingbird(being);
+        } else if (being.type === 'leaf' && being.subtype === 'thoughtful') {
+          const centerDiv = this.getOrCreateThoughtfulCenterDiv(being.playerId, being.cells);
+          for (let i = 0; i < being.count; i++) {
+            centerDiv?.insertAdjacentHTML('beforeend', this.formatPiece('leaf'));
+          }
         } else {
           this.renderBeing(being);
         }
@@ -39,6 +44,7 @@ class BeingsManager implements Game {
     dojo.subscribe('arrivalExplorerMushroom', this, (notif) => this.arrivalMushroomDwellerNotif(notif));
     dojo.subscribe('arrivalLonerMushroom', this, (notif) => this.arrivalMushroomDwellerNotif(notif));
     dojo.subscribe('arrivalCollectorMushroom', this, (notif) => this.arrivalMushroomDwellerNotif(notif));
+    dojo.subscribe('arrivalThoughtfulLeaf', this, (notif) => this.arrivalLeafDwellerNotif(notif));
     dojo.subscribe('majorityBonus', this, (notif) => this.majorityBonusNotif(notif));
   }
 
@@ -128,6 +134,39 @@ class BeingsManager implements Game {
     }
 
     this.game.games.playerManager.incCounter(notif.args.playerId, 'mushroom', notif.args.count_beings);
+  }
+
+  private async arrivalLeafDwellerNotif(notif: Notif<ArrivalLeafDwellerNotif>) {
+    for (const sector of notif.args.sectors) {
+      const centerDiv = this.getOrCreateThoughtfulCenterDiv(notif.args.playerId, sector.cells);
+      if (!centerDiv) continue;
+      await this.animatePieceFromVoid('leaf', centerDiv);
+    }
+
+    this.game.games.playerManager.incCounter(notif.args.playerId, 'leaf', notif.args.count_beings);
+  }
+
+  private getOrCreateThoughtfulCenterDiv(playerId: number, cells: number[][]): HTMLElement | null {
+    const minX = Math.min(...cells.map((c) => c[0]));
+    const minY = Math.min(...cells.map((c) => c[1]));
+    const id = `thoughtful-center-${playerId}-${minX}-${minY}`;
+
+    const existing = document.getElementById(id);
+    if (existing) return existing;
+
+    const maxY = Math.max(...cells.map((c) => c[1]));
+    const topLeftCell = cells.filter((c) => c[1] === maxY).sort((a, b) => a[0] - b[0])[0];
+    const terrainDiv = this.getTerrainDiv(playerId, topLeftCell);
+    if (!terrainDiv) return null;
+
+    terrainDiv.style.zIndex = '10';
+
+    const centerDiv = document.createElement('div');
+    centerDiv.id = id;
+    centerDiv.className = 'undertheleaves-being-corner-position';
+    terrainDiv.appendChild(centerDiv);
+
+    return centerDiv;
   }
 
   private async arrivalPuddleDwellerNotif(notif: Notif<ArrivalPuddleDwellerNotif>) {

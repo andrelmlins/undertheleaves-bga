@@ -10,6 +10,7 @@ use Bga\Games\undertheleaves\Being\HostMushroomBeing;
 use Bga\Games\undertheleaves\Being\LonerMushroomBeing;
 use Bga\Games\undertheleaves\Being\ShyPuddleBeing;
 use Bga\Games\undertheleaves\Being\SkipperPuddleBeing;
+use Bga\Games\undertheleaves\Being\ThoughtfulLeafBeing;
 use Bga\Games\undertheleaves\Entities\CardConfig;
 use Bga\Games\undertheleaves\Entities\CardType;
 use Bga\Games\undertheleaves\Entities\Position;
@@ -531,7 +532,8 @@ trait Constants
                 CardType::Leaf,
                 clienttranslate('Thoughtful'),
                 clienttranslate('If a pollinized sector has four terrain spaces arranged in a square, it will attract a leaf dweller. Place its piece in the center of the square. You cannot use any of these four spaces to attract any other leaf dweller.'),
-                true
+                true,
+                dweller: new ThoughtfulLeafBeing(),
             ),
             new CardConfig(
                 new Position(0, 1),

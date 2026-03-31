@@ -142,6 +142,7 @@ html {
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
+
           display: flex;
           align-items: center;
           justify-content: center;
@@ -166,6 +167,29 @@ html {
           width: 50%;
           height: 50%;
           box-sizing: border-box;
+          overflow: visible;
+
+          .undertheleaves-being-corner-position {
+            position: absolute;
+            left: 100%;
+            top: 100%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            .undertheleaves-piece {
+              width: 35px;
+              height: 35px;
+              min-width: 35px;
+              min-height: 35px;
+              filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.55));
+
+              &:not(:first-child) {
+                margin-top: -50px;
+              }
+            }
+          }
 
           &.selectable {
             &::before {
@@ -308,5 +332,9 @@ html {
 .show_settings,
 .scrollmap_button_wrapper.info,
 .scrollmap_button_wrapper.toogle_buttons_visibility {
+  display: none !important;
+}
+
+.scrollmap_container::after {
   display: none !important;
 }
