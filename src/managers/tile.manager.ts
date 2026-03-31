@@ -7,6 +7,13 @@ class TileManager implements Game {
 
   gridMap: Record<string, ScrollmapWithZoomNS.ScrollmapWithZoom>;
 
+  private readonly terrainIndexMap: Record<number, Record<number, number[][]>> = {
+    0:   { 0: [[0,1],[2,3]], 1: [[1,0],[3,2]] },
+    90:  { 0: [[2,0],[3,1]], 1: [[3,1],[2,0]] },
+    180: { 0: [[3,2],[1,0]], 1: [[2,3],[0,1]] },
+    270: { 0: [[1,3],[0,2]], 1: [[0,2],[1,3]] },
+  };
+
   constructor(public game: UndertheLeavesGame) {
     this.gridMap = {};
     this.handlers = [];
@@ -157,12 +164,12 @@ class TileManager implements Game {
             <div class="undertheleaves-tile-back"></div>
           </div>
         </div>
-        ${this.formatBeingPositions(gridTile.x, gridTile.y)}
+        ${this.formatBeingPositions(gridTile.x, gridTile.y, tileConfig?.terrains, gridTile.rotation, gridTile.side)}
       </div>
     `;
   }
 
-  public formatBeingPositions(x: number, y: number) {
+  public formatBeingPositions(x: number, y: number, terrains?: Terrain[], rotation: number = 0, side: number = 0) {
     const localPositions = [
       { localX: 0, localY: 0 },
       { localX: 1, localY: 0 },
@@ -189,6 +196,12 @@ class TileManager implements Game {
           div.dataset.localY = String(pos.localY);
           div.dataset.x = String(pos.x);
           div.dataset.y = String(pos.y);
+          const row = pos.localY === 0 ? 0 : 1;
+          const col = pos.localX;
+          const terrainIndex = this.terrainIndexMap[rotation]?.[side]?.[row]?.[col];
+          if (terrains && terrainIndex !== undefined && terrains[terrainIndex]?.mushroom) {
+            div.dataset.mushroom = 'true';
+          }
           return div.outerHTML;
         })
         .join('')

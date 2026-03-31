@@ -261,6 +261,22 @@ html {
               transform: translate(calc(-50% - 8px), calc(-50% - 14px));
             }
           }
+
+          &[data-mushroom='true'] .undertheleaves-piece {
+            &:nth-child(1) {
+              transform: translate(calc(-50% + 12px), calc(-50% - 10px));
+              z-index: 1;
+            }
+            &:nth-child(2) {
+              transform: translate(calc(-50% - 14px), calc(-50% + 8px));
+            }
+            &:nth-child(3) {
+              transform: translate(calc(-50% + 6px), calc(-50% + 14px));
+            }
+            &:nth-child(4) {
+              transform: translate(calc(-50% - 8px), calc(-50% - 14px));
+            }
+          }
         }
       }
     }

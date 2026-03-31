@@ -709,6 +709,19 @@ html {
 .undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain .undertheleaves-piece:nth-child(5) {
   transform: translate(calc(-50% - 8px), calc(-50% - 14px));
 }
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain[data-mushroom=true] .undertheleaves-piece:nth-child(1) {
+  transform: translate(calc(-50% + 12px), calc(-50% - 10px));
+  z-index: 1;
+}
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain[data-mushroom=true] .undertheleaves-piece:nth-child(2) {
+  transform: translate(calc(-50% - 14px), calc(-50% + 8px));
+}
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain[data-mushroom=true] .undertheleaves-piece:nth-child(3) {
+  transform: translate(calc(-50% + 6px), calc(-50% + 14px));
+}
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-terrain[data-mushroom=true] .undertheleaves-piece:nth-child(4) {
+  transform: translate(calc(-50% - 8px), calc(-50% - 14px));
+}
 
 @container undertheleaves-box (width < 980px) {
   .undertheleaves-box .undertheleaves-header {

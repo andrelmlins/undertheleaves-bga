@@ -270,6 +270,12 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 var TileManager = /** @class */ (function () {
     function TileManager(game) {
         this.game = game;
+        this.terrainIndexMap = {
+            0: { 0: [[0, 1], [2, 3]], 1: [[1, 0], [3, 2]] },
+            90: { 0: [[2, 0], [3, 1]], 1: [[3, 1], [2, 0]] },
+            180: { 0: [[3, 2], [1, 0]], 1: [[2, 3], [0, 1]] },
+            270: { 0: [[1, 3], [0, 2]], 1: [[0, 2], [1, 3]] },
+        };
         this.gridMap = {};
         this.handlers = [];
         this.mapContainerIds = [];
@@ -350,9 +356,12 @@ var TileManager = /** @class */ (function () {
     };
     TileManager.prototype.formatGridTile = function (gridTile) {
         var tileConfig = this.getTileConfig(gridTile.tile);
-        return "\n      <div id=\"undertheleaves-tile-".concat(gridTile.tile.id, "\" class=\"undertheleaves-tile\" line=\"").concat(tileConfig.position.row, "\" column=\"").concat(tileConfig.position.column, "\" type=\"").concat(gridTile.tile.type, "\" data-x=\"").concat(gridTile.x, "\" data-y=\"").concat(gridTile.y, "\" data-rotation=\"").concat(gridTile.rotation, "\" data-side=\"").concat(gridTile.side, "\">\n        <div class=\"undertheleaves-tile-box\" style=\"transform: rotate(").concat(gridTile.rotation, "deg)\">\n          <div class=\"undertheleaves-tile-inner\" style=\"").concat(gridTile.side == 1 ? 'transform: rotateY(180deg)' : '', "\">\n            <div class=\"undertheleaves-tile-front\"></div>\n            <div class=\"undertheleaves-tile-back\"></div>\n          </div>\n        </div>\n        ").concat(this.formatBeingPositions(gridTile.x, gridTile.y), "\n      </div>\n    ");
+        return "\n      <div id=\"undertheleaves-tile-".concat(gridTile.tile.id, "\" class=\"undertheleaves-tile\" line=\"").concat(tileConfig.position.row, "\" column=\"").concat(tileConfig.position.column, "\" type=\"").concat(gridTile.tile.type, "\" data-x=\"").concat(gridTile.x, "\" data-y=\"").concat(gridTile.y, "\" data-rotation=\"").concat(gridTile.rotation, "\" data-side=\"").concat(gridTile.side, "\">\n        <div class=\"undertheleaves-tile-box\" style=\"transform: rotate(").concat(gridTile.rotation, "deg)\">\n          <div class=\"undertheleaves-tile-inner\" style=\"").concat(gridTile.side == 1 ? 'transform: rotateY(180deg)' : '', "\">\n            <div class=\"undertheleaves-tile-front\"></div>\n            <div class=\"undertheleaves-tile-back\"></div>\n          </div>\n        </div>\n        ").concat(this.formatBeingPositions(gridTile.x, gridTile.y, tileConfig === null || tileConfig === void 0 ? void 0 : tileConfig.terrains, gridTile.rotation, gridTile.side), "\n      </div>\n    ");
     };
-    TileManager.prototype.formatBeingPositions = function (x, y) {
+    TileManager.prototype.formatBeingPositions = function (x, y, terrains, rotation, side) {
+        var _this = this;
+        if (rotation === void 0) { rotation = 0; }
+        if (side === void 0) { side = 0; }
         var localPositions = [
             { localX: 0, localY: 0 },
             { localX: 1, localY: 0 },
@@ -369,12 +378,19 @@ var TileManager = /** @class */ (function () {
         return (html +
             positions
                 .map(function (pos) {
+                var _a, _b, _c, _d;
                 var div = document.createElement('div');
                 div.className = 'undertheleaves-terrain';
                 div.dataset.localX = String(pos.localX);
                 div.dataset.localY = String(pos.localY);
                 div.dataset.x = String(pos.x);
                 div.dataset.y = String(pos.y);
+                var row = pos.localY === 0 ? 0 : 1;
+                var col = pos.localX;
+                var terrainIndex = (_c = (_b = (_a = _this.terrainIndexMap[rotation]) === null || _a === void 0 ? void 0 : _a[side]) === null || _b === void 0 ? void 0 : _b[row]) === null || _c === void 0 ? void 0 : _c[col];
+                if (terrains && terrainIndex !== undefined && ((_d = terrains[terrainIndex]) === null || _d === void 0 ? void 0 : _d.mushroom)) {
+                    div.dataset.mushroom = 'true';
+                }
                 return div.outerHTML;
             })
                 .join(''));
