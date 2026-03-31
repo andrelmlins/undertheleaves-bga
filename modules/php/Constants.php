@@ -12,6 +12,7 @@ use Bga\Games\undertheleaves\Being\ShyPuddleBeing;
 use Bga\Games\undertheleaves\Being\SkipperPuddleBeing;
 use Bga\Games\undertheleaves\Being\RestlessLeafBeing;
 use Bga\Games\undertheleaves\Being\RunnerLeafBeing;
+use Bga\Games\undertheleaves\Being\FlirtyLeafBeing;
 use Bga\Games\undertheleaves\Being\ThoughtfulLeafBeing;
 use Bga\Games\undertheleaves\Entities\CardConfig;
 use Bga\Games\undertheleaves\Entities\CardType;
@@ -548,7 +549,8 @@ trait Constants
                 new Position(0, 2),
                 CardType::Leaf,
                 clienttranslate('Flirty'),
-                clienttranslate('If you have 4 terrain spaces that are differently colored and/or a puddle, it will attract a leaf dweller. Place the dweller in the center of the four spaces. You cannot use any of these four spaces to attract any other leaf dweller.')
+                clienttranslate('If you have 4 terrain spaces that are differently colored and/or a puddle, it will attract a leaf dweller. Place the dweller in the center of the four spaces. You cannot use any of these four spaces to attract any other leaf dweller.'),
+                dweller: new FlirtyLeafBeing(),
             ),
             new CardConfig(
                 new Position(0, 3),

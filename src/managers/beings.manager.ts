@@ -8,7 +8,7 @@ class BeingsManager implements Game {
       for (const being of playerBeings) {
         if (being.type === 'hummingbird') {
           this.renderHummingbird(being);
-        } else if (being.type === 'leaf' && being.subtype === 'thoughtful') {
+        } else if (being.type === 'leaf' && (being.subtype === 'thoughtful' || being.subtype === 'flirty')) {
           const centerDiv = this.getOrCreateThoughtfulCenterDiv(being.playerId, being.cells);
           for (let i = 0; i < being.count; i++) {
             centerDiv?.insertAdjacentHTML('beforeend', this.formatPiece('leaf'));
@@ -45,6 +45,7 @@ class BeingsManager implements Game {
     dojo.subscribe('arrivalLonerMushroom', this, (notif) => this.arrivalGenericNotif(notif));
     dojo.subscribe('arrivalCollectorMushroom', this, (notif) => this.arrivalGenericNotif(notif));
     dojo.subscribe('arrivalThoughtfulLeaf', this, (notif) => this.arrivalLeafDwellerNotif(notif));
+    dojo.subscribe('arrivalFlirtyLeaf', this, (notif) => this.arrivalLeafDwellerNotif(notif));
     dojo.subscribe('arrivalRestlessLeaf', this, (notif) => this.arrivalGenericNotif(notif));
     dojo.subscribe('arrivalRunnerLeaf', this, (notif) => this.arrivalGenericNotif(notif));
     dojo.subscribe('majorityBonus', this, (notif) => this.majorityBonusNotif(notif));
@@ -126,7 +127,7 @@ class BeingsManager implements Game {
 
   private async arrivalGenericNotif(notif: Notif<ArrivalGenericNotif>) {
     for (const sector of notif.args.sectors) {
-      const countBeings = this.countPiecesInSector(notif.args.playerId, sector.cells, 'mushroom');
+      const countBeings = this.countPiecesInSector(notif.args.playerId, sector.cells, notif.args.being);
       const cellDestination = sector.cells[countBeings % sector.cells.length];
       const destElement = this.getTerrainDiv(notif.args.playerId, cellDestination);
 
@@ -185,7 +186,8 @@ class BeingsManager implements Game {
       }
     }
 
-    this.game.games.playerManager.incCounter(notif.args.playerId, 'leaf', notif.args.tiles.length);
+    const totalDelta = notif.args.tiles.reduce((sum, t) => sum + t.delta, 0);
+    this.game.games.playerManager.incCounter(notif.args.playerId, 'leaf', totalDelta);
   }
 
   private async majorityBonusNotif(notif: Notif<MajorityBonusNotif>) {

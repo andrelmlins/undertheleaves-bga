@@ -25,6 +25,7 @@ class BeeBeing
         }
 
         $registeredBees = $this->game->beingService->getBeingsBySector($playerId, 'bee');
+        $colorsWithExistingBees = array_unique(array_map(fn($b) => $b->color, $registeredBees));
 
         $newSectors = [];
 
@@ -49,17 +50,15 @@ class BeeBeing
             return;
         }
 
-        $colorsToIncrement = array_unique(array_column($newSectors, 'color'));
+        $colorsToIncrement = array_unique(array_filter(
+            array_column($newSectors, 'color'),
+            fn($color) => in_array($color, $colorsWithExistingBees)
+        ));
 
         $existingSectorsForNotif = array_values(array_filter(
             $registeredBees,
             fn($being) => in_array($being->color, $colorsToIncrement)
         ));
-
-        foreach ($colorsToIncrement as $color) {
-            $this->game->beingService->incrementBeesByColor($playerId, $color);
-            $this->game->statsService->incBee(1, $playerId, true);
-        }
 
         foreach ($newSectors as $newSector) {
             $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $newSector['cells']);
@@ -72,6 +71,11 @@ class BeeBeing
                 color: $newSector['color'],
             ));
             $this->game->statsService->incBee(1, $playerId, false);
+        }
+
+        foreach ($colorsToIncrement as $color) {
+            $this->game->beingService->incrementBeesByColor($playerId, $color);
+            $this->game->statsService->incBee(1, $playerId, true);
         }
 
         $transformedNew = array_map(function ($sector) {

@@ -606,7 +606,7 @@ var BeingsManager = /** @class */ (function () {
                     if (being.type === 'hummingbird') {
                         this.renderHummingbird(being);
                     }
-                    else if (being.type === 'leaf' && being.subtype === 'thoughtful') {
+                    else if (being.type === 'leaf' && (being.subtype === 'thoughtful' || being.subtype === 'flirty')) {
                         var centerDiv = this.getOrCreateThoughtfulCenterDiv(being.playerId, being.cells);
                         for (var i = 0; i < being.count; i++) {
                             centerDiv === null || centerDiv === void 0 ? void 0 : centerDiv.insertAdjacentHTML('beforeend', this.formatPiece('leaf'));
@@ -649,6 +649,7 @@ var BeingsManager = /** @class */ (function () {
         dojo.subscribe('arrivalLonerMushroom', this, function (notif) { return _this.arrivalGenericNotif(notif); });
         dojo.subscribe('arrivalCollectorMushroom', this, function (notif) { return _this.arrivalGenericNotif(notif); });
         dojo.subscribe('arrivalThoughtfulLeaf', this, function (notif) { return _this.arrivalLeafDwellerNotif(notif); });
+        dojo.subscribe('arrivalFlirtyLeaf', this, function (notif) { return _this.arrivalLeafDwellerNotif(notif); });
         dojo.subscribe('arrivalRestlessLeaf', this, function (notif) { return _this.arrivalGenericNotif(notif); });
         dojo.subscribe('arrivalRunnerLeaf', this, function (notif) { return _this.arrivalGenericNotif(notif); });
         dojo.subscribe('majorityBonus', this, function (notif) { return _this.majorityBonusNotif(notif); });
@@ -741,7 +742,7 @@ var BeingsManager = /** @class */ (function () {
                     case 1:
                         if (!!_b.done) return [3 /*break*/, 4];
                         sector = _b.value;
-                        countBeings = this.countPiecesInSector(notif.args.playerId, sector.cells, 'mushroom');
+                        countBeings = this.countPiecesInSector(notif.args.playerId, sector.cells, notif.args.being);
                         cellDestination = sector.cells[countBeings % sector.cells.length];
                         destElement = this.getTerrainDiv(notif.args.playerId, cellDestination);
                         if (!destElement)
@@ -833,7 +834,7 @@ var BeingsManager = /** @class */ (function () {
     };
     BeingsManager.prototype.arrivalHummingbirdNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var gridBox, _a, _b, tile, nestBox, i, e_4_1;
+            var gridBox, _a, _b, tile, nestBox, i, e_4_1, totalDelta;
             var e_4, _c;
             return __generator(this, function (_d) {
                 switch (_d.label) {
@@ -876,7 +877,8 @@ var BeingsManager = /** @class */ (function () {
                         finally { if (e_4) throw e_4.error; }
                         return [7 /*endfinally*/];
                     case 10:
-                        this.game.games.playerManager.incCounter(notif.args.playerId, 'leaf', notif.args.tiles.length);
+                        totalDelta = notif.args.tiles.reduce(function (sum, t) { return sum + t.delta; }, 0);
+                        this.game.games.playerManager.incCounter(notif.args.playerId, 'leaf', totalDelta);
                         return [2 /*return*/];
                 }
             });

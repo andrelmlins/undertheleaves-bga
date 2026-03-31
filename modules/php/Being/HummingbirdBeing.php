@@ -33,7 +33,8 @@ class HummingbirdBeing
 
         $tiles = $this->game->tileService->listPlayerTiles($playerId);
 
-        $tileTargets = [];
+        $baseTargets = [];
+        $bonusTargets = [];
         $tilePositions = [];
 
         foreach ($tiles as $gridTile) {
@@ -54,30 +55,31 @@ class HummingbirdBeing
                 }
             }
 
-            $tileTargets[$key] = $allPollinized ? 1 : 0;
+            $baseTargets[$key] = $allPollinized ? 1 : 0;
+            $bonusTargets[$key] = 0;
         }
 
         foreach ($tilePositions as $key => [$tx, $ty]) {
-            if ($tileTargets[$key] !== 1) {
+            if ($baseTargets[$key] !== 1) {
                 continue;
             }
 
             $leftKey = ($tx - 1) . "_{$ty}";
             $rightKey = ($tx + 1) . "_{$ty}";
             if (
-                isset($tileTargets[$leftKey]) && $tileTargets[$leftKey] === 1 &&
-                isset($tileTargets[$rightKey]) && $tileTargets[$rightKey] === 1
+                isset($baseTargets[$leftKey]) && $baseTargets[$leftKey] === 1 &&
+                isset($baseTargets[$rightKey]) && $baseTargets[$rightKey] === 1
             ) {
-                $tileTargets[$key]++;
+                $bonusTargets[$key]++;
             }
 
             $downKey = "{$tx}_" . ($ty - 1);
             $upKey = "{$tx}_" . ($ty + 1);
             if (
-                isset($tileTargets[$downKey]) && $tileTargets[$downKey] === 1 &&
-                isset($tileTargets[$upKey]) && $tileTargets[$upKey] === 1
+                isset($baseTargets[$downKey]) && $baseTargets[$downKey] === 1 &&
+                isset($baseTargets[$upKey]) && $baseTargets[$upKey] === 1
             ) {
-                $tileTargets[$key]++;
+                $bonusTargets[$key]++;
             }
         }
 
@@ -89,24 +91,45 @@ class HummingbirdBeing
             $existingByTile[$key] = $being->count;
         }
 
-        $newHummingbirds = [];
+        $baseHummingbirds = [];
+        $bonusHummingbirds = [];
+        $addedByTile = [];
 
-        foreach ($tileTargets as $key => $targetCount) {
-            if ($targetCount === 0) {
+        foreach ($baseTargets as $key => $baseCount) {
+            if ($baseCount === 0) {
                 continue;
             }
 
             $existingCount = $existingByTile[$key] ?? 0;
-            if ($targetCount > $existingCount) {
+            $delta = max(0, $baseCount - $existingCount);
+            if ($delta > 0) {
                 [$tx, $ty] = $tilePositions[$key];
-                $delta = $targetCount - $existingCount;
                 $this->game->beingService->upsertHummingbird($playerId, $tx, $ty, $delta);
-
-                $newHummingbirds[] = ['x' => $tx, 'y' => $ty, 'delta' => $delta];
-
+                $baseHummingbirds[] = ['x' => $tx, 'y' => $ty, 'delta' => $delta];
+                $addedByTile[$key] = $delta;
                 $this->game->statsService->incHummingbird($delta, $playerId);
             }
         }
+
+        foreach ($bonusTargets as $key => $bonusCount) {
+            if ($bonusCount === 0) {
+                continue;
+            }
+
+            $existingCount = $existingByTile[$key] ?? 0;
+            $alreadyAdded = $addedByTile[$key] ?? 0;
+            $totalExisting = $existingCount + $alreadyAdded;
+            $totalTarget = ($baseTargets[$key] ?? 0) + $bonusCount;
+            $delta = max(0, $totalTarget - $totalExisting);
+            if ($delta > 0) {
+                [$tx, $ty] = $tilePositions[$key];
+                $this->game->beingService->upsertHummingbird($playerId, $tx, $ty, $delta);
+                $bonusHummingbirds[] = ['x' => $tx, 'y' => $ty, 'delta' => $delta];
+                $this->game->statsService->incHummingbird($delta, $playerId);
+            }
+        }
+
+        $newHummingbirds = array_merge($baseHummingbirds, $bonusHummingbirds);
 
         if (empty($newHummingbirds)) {
             return;
