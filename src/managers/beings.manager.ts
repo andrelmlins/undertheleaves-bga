@@ -9,7 +9,7 @@ class BeingsManager implements Game {
         if (being.type === 'hummingbird') {
           this.renderHummingbird(being);
         } else if (being.type === 'leaf' && (being.subtype === 'thoughtful' || being.subtype === 'flirty')) {
-          const centerDiv = this.getOrCreateThoughtfulCenterDiv(being.playerId, being.cells);
+          const centerDiv = this.getOrCreateCornerDiv(being.playerId, being.cells);
           for (let i = 0; i < being.count; i++) {
             centerDiv?.insertAdjacentHTML('beforeend', this.formatPiece('leaf'));
           }
@@ -59,14 +59,19 @@ class BeingsManager implements Game {
   }
 
   public renderHummingbird(being: Being) {
-    const gridBox = this.game.games.tileManager.getGridBoxDiv(being.playerId);
-
+    const centerDiv = this.getOrCreateCornerDiv(being.playerId, this.getTileCells(being.x, being.y));
     for (let i = 0; i < being.count; i++) {
-      const nestBox = gridBox.querySelector(
-        `.undertheleaves-being-center-position[data-x='${being.x}'][data-y='${being.y}']`,
-      );
-      nestBox?.insertAdjacentHTML('beforeend', this.formatPiece('hummingbird'));
+      centerDiv?.insertAdjacentHTML('beforeend', this.formatPiece('hummingbird'));
     }
+  }
+
+  private getTileCells(x: number, y: number): number[][] {
+    return [
+      [x * 2, y * 2],
+      [x * 2 + 1, y * 2],
+      [x * 2, y * 2 - 1],
+      [x * 2 + 1, y * 2 - 1],
+    ];
   }
 
   public formatPiece(piece: string, id?: string) {
@@ -141,7 +146,7 @@ class BeingsManager implements Game {
 
   private async arrivalLeafDwellerNotif(notif: Notif<ArrivalGenericNotif>) {
     for (const sector of notif.args.sectors) {
-      const centerDiv = this.getOrCreateThoughtfulCenterDiv(notif.args.playerId, sector.cells);
+      const centerDiv = this.getOrCreateCornerDiv(notif.args.playerId, sector.cells);
       if (!centerDiv) continue;
       await this.animatePieceFromVoid('leaf', centerDiv);
     }
@@ -149,7 +154,7 @@ class BeingsManager implements Game {
     this.game.games.playerManager.incCounter(notif.args.playerId, 'leaf', notif.args.sectors.length);
   }
 
-  private getOrCreateThoughtfulCenterDiv(playerId: number, cells: number[][]): HTMLElement | null {
+  private getOrCreateCornerDiv(playerId: number, cells: number[][]): HTMLElement | null {
     const minX = Math.min(...cells.map((c) => c[0]));
     const minY = Math.min(...cells.map((c) => c[1]));
     const id = `thoughtful-center-${playerId}-${minX}-${minY}`;
@@ -173,12 +178,8 @@ class BeingsManager implements Game {
   }
 
   private async arrivalHummingbirdNotif(notif: Notif<ArrivalHummingbirdNotif>) {
-    const gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
-
     for (const tile of notif.args.tiles) {
-      const nestBox = gridBox.querySelector<HTMLElement>(
-        `.undertheleaves-being-center-position[data-x='${tile.x}'][data-y='${tile.y}']`,
-      );
+      const nestBox = this.getOrCreateCornerDiv(notif.args.playerId, this.getTileCells(tile.x, tile.y));
 
       for (let i = 0; i < tile.delta; i++) {
         if (!nestBox) continue;

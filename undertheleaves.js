@@ -271,10 +271,46 @@ var TileManager = /** @class */ (function () {
     function TileManager(game) {
         this.game = game;
         this.terrainIndexMap = {
-            0: { 0: [[0, 1], [2, 3]], 1: [[1, 0], [3, 2]] },
-            90: { 0: [[2, 0], [3, 1]], 1: [[3, 1], [2, 0]] },
-            180: { 0: [[3, 2], [1, 0]], 1: [[2, 3], [0, 1]] },
-            270: { 0: [[1, 3], [0, 2]], 1: [[0, 2], [1, 3]] },
+            0: {
+                0: [
+                    [0, 1],
+                    [2, 3],
+                ],
+                1: [
+                    [1, 0],
+                    [3, 2],
+                ],
+            },
+            90: {
+                0: [
+                    [2, 0],
+                    [3, 1],
+                ],
+                1: [
+                    [3, 1],
+                    [2, 0],
+                ],
+            },
+            180: {
+                0: [
+                    [3, 2],
+                    [1, 0],
+                ],
+                1: [
+                    [2, 3],
+                    [0, 1],
+                ],
+            },
+            270: {
+                0: [
+                    [1, 3],
+                    [0, 2],
+                ],
+                1: [
+                    [0, 2],
+                    [1, 3],
+                ],
+            },
         };
         this.gridMap = {};
         this.handlers = [];
@@ -374,26 +410,24 @@ var TileManager = /** @class */ (function () {
             x: x * 2 + pos.localX,
             y: y * 2 + pos.localY,
         }); });
-        var html = "<div class=\"undertheleaves-being-center-position\" data-x=\"".concat(x, "\" data-y=\"").concat(y, "\"></div>");
-        return (html +
-            positions
-                .map(function (pos) {
-                var _a, _b, _c, _d;
-                var div = document.createElement('div');
-                div.className = 'undertheleaves-terrain';
-                div.dataset.localX = String(pos.localX);
-                div.dataset.localY = String(pos.localY);
-                div.dataset.x = String(pos.x);
-                div.dataset.y = String(pos.y);
-                var row = pos.localY === 0 ? 0 : 1;
-                var col = pos.localX;
-                var terrainIndex = (_c = (_b = (_a = _this.terrainIndexMap[rotation]) === null || _a === void 0 ? void 0 : _a[side]) === null || _b === void 0 ? void 0 : _b[row]) === null || _c === void 0 ? void 0 : _c[col];
-                if (terrains && terrainIndex !== undefined && ((_d = terrains[terrainIndex]) === null || _d === void 0 ? void 0 : _d.mushroom)) {
-                    div.dataset.mushroom = 'true';
-                }
-                return div.outerHTML;
-            })
-                .join(''));
+        return positions
+            .map(function (pos) {
+            var _a, _b, _c, _d;
+            var div = document.createElement('div');
+            div.className = 'undertheleaves-terrain';
+            div.dataset.localX = String(pos.localX);
+            div.dataset.localY = String(pos.localY);
+            div.dataset.x = String(pos.x);
+            div.dataset.y = String(pos.y);
+            var row = pos.localY === 0 ? 0 : 1;
+            var col = pos.localX;
+            var terrainIndex = (_c = (_b = (_a = _this.terrainIndexMap[rotation]) === null || _a === void 0 ? void 0 : _a[side]) === null || _b === void 0 ? void 0 : _b[row]) === null || _c === void 0 ? void 0 : _c[col];
+            if (terrains && terrainIndex !== undefined && ((_d = terrains[terrainIndex]) === null || _d === void 0 ? void 0 : _d.mushroom)) {
+                div.dataset.mushroom = 'true';
+            }
+            return div.outerHTML;
+        })
+            .join('');
     };
     TileManager.prototype.createBeingPositionDivs = function (cellElement, x, y, rotation, side) { };
     TileManager.prototype.getTileConfig = function (tile) {
@@ -623,7 +657,7 @@ var BeingsManager = /** @class */ (function () {
                         this.renderHummingbird(being);
                     }
                     else if (being.type === 'leaf' && (being.subtype === 'thoughtful' || being.subtype === 'flirty')) {
-                        var centerDiv = this.getOrCreateThoughtfulCenterDiv(being.playerId, being.cells);
+                        var centerDiv = this.getOrCreateCornerDiv(being.playerId, being.cells);
                         for (var i = 0; i < being.count; i++) {
                             centerDiv === null || centerDiv === void 0 ? void 0 : centerDiv.insertAdjacentHTML('beforeend', this.formatPiece('leaf'));
                         }
@@ -678,11 +712,18 @@ var BeingsManager = /** @class */ (function () {
         }
     };
     BeingsManager.prototype.renderHummingbird = function (being) {
-        var gridBox = this.game.games.tileManager.getGridBoxDiv(being.playerId);
+        var centerDiv = this.getOrCreateCornerDiv(being.playerId, this.getTileCells(being.x, being.y));
         for (var i = 0; i < being.count; i++) {
-            var nestBox = gridBox.querySelector(".undertheleaves-being-center-position[data-x='".concat(being.x, "'][data-y='").concat(being.y, "']"));
-            nestBox === null || nestBox === void 0 ? void 0 : nestBox.insertAdjacentHTML('beforeend', this.formatPiece('hummingbird'));
+            centerDiv === null || centerDiv === void 0 ? void 0 : centerDiv.insertAdjacentHTML('beforeend', this.formatPiece('hummingbird'));
         }
+    };
+    BeingsManager.prototype.getTileCells = function (x, y) {
+        return [
+            [x * 2, y * 2],
+            [x * 2 + 1, y * 2],
+            [x * 2, y * 2 - 1],
+            [x * 2 + 1, y * 2 - 1],
+        ];
     };
     BeingsManager.prototype.formatPiece = function (piece, id) {
         return "<div ".concat(id ? "id=".concat(id) : '', " class=\"undertheleaves-piece\" piece=\"").concat(piece, "\"></div>");
@@ -801,7 +842,7 @@ var BeingsManager = /** @class */ (function () {
                     case 1:
                         if (!!_b.done) return [3 /*break*/, 4];
                         sector = _b.value;
-                        centerDiv = this.getOrCreateThoughtfulCenterDiv(notif.args.playerId, sector.cells);
+                        centerDiv = this.getOrCreateCornerDiv(notif.args.playerId, sector.cells);
                         if (!centerDiv)
                             return [3 /*break*/, 3];
                         return [4 /*yield*/, this.animatePieceFromVoid('leaf', centerDiv)];
@@ -829,7 +870,7 @@ var BeingsManager = /** @class */ (function () {
             });
         });
     };
-    BeingsManager.prototype.getOrCreateThoughtfulCenterDiv = function (playerId, cells) {
+    BeingsManager.prototype.getOrCreateCornerDiv = function (playerId, cells) {
         var minX = Math.min.apply(Math, __spreadArray([], __read(cells.map(function (c) { return c[0]; })), false));
         var minY = Math.min.apply(Math, __spreadArray([], __read(cells.map(function (c) { return c[1]; })), false));
         var id = "thoughtful-center-".concat(playerId, "-").concat(minX, "-").concat(minY);
@@ -850,49 +891,46 @@ var BeingsManager = /** @class */ (function () {
     };
     BeingsManager.prototype.arrivalHummingbirdNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var gridBox, _a, _b, tile, nestBox, i, e_4_1, totalDelta;
+            var _a, _b, tile, nestBox, i, e_4_1, totalDelta;
             var e_4, _c;
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0:
-                        gridBox = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
+                        _d.trys.push([0, 7, 8, 9]);
+                        _a = __values(notif.args.tiles), _b = _a.next();
                         _d.label = 1;
                     case 1:
-                        _d.trys.push([1, 8, 9, 10]);
-                        _a = __values(notif.args.tiles), _b = _a.next();
+                        if (!!_b.done) return [3 /*break*/, 6];
+                        tile = _b.value;
+                        nestBox = this.getOrCreateCornerDiv(notif.args.playerId, this.getTileCells(tile.x, tile.y));
+                        i = 0;
                         _d.label = 2;
                     case 2:
-                        if (!!_b.done) return [3 /*break*/, 7];
-                        tile = _b.value;
-                        nestBox = gridBox.querySelector(".undertheleaves-being-center-position[data-x='".concat(tile.x, "'][data-y='").concat(tile.y, "']"));
-                        i = 0;
-                        _d.label = 3;
-                    case 3:
-                        if (!(i < tile.delta)) return [3 /*break*/, 6];
+                        if (!(i < tile.delta)) return [3 /*break*/, 5];
                         if (!nestBox)
-                            return [3 /*break*/, 5];
+                            return [3 /*break*/, 4];
                         return [4 /*yield*/, this.animatePieceFromVoid('hummingbird', nestBox)];
-                    case 4:
+                    case 3:
                         _d.sent();
-                        _d.label = 5;
-                    case 5:
+                        _d.label = 4;
+                    case 4:
                         i++;
-                        return [3 /*break*/, 3];
-                    case 6:
-                        _b = _a.next();
                         return [3 /*break*/, 2];
-                    case 7: return [3 /*break*/, 10];
-                    case 8:
+                    case 5:
+                        _b = _a.next();
+                        return [3 /*break*/, 1];
+                    case 6: return [3 /*break*/, 9];
+                    case 7:
                         e_4_1 = _d.sent();
                         e_4 = { error: e_4_1 };
-                        return [3 /*break*/, 10];
-                    case 9:
+                        return [3 /*break*/, 9];
+                    case 8:
                         try {
                             if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
                         }
                         finally { if (e_4) throw e_4.error; }
                         return [7 /*endfinally*/];
-                    case 10:
+                    case 9:
                         totalDelta = notif.args.tiles.reduce(function (sum, t) { return sum + t.delta; }, 0);
                         this.game.games.playerManager.incCounter(notif.args.playerId, 'leaf', totalDelta);
                         return [2 /*return*/];
