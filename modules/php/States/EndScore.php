@@ -69,6 +69,7 @@ class EndScore extends \Bga\GameFramework\States\GameState
                                 type: $type,
                                 cells: $targetGroup->cells,
                                 count: 2,
+                                subtype: $targetGroup->subtype,
                                 x: $targetGroup->x,
                                 y: $targetGroup->y,
                             );
@@ -77,6 +78,7 @@ class EndScore extends \Bga\GameFramework\States\GameState
                                 'player_name' => $this->game->getPlayerNameById($playerId),
                                 'playerId' => $playerId,
                                 'type' => $type,
+                                'subtype' => $targetGroup->subtype,
                                 'count' => 2,
                                 'being_icon' => str_replace('_dweller', '', $type),
                                 'cells' => $targetGroup->cells,

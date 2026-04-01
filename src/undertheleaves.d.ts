@@ -122,6 +122,7 @@ interface ArrivalGenericNotif {
 interface MajorityBonusNotif {
   playerId: number;
   type: BeingType;
+  subtype?: string;
   count: number;
   cells: number[][];
 }

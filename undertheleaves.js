@@ -981,27 +981,37 @@ var BeingsManager = /** @class */ (function () {
     };
     BeingsManager.prototype.majorityBonusNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var pieceType, i, cell, destBox;
+            var pieceType, isCornerLeaf, i, centerDiv, cell, destBox;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         pieceType = notif.args.type.replace('_dweller', '');
+                        isCornerLeaf = notif.args.type === 'leaf' && (notif.args.subtype === 'thoughtful' || notif.args.subtype === 'flirty');
                         i = 0;
                         _a.label = 1;
                     case 1:
-                        if (!(i < notif.args.count)) return [3 /*break*/, 4];
+                        if (!(i < notif.args.count)) return [3 /*break*/, 6];
+                        if (!isCornerLeaf) return [3 /*break*/, 3];
+                        centerDiv = this.getOrCreateCornerDiv(notif.args.playerId, notif.args.cells);
+                        if (!centerDiv)
+                            return [3 /*break*/, 5];
+                        return [4 /*yield*/, this.animatePieceFromVoid(pieceType, centerDiv)];
+                    case 2:
+                        _a.sent();
+                        return [3 /*break*/, 5];
+                    case 3:
                         cell = notif.args.cells[i % notif.args.cells.length];
                         destBox = this.getTerrainDiv(notif.args.playerId, cell);
                         if (!destBox)
-                            return [3 /*break*/, 3];
+                            return [3 /*break*/, 5];
                         return [4 /*yield*/, this.animatePieceFromVoid(pieceType, destBox)];
-                    case 2:
+                    case 4:
                         _a.sent();
-                        _a.label = 3;
-                    case 3:
+                        _a.label = 5;
+                    case 5:
                         i++;
                         return [3 /*break*/, 1];
-                    case 4:
+                    case 6:
                         this.game.games.playerManager.incCounter(notif.args.playerId, notif.args.type, notif.args.count);
                         return [2 /*return*/];
                 }

@@ -197,14 +197,19 @@ class BeingsManager implements Game {
 
   private async majorityBonusNotif(notif: Notif<MajorityBonusNotif>) {
     const pieceType = notif.args.type.replace('_dweller', '') as BeingType;
+    const isCornerLeaf = notif.args.type === 'leaf' && (notif.args.subtype === 'thoughtful' || notif.args.subtype === 'flirty');
 
     for (let i = 0; i < notif.args.count; i++) {
-      const cell = notif.args.cells[i % notif.args.cells.length];
-      const destBox = this.getTerrainDiv(notif.args.playerId, cell);
-
-      if (!destBox) continue;
-
-      await this.animatePieceFromVoid(pieceType, destBox);
+      if (isCornerLeaf) {
+        const centerDiv = this.getOrCreateCornerDiv(notif.args.playerId, notif.args.cells);
+        if (!centerDiv) continue;
+        await this.animatePieceFromVoid(pieceType, centerDiv);
+      } else {
+        const cell = notif.args.cells[i % notif.args.cells.length];
+        const destBox = this.getTerrainDiv(notif.args.playerId, cell);
+        if (!destBox) continue;
+        await this.animatePieceFromVoid(pieceType, destBox);
+      }
     }
 
     this.game.games.playerManager.incCounter(notif.args.playerId, notif.args.type, notif.args.count);
