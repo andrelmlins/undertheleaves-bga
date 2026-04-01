@@ -113,6 +113,27 @@ class BeingsManager implements Game {
     await animation.call();
   }
 
+  private getOrCreateCornerDiv(playerId: number, cells: number[][]): HTMLElement | null {
+    const minX = Math.min(...cells.map((c) => c[0]));
+    const minY = Math.min(...cells.map((c) => c[1]));
+    const id = `undertheleaves-being-center-${playerId}-${minX}-${minY}`;
+
+    const existing = document.getElementById(id);
+    if (existing) return existing;
+
+    const maxY = Math.max(...cells.map((c) => c[1]));
+    const topLeftCell = cells.filter((c) => c[1] === maxY).sort((a, b) => a[0] - b[0])[0];
+    const terrainDiv = this.getTerrainDiv(playerId, topLeftCell);
+    if (!terrainDiv) return null;
+
+    const centerDiv = document.createElement('div');
+    centerDiv.id = id;
+    centerDiv.className = 'undertheleaves-being-center-position';
+    terrainDiv.appendChild(centerDiv);
+
+    return centerDiv;
+  }
+
   private async mergeBeeNotif(notif: Notif<MergeBeeNotif>) {
     const existingPieces: HTMLElement[] = [];
     notif.args.oldBeings.forEach((being) => {
@@ -160,27 +181,6 @@ class BeingsManager implements Game {
     this.game.games.playerManager.incCounter(notif.args.playerId, 'leaf', notif.args.sectors.length);
   }
 
-  private getOrCreateCornerDiv(playerId: number, cells: number[][]): HTMLElement | null {
-    const minX = Math.min(...cells.map((c) => c[0]));
-    const minY = Math.min(...cells.map((c) => c[1]));
-    const id = `undertheleaves-being-center-${playerId}-${minX}-${minY}`;
-
-    const existing = document.getElementById(id);
-    if (existing) return existing;
-
-    const maxY = Math.max(...cells.map((c) => c[1]));
-    const topLeftCell = cells.filter((c) => c[1] === maxY).sort((a, b) => a[0] - b[0])[0];
-    const terrainDiv = this.getTerrainDiv(playerId, topLeftCell);
-    if (!terrainDiv) return null;
-
-    const centerDiv = document.createElement('div');
-    centerDiv.id = id;
-    centerDiv.className = 'undertheleaves-being-center-position';
-    terrainDiv.appendChild(centerDiv);
-
-    return centerDiv;
-  }
-
   private async arrivalHummingbirdNotif(notif: Notif<ArrivalHummingbirdNotif>) {
     for (const tile of notif.args.tiles) {
       const nestBox = this.getOrCreateCornerDiv(notif.args.playerId, this.getTileCells(tile.x, tile.y));
@@ -192,12 +192,13 @@ class BeingsManager implements Game {
     }
 
     const totalDelta = notif.args.tiles.reduce((sum, t) => sum + t.delta, 0);
-    this.game.games.playerManager.incCounter(notif.args.playerId, 'leaf', totalDelta);
+    this.game.games.playerManager.incCounter(notif.args.playerId, 'hummingbird', totalDelta);
   }
 
   private async majorityBonusNotif(notif: Notif<MajorityBonusNotif>) {
     const pieceType = notif.args.type.replace('_dweller', '') as BeingType;
-    const isCornerLeaf = notif.args.type === 'leaf' && (notif.args.subtype === 'thoughtful' || notif.args.subtype === 'flirty');
+    const isCornerLeaf =
+      notif.args.type === 'leaf' && (notif.args.subtype === 'thoughtful' || notif.args.subtype === 'flirty');
 
     for (let i = 0; i < notif.args.count; i++) {
       if (isCornerLeaf) {

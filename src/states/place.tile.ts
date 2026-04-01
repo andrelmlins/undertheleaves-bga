@@ -260,6 +260,7 @@ class PlaceTile implements Game {
 
       this.game.games.tileManager.recalculateGrid(notif.args.playerId);
       this.game.games.tileManager.applyZoom(notif.args.playerId);
+      this.game.games.tileManager.addTileToBeingsOverlay(notif.args.gridTile, notif.args.playerId);
 
       await delayTime(300);
 
@@ -275,8 +276,8 @@ class PlaceTile implements Game {
       await animation.call();
 
       externalElement.classList.remove('selectable');
+    } else {
+      this.game.games.tileManager.addTileToBeingsOverlay(notif.args.gridTile, notif.args.playerId);
     }
-
-    this.game.games.tileManager.addTileToBeingsOverlay(notif.args.gridTile, notif.args.playerId);
   }
 }

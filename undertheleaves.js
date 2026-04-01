@@ -812,6 +812,24 @@ var BeingsManager = /** @class */ (function () {
             });
         });
     };
+    BeingsManager.prototype.getOrCreateCornerDiv = function (playerId, cells) {
+        var minX = Math.min.apply(Math, __spreadArray([], __read(cells.map(function (c) { return c[0]; })), false));
+        var minY = Math.min.apply(Math, __spreadArray([], __read(cells.map(function (c) { return c[1]; })), false));
+        var id = "undertheleaves-being-center-".concat(playerId, "-").concat(minX, "-").concat(minY);
+        var existing = document.getElementById(id);
+        if (existing)
+            return existing;
+        var maxY = Math.max.apply(Math, __spreadArray([], __read(cells.map(function (c) { return c[1]; })), false));
+        var topLeftCell = cells.filter(function (c) { return c[1] === maxY; }).sort(function (a, b) { return a[0] - b[0]; })[0];
+        var terrainDiv = this.getTerrainDiv(playerId, topLeftCell);
+        if (!terrainDiv)
+            return null;
+        var centerDiv = document.createElement('div');
+        centerDiv.id = id;
+        centerDiv.className = 'undertheleaves-being-center-position';
+        terrainDiv.appendChild(centerDiv);
+        return centerDiv;
+    };
     BeingsManager.prototype.mergeBeeNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
             var existingPieces, cells;
@@ -921,24 +939,6 @@ var BeingsManager = /** @class */ (function () {
             });
         });
     };
-    BeingsManager.prototype.getOrCreateCornerDiv = function (playerId, cells) {
-        var minX = Math.min.apply(Math, __spreadArray([], __read(cells.map(function (c) { return c[0]; })), false));
-        var minY = Math.min.apply(Math, __spreadArray([], __read(cells.map(function (c) { return c[1]; })), false));
-        var id = "undertheleaves-being-center-".concat(playerId, "-").concat(minX, "-").concat(minY);
-        var existing = document.getElementById(id);
-        if (existing)
-            return existing;
-        var maxY = Math.max.apply(Math, __spreadArray([], __read(cells.map(function (c) { return c[1]; })), false));
-        var topLeftCell = cells.filter(function (c) { return c[1] === maxY; }).sort(function (a, b) { return a[0] - b[0]; })[0];
-        var terrainDiv = this.getTerrainDiv(playerId, topLeftCell);
-        if (!terrainDiv)
-            return null;
-        var centerDiv = document.createElement('div');
-        centerDiv.id = id;
-        centerDiv.className = 'undertheleaves-being-center-position';
-        terrainDiv.appendChild(centerDiv);
-        return centerDiv;
-    };
     BeingsManager.prototype.arrivalHummingbirdNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b, tile, nestBox, i, e_4_1, totalDelta;
@@ -982,7 +982,7 @@ var BeingsManager = /** @class */ (function () {
                         return [7 /*endfinally*/];
                     case 9:
                         totalDelta = notif.args.tiles.reduce(function (sum, t) { return sum + t.delta; }, 0);
-                        this.game.games.playerManager.incCounter(notif.args.playerId, 'leaf', totalDelta);
+                        this.game.games.playerManager.incCounter(notif.args.playerId, 'hummingbird', totalDelta);
                         return [2 /*return*/];
                 }
             });
@@ -1297,6 +1297,7 @@ var PlaceTile = /** @class */ (function () {
                         }
                         this.game.games.tileManager.recalculateGrid(notif.args.playerId);
                         this.game.games.tileManager.applyZoom(notif.args.playerId);
+                        this.game.games.tileManager.addTileToBeingsOverlay(notif.args.gridTile, notif.args.playerId);
                         return [4 /*yield*/, delayTime(300)];
                     case 1:
                         _a.sent();
@@ -1309,10 +1310,11 @@ var PlaceTile = /** @class */ (function () {
                     case 2:
                         _a.sent();
                         externalElement.classList.remove('selectable');
-                        _a.label = 3;
+                        return [3 /*break*/, 4];
                     case 3:
                         this.game.games.tileManager.addTileToBeingsOverlay(notif.args.gridTile, notif.args.playerId);
-                        return [2 /*return*/];
+                        _a.label = 4;
+                    case 4: return [2 /*return*/];
                 }
             });
         });

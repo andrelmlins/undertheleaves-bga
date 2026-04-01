@@ -85,9 +85,10 @@ class ExplorerMushroomBeing extends DwellerBeing
 
     private function isMiddle(array $m, array $a, array $b): bool
     {
+        $orthogonal = $a[0] === $b[0] || $a[1] === $b[1];
         $collinear = ($m[0] - $a[0]) * ($b[1] - $a[1]) === ($b[0] - $a[0]) * ($m[1] - $a[1]);
         $between = ($m[0] - $a[0]) * ($m[0] - $b[0]) <= 0
             && ($m[1] - $a[1]) * ($m[1] - $b[1]) <= 0;
-        return $collinear && $between;
+        return $orthogonal && $collinear && $between;
     }
 }
