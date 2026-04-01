@@ -157,7 +157,7 @@ class BeingsManager implements Game {
   private getOrCreateCornerDiv(playerId: number, cells: number[][]): HTMLElement | null {
     const minX = Math.min(...cells.map((c) => c[0]));
     const minY = Math.min(...cells.map((c) => c[1]));
-    const id = `thoughtful-center-${playerId}-${minX}-${minY}`;
+    const id = `undertheleaves-being-center-${playerId}-${minX}-${minY}`;
 
     const existing = document.getElementById(id);
     if (existing) return existing;

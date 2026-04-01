@@ -123,6 +123,48 @@ define([
     return declare('bgagame.undertheleaves', ebg.core.gamegui, new UndertheLeavesGame());
 });
 var TILE_SIZE = 150;
+var TERRAIN_INDEX_MAP = {
+    0: {
+        0: [
+            [0, 1],
+            [2, 3],
+        ],
+        1: [
+            [1, 0],
+            [3, 2],
+        ],
+    },
+    90: {
+        0: [
+            [2, 0],
+            [3, 1],
+        ],
+        1: [
+            [0, 2],
+            [1, 3],
+        ],
+    },
+    180: {
+        0: [
+            [3, 2],
+            [1, 0],
+        ],
+        1: [
+            [2, 3],
+            [0, 1],
+        ],
+    },
+    270: {
+        0: [
+            [1, 3],
+            [0, 2],
+        ],
+        1: [
+            [3, 1],
+            [2, 0],
+        ],
+    },
+};
 var delayTime = function (time) { return new Promise(function (resolve) { return setTimeout(function () { return resolve(); }, time); }); };
 var generateId = function () { return "".concat(Math.floor(Math.random() * 100000000)); };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -270,48 +312,6 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 var TileManager = /** @class */ (function () {
     function TileManager(game) {
         this.game = game;
-        this.terrainIndexMap = {
-            0: {
-                0: [
-                    [0, 1],
-                    [2, 3],
-                ],
-                1: [
-                    [1, 0],
-                    [3, 2],
-                ],
-            },
-            90: {
-                0: [
-                    [2, 0],
-                    [3, 1],
-                ],
-                1: [
-                    [3, 1],
-                    [2, 0],
-                ],
-            },
-            180: {
-                0: [
-                    [3, 2],
-                    [1, 0],
-                ],
-                1: [
-                    [2, 3],
-                    [0, 1],
-                ],
-            },
-            270: {
-                0: [
-                    [1, 3],
-                    [0, 2],
-                ],
-                1: [
-                    [0, 2],
-                    [1, 3],
-                ],
-            },
-        };
         this.gridMap = {};
         this.handlers = [];
         this.mapContainerIds = [];
@@ -388,14 +388,13 @@ var TileManager = /** @class */ (function () {
     TileManager.prototype.formatTile = function (tile, notif) {
         if (notif === void 0) { notif = false; }
         var tileConfig = this.getTileConfig(tile);
-        return "\n      <div ".concat(!notif ? "id=\"undertheleaves-tile-".concat(tile.id, "\"") : '', " class=\"undertheleaves-tile ").concat(notif ? 'notif' : '', "\" line=\"").concat(tileConfig.position.row, "\" column=\"").concat(tileConfig.position.column, "\" type=\"").concat(tile.type, "\">\n        <div class=\"undertheleaves-tile-box\">  \n          <div class=\"undertheleaves-tile-inner\">\n            <div class=\"undertheleaves-tile-front\"></div>\n            <div class=\"undertheleaves-tile-back\"></div>\n          </div>\n        </div>\n      </div>\n    ");
+        return "\n      <div ".concat(!notif ? "id=\"undertheleaves-tile-".concat(tile.id, "\"") : '', " class=\"undertheleaves-tile ").concat(notif ? 'notif' : '', "\" line=\"").concat(tileConfig.position.row, "\" column=\"").concat(tileConfig.position.column, "\" type=\"").concat(tile.type, "\">\n        <div class=\"undertheleaves-tile-flipper\">\n          <div class=\"undertheleaves-tile-box\">\n            <div class=\"undertheleaves-tile-inner\">\n              <div class=\"undertheleaves-tile-front\"></div>\n              <div class=\"undertheleaves-tile-back\"></div>\n            </div>\n          </div>\n        </div>\n      </div>\n    ");
     };
     TileManager.prototype.formatGridTile = function (gridTile) {
         var tileConfig = this.getTileConfig(gridTile.tile);
-        return "\n      <div id=\"undertheleaves-tile-".concat(gridTile.tile.id, "\" class=\"undertheleaves-tile\" line=\"").concat(tileConfig.position.row, "\" column=\"").concat(tileConfig.position.column, "\" type=\"").concat(gridTile.tile.type, "\" data-x=\"").concat(gridTile.x, "\" data-y=\"").concat(gridTile.y, "\" data-rotation=\"").concat(gridTile.rotation, "\" data-side=\"").concat(gridTile.side, "\">\n        <div class=\"undertheleaves-tile-box\" style=\"transform: rotate(").concat(gridTile.rotation, "deg)\">\n          <div class=\"undertheleaves-tile-inner\" style=\"").concat(gridTile.side == 1 ? 'transform: rotateY(180deg)' : '', "\">\n            <div class=\"undertheleaves-tile-front\"></div>\n            <div class=\"undertheleaves-tile-back\"></div>\n          </div>\n        </div>\n        ").concat(this.formatBeingPositions(gridTile.x, gridTile.y, tileConfig === null || tileConfig === void 0 ? void 0 : tileConfig.terrains, gridTile.rotation, gridTile.side), "\n      </div>\n    ");
+        return "\n      <div id=\"undertheleaves-tile-".concat(gridTile.tile.id, "\" class=\"undertheleaves-tile\" line=\"").concat(tileConfig.position.row, "\" column=\"").concat(tileConfig.position.column, "\" type=\"").concat(gridTile.tile.type, "\" data-x=\"").concat(gridTile.x, "\" data-y=\"").concat(gridTile.y, "\" data-rotation=\"").concat(gridTile.rotation, "\" data-side=\"").concat(gridTile.side, "\">\n        <div class=\"undertheleaves-tile-flipper\" style=\"").concat(gridTile.side == 1 ? 'transform: rotateY(180deg)' : '', "\">\n          <div class=\"undertheleaves-tile-box\" style=\"transform: rotate(").concat(gridTile.rotation, "deg)\">\n            <div class=\"undertheleaves-tile-inner\">\n              <div class=\"undertheleaves-tile-front\"></div>\n              <div class=\"undertheleaves-tile-back\"></div>\n            </div>\n          </div>\n        </div>\n        ").concat(this.formatBeingPositions(gridTile.x, gridTile.y, tileConfig === null || tileConfig === void 0 ? void 0 : tileConfig.terrains, gridTile.rotation, gridTile.side), "\n      </div>\n    ");
     };
     TileManager.prototype.formatBeingPositions = function (x, y, terrains, rotation, side) {
-        var _this = this;
         if (rotation === void 0) { rotation = 0; }
         if (side === void 0) { side = 0; }
         var localPositions = [
@@ -421,7 +420,7 @@ var TileManager = /** @class */ (function () {
             div.dataset.y = String(pos.y);
             var row = pos.localY === 0 ? 0 : 1;
             var col = pos.localX;
-            var terrainIndex = (_c = (_b = (_a = _this.terrainIndexMap[rotation]) === null || _a === void 0 ? void 0 : _a[side]) === null || _b === void 0 ? void 0 : _b[row]) === null || _c === void 0 ? void 0 : _c[col];
+            var terrainIndex = (_c = (_b = (_a = TERRAIN_INDEX_MAP[rotation]) === null || _a === void 0 ? void 0 : _a[side]) === null || _b === void 0 ? void 0 : _b[row]) === null || _c === void 0 ? void 0 : _c[col];
             if (terrains && terrainIndex !== undefined && ((_d = terrains[terrainIndex]) === null || _d === void 0 ? void 0 : _d.mushroom)) {
                 div.dataset.mushroom = 'true';
             }
@@ -536,6 +535,9 @@ var TileManager = /** @class */ (function () {
     };
     TileManager.prototype.getBoxTileById = function (id) {
         return this.getTileById(id).querySelector('.undertheleaves-tile-box');
+    };
+    TileManager.prototype.getFlipperTileById = function (id) {
+        return this.getTileById(id).querySelector('.undertheleaves-tile-flipper');
     };
     return TileManager;
 }());
@@ -873,7 +875,7 @@ var BeingsManager = /** @class */ (function () {
     BeingsManager.prototype.getOrCreateCornerDiv = function (playerId, cells) {
         var minX = Math.min.apply(Math, __spreadArray([], __read(cells.map(function (c) { return c[0]; })), false));
         var minY = Math.min.apply(Math, __spreadArray([], __read(cells.map(function (c) { return c[1]; })), false));
-        var id = "thoughtful-center-".concat(playerId, "-").concat(minX, "-").concat(minY);
+        var id = "undertheleaves-being-center-".concat(playerId, "-").concat(minX, "-").concat(minY);
         var existing = document.getElementById(id);
         if (existing)
             return existing;
@@ -1138,7 +1140,7 @@ var PlaceTile = /** @class */ (function () {
                         _a.label = 2;
                     case 2:
                         tileElement.querySelector('.undertheleaves-tile-box').style.transform = "rotate(0deg)";
-                        tileElement.querySelector('.undertheleaves-tile-inner').style.transform = '';
+                        tileElement.querySelector('.undertheleaves-tile-flipper').style.transform = '';
                         this.externalTileSelected = null;
                         this.removeSelectExternals();
                         this.game.bga.states.setClientState('client_SelectTile', {
@@ -1151,23 +1153,24 @@ var PlaceTile = /** @class */ (function () {
     };
     PlaceTile.prototype.onClickChangeDirection = function (type) {
         return __awaiter(this, void 0, void 0, function () {
-            var tileElement, inner;
+            var tileElement, flipper, rotationDelta;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         if (this.isAnimating)
                             return [2 /*return*/];
                         tileElement = this.game.games.tileManager.getBoxTileById(this.externalTileSelected.tileId);
-                        inner = tileElement.querySelector('.undertheleaves-tile-inner');
+                        flipper = this.game.games.tileManager.getFlipperTileById(this.externalTileSelected.tileId);
                         this.isAnimating = true;
+                        rotationDelta = this.externalTileSelected.inverse ? -90 : 90;
                         if (type === 'right')
-                            this.externalTileSelected.rotation += 90;
+                            this.externalTileSelected.rotation += rotationDelta;
                         if (type === 'left')
-                            this.externalTileSelected.rotation -= 90;
+                            this.externalTileSelected.rotation -= rotationDelta;
                         if (type === 'inverse')
                             this.externalTileSelected.inverse = !this.externalTileSelected.inverse;
                         tileElement.style.transform = "rotate(".concat(this.externalTileSelected.rotation, "deg)");
-                        inner.style.transform = this.externalTileSelected.inverse ? 'rotateY(180deg)' : '';
+                        flipper.style.transform = this.externalTileSelected.inverse ? 'rotateY(180deg)' : '';
                         return [4 /*yield*/, delayTime(300)];
                     case 1:
                         _a.sent();
@@ -1218,7 +1221,7 @@ var PlaceTile = /** @class */ (function () {
     };
     PlaceTile.prototype.placeTileNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var tileBoxElement, inner, playerGridBoxElement, tileElement, externalElement, animation;
+            var tileBoxElement, flipperElement, playerGridBoxElement, tileElement, externalElement, animation;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -1226,9 +1229,9 @@ var PlaceTile = /** @class */ (function () {
                             return [2 /*return*/];
                         }
                         tileBoxElement = this.game.games.tileManager.getBoxTileById(notif.args.gridTile.tile.id);
-                        inner = tileBoxElement.querySelector('.undertheleaves-tile-inner');
+                        flipperElement = this.game.games.tileManager.getFlipperTileById(notif.args.gridTile.tile.id);
                         tileBoxElement.style.transform = "rotate(".concat(notif.args.gridTile.rotation, "deg)");
-                        inner.style.transform = notif.args.gridTile.side == 1 ? 'rotateY(180deg)' : '';
+                        flipperElement.style.transform = notif.args.gridTile.side == 1 ? 'rotateY(180deg)' : '';
                         playerGridBoxElement = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
                         if (!playerGridBoxElement.querySelector(".undertheleaves-player-cell[data-x=\"".concat(notif.args.gridTile.x, "\"][data-y=\"").concat(notif.args.gridTile.y, "\"]"))) {
                             this.game.games.tileManager

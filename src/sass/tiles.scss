@@ -4,13 +4,23 @@
   width: $TILE_SIZE;
   height: $TILE_SIZE;
   position: relative;
+  perspective: 1000px;
+
+  .undertheleaves-tile-flipper {
+    width: $TILE_SIZE;
+    height: $TILE_SIZE;
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease;
+    position: relative;
+  }
 
   .undertheleaves-tile-box {
     width: $TILE_SIZE;
     height: $TILE_SIZE;
     position: relative;
-    perspective: 1000px;
+    transform-style: preserve-3d;
     transition: transform 0.3s ease;
+    will-change: transform;
 
     & .undertheleaves-tile-front,
     & .undertheleaves-tile-back {
@@ -43,9 +53,7 @@
       width: 100%;
       height: 100%;
       position: relative;
-      transition: transform 0.3s ease;
-      transform-origin: center;
-      will-change: transform;
+      transform-style: preserve-3d;
     }
   }
 

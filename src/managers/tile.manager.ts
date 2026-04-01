@@ -7,49 +7,6 @@ class TileManager implements Game {
 
   gridMap: Record<string, ScrollmapWithZoomNS.ScrollmapWithZoom>;
 
-  private readonly terrainIndexMap: Record<number, Record<number, number[][]>> = {
-    0: {
-      0: [
-        [0, 1],
-        [2, 3],
-      ],
-      1: [
-        [1, 0],
-        [3, 2],
-      ],
-    },
-    90: {
-      0: [
-        [2, 0],
-        [3, 1],
-      ],
-      1: [
-        [3, 1],
-        [2, 0],
-      ],
-    },
-    180: {
-      0: [
-        [3, 2],
-        [1, 0],
-      ],
-      1: [
-        [2, 3],
-        [0, 1],
-      ],
-    },
-    270: {
-      0: [
-        [1, 3],
-        [0, 2],
-      ],
-      1: [
-        [0, 2],
-        [1, 3],
-      ],
-    },
-  };
-
   constructor(public game: UndertheLeavesGame) {
     this.gridMap = {};
     this.handlers = [];
@@ -179,10 +136,12 @@ class TileManager implements Game {
       <div ${!notif ? `id="undertheleaves-tile-${tile.id}"` : ''} class="undertheleaves-tile ${
         notif ? 'notif' : ''
       }" line="${tileConfig.position.row}" column="${tileConfig.position.column}" type="${tile.type}">
-        <div class="undertheleaves-tile-box">  
-          <div class="undertheleaves-tile-inner">
-            <div class="undertheleaves-tile-front"></div>
-            <div class="undertheleaves-tile-back"></div>
+        <div class="undertheleaves-tile-flipper">
+          <div class="undertheleaves-tile-box">
+            <div class="undertheleaves-tile-inner">
+              <div class="undertheleaves-tile-front"></div>
+              <div class="undertheleaves-tile-back"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -194,10 +153,12 @@ class TileManager implements Game {
 
     return `
       <div id="undertheleaves-tile-${gridTile.tile.id}" class="undertheleaves-tile" line="${tileConfig.position.row}" column="${tileConfig.position.column}" type="${gridTile.tile.type}" data-x="${gridTile.x}" data-y="${gridTile.y}" data-rotation="${gridTile.rotation}" data-side="${gridTile.side}">
-        <div class="undertheleaves-tile-box" style="transform: rotate(${gridTile.rotation}deg)">
-          <div class="undertheleaves-tile-inner" style="${gridTile.side == 1 ? 'transform: rotateY(180deg)' : ''}">
-            <div class="undertheleaves-tile-front"></div>
-            <div class="undertheleaves-tile-back"></div>
+        <div class="undertheleaves-tile-flipper" style="${gridTile.side == 1 ? 'transform: rotateY(180deg)' : ''}">
+          <div class="undertheleaves-tile-box" style="transform: rotate(${gridTile.rotation}deg)">
+            <div class="undertheleaves-tile-inner">
+              <div class="undertheleaves-tile-front"></div>
+              <div class="undertheleaves-tile-back"></div>
+            </div>
           </div>
         </div>
         ${this.formatBeingPositions(gridTile.x, gridTile.y, tileConfig?.terrains, gridTile.rotation, gridTile.side)}
@@ -230,7 +191,7 @@ class TileManager implements Game {
         div.dataset.y = String(pos.y);
         const row = pos.localY === 0 ? 0 : 1;
         const col = pos.localX;
-        const terrainIndex = this.terrainIndexMap[rotation]?.[side]?.[row]?.[col];
+        const terrainIndex = TERRAIN_INDEX_MAP[rotation]?.[side]?.[row]?.[col];
         if (terrains && terrainIndex !== undefined && terrains[terrainIndex]?.mushroom) {
           div.dataset.mushroom = 'true';
         }
@@ -383,5 +344,9 @@ class TileManager implements Game {
 
   public getBoxTileById(id: string | number) {
     return this.getTileById(id).querySelector<HTMLElement>('.undertheleaves-tile-box');
+  }
+
+  public getFlipperTileById(id: string | number) {
+    return this.getTileById(id).querySelector<HTMLElement>('.undertheleaves-tile-flipper');
   }
 }

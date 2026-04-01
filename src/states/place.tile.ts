@@ -174,7 +174,7 @@ class PlaceTile implements Game {
     }
 
     tileElement.querySelector<HTMLElement>('.undertheleaves-tile-box').style.transform = `rotate(0deg)`;
-    tileElement.querySelector<HTMLElement>('.undertheleaves-tile-inner').style.transform = '';
+    tileElement.querySelector<HTMLElement>('.undertheleaves-tile-flipper').style.transform = '';
 
     this.externalTileSelected = null;
     this.removeSelectExternals();
@@ -187,16 +187,17 @@ class PlaceTile implements Game {
     if (this.isAnimating) return;
 
     const tileElement = this.game.games.tileManager.getBoxTileById(this.externalTileSelected.tileId);
-    const inner = tileElement.querySelector<HTMLElement>('.undertheleaves-tile-inner');
+    const flipper = this.game.games.tileManager.getFlipperTileById(this.externalTileSelected.tileId);
 
     this.isAnimating = true;
 
-    if (type === 'right') this.externalTileSelected.rotation += 90;
-    if (type === 'left') this.externalTileSelected.rotation -= 90;
+    const rotationDelta = this.externalTileSelected.inverse ? -90 : 90;
+    if (type === 'right') this.externalTileSelected.rotation += rotationDelta;
+    if (type === 'left') this.externalTileSelected.rotation -= rotationDelta;
     if (type === 'inverse') this.externalTileSelected.inverse = !this.externalTileSelected.inverse;
 
     tileElement.style.transform = `rotate(${this.externalTileSelected.rotation}deg)`;
-    inner.style.transform = this.externalTileSelected.inverse ? 'rotateY(180deg)' : '';
+    flipper.style.transform = this.externalTileSelected.inverse ? 'rotateY(180deg)' : '';
 
     await delayTime(300);
 
@@ -239,10 +240,9 @@ class PlaceTile implements Game {
     }
 
     const tileBoxElement = this.game.games.tileManager.getBoxTileById(notif.args.gridTile.tile.id);
-    const inner = tileBoxElement.querySelector<HTMLElement>('.undertheleaves-tile-inner');
-
+    const flipperElement = this.game.games.tileManager.getFlipperTileById(notif.args.gridTile.tile.id);
     tileBoxElement.style.transform = `rotate(${notif.args.gridTile.rotation}deg)`;
-    inner.style.transform = notif.args.gridTile.side == 1 ? 'rotateY(180deg)' : '';
+    flipperElement.style.transform = notif.args.gridTile.side == 1 ? 'rotateY(180deg)' : '';
 
     const playerGridBoxElement = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
 
