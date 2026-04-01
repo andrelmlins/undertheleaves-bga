@@ -126,3 +126,8 @@ interface MajorityBonusNotif {
   count: number;
   cells: number[][];
 }
+
+interface ScoreNotif {
+  playerId: number;
+  playerScore: number;
+}

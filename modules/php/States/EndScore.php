@@ -30,8 +30,8 @@ class EndScore extends \Bga\GameFramework\States\GameState
             $players = $this->game->loadPlayersBasicInfos();
             foreach ($players as $player) {
                 $this->game->notify->all('score', '', [
-                    'player_id' => (int)$player['player_id'],
-                    'player_score' => (int)$player['player_score'],
+                    'playerId' => (int)$player['player_id'],
+                    'playerScore' => $this->game->playerScore->get((int)$player['player_id'])
                 ]);
             }
         }
@@ -83,11 +83,11 @@ class EndScore extends \Bga\GameFramework\States\GameState
                                 'being_icon' => str_replace('_dweller', '', $type),
                                 'cells' => $targetGroup->cells,
                             ]);
+                            $this->game->beingService->notifyBeingArrivalPause(2);
                         }
                     }
                 }
             }
-            $this->game->notify->all('simplePause', '', ['time' => 1000]);
 
             $totals = $this->game->beingService->getTotalsByPlayer();
         }

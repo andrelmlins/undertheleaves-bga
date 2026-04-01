@@ -663,7 +663,16 @@ var PlayerManager = /** @class */ (function () {
         //
     };
     PlayerManager.prototype.setupNotifications = function () {
-        //
+        var _this = this;
+        dojo.subscribe('score', this, function (notif) { return _this.scoreNotif(notif); });
+    };
+    PlayerManager.prototype.scoreNotif = function (notif) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                this.game.scoreCtrl[notif.args.playerId].toValue(notif.args.playerScore);
+                return [2 /*return*/];
+            });
+        });
     };
     return PlayerManager;
 }());

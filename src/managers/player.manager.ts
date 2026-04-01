@@ -80,6 +80,10 @@ class PlayerManager implements Game {
   }
 
   public setupNotifications() {
-    //
+    dojo.subscribe('score', this, (notif) => this.scoreNotif(notif));
+  }
+
+  private async scoreNotif(notif: Notif<ScoreNotif>) {
+    this.game.scoreCtrl[notif.args.playerId].toValue(notif.args.playerScore);
   }
 }
