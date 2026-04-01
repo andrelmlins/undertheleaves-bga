@@ -80,7 +80,7 @@ class BeingsManager implements Game {
 
   public getTerrainDiv(playerId: number, cell: number[]): HTMLElement | null {
     return document.querySelector(
-      `#undertheleaves-player-grid-${playerId} .undertheleaves-terrain[data-x='${cell[0]}'][data-y='${cell[1]}']`,
+      `#undertheleaves-player-beings-${playerId} .undertheleaves-terrain[data-x='${cell[0]}'][data-y='${cell[1]}']`,
     );
   }
 
@@ -167,11 +167,9 @@ class BeingsManager implements Game {
     const terrainDiv = this.getTerrainDiv(playerId, topLeftCell);
     if (!terrainDiv) return null;
 
-    terrainDiv.style.zIndex = '10';
-
     const centerDiv = document.createElement('div');
     centerDiv.id = id;
-    centerDiv.className = 'undertheleaves-being-corner-position';
+    centerDiv.className = 'undertheleaves-being-center-position';
     terrainDiv.appendChild(centerDiv);
 
     return centerDiv;

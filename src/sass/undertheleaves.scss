@@ -136,124 +136,94 @@ html {
             -webkit-box-shadow: none;
           }
         }
+      }
+    }
+  }
+}
 
-        .undertheleaves-terrain {
-          position: absolute;
-          width: 50%;
-          height: 50%;
-          box-sizing: border-box;
-          overflow: visible;
+.undertheleaves-player-beings {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  pointer-events: none;
 
-          .undertheleaves-being-corner-position {
-            position: absolute;
-            left: 100%;
-            top: 100%;
-            transform: translate(-50%, -50%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
+  .undertheleaves-terrain {
+    position: absolute;
+    width: $TILE_SIZE * 0.5;
+    height: $TILE_SIZE * 0.5;
+    box-sizing: border-box;
+    overflow: visible;
+    transform: translate(-50%, -50%);
 
-            .undertheleaves-piece {
-              width: 35px;
-              height: 35px;
-              min-width: 35px;
-              min-height: 35px;
-              filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.55));
+    .undertheleaves-being-center-position {
+      position: absolute;
+      left: 100%;
+      top: 100%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
 
-              &:not(:first-child) {
-                margin-top: -50px;
-              }
-            }
-          }
+      .undertheleaves-piece {
+        width: 35px;
+        height: 35px;
+        min-width: 35px;
+        min-height: 35px;
+        filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.55));
 
-          &.selectable {
-            &::before {
-              content: '';
-              position: absolute;
-              width: 100%;
-              height: 100%;
-              background: #ff000050;
-              border: 1px solid red;
-              cursor: pointer;
-              transition: 0.1s ease-in-out;
-              box-sizing: border-box;
-            }
-
-            &.selected::before {
-              background: #0000ff50;
-              border: 1px solid blue;
-            }
-          }
-
-          &[data-local-x='0'][data-local-y='0'] {
-            top: 25%;
-            left: 25%;
-            transform: translate(-50%, -50%);
-          }
-
-          &[data-local-x='1'][data-local-y='0'] {
-            top: 25%;
-            left: 75%;
-            transform: translate(-50%, -50%);
-          }
-
-          &[data-local-x='0'][data-local-y='-1'] {
-            top: 75%;
-            left: 25%;
-            transform: translate(-50%, -50%);
-          }
-
-          &[data-local-x='1'][data-local-y='-1'] {
-            top: 75%;
-            left: 75%;
-            transform: translate(-50%, -50%);
-          }
-
-          & > .undertheleaves-piece {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 35px;
-            height: 35px;
-            min-width: 35px;
-            min-height: 35px;
-            filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.55));
-
-            &:nth-child(1) {
-              transform: translate(-50%, -50%);
-              z-index: 1;
-            }
-            &:nth-child(2) {
-              transform: translate(calc(-50% + 12px), calc(-50% - 10px));
-            }
-            &:nth-child(3) {
-              transform: translate(calc(-50% - 14px), calc(-50% + 8px));
-            }
-            &:nth-child(4) {
-              transform: translate(calc(-50% + 6px), calc(-50% + 14px));
-            }
-            &:nth-child(5) {
-              transform: translate(calc(-50% - 8px), calc(-50% - 14px));
-            }
-          }
-
-          &[data-mushroom='true'] .undertheleaves-piece {
-            &:nth-child(1) {
-              transform: translate(calc(-50% + 12px), calc(-50% - 10px));
-              z-index: 1;
-            }
-            &:nth-child(2) {
-              transform: translate(calc(-50% - 14px), calc(-50% + 8px));
-            }
-            &:nth-child(3) {
-              transform: translate(calc(-50% + 6px), calc(-50% + 14px));
-            }
-            &:nth-child(4) {
-              transform: translate(calc(-50% - 8px), calc(-50% - 14px));
-            }
-          }
+        &:not(:first-child) {
+          margin-top: -50px;
         }
+      }
+    }
+
+    & > .undertheleaves-piece {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 35px;
+      height: 35px;
+      min-width: 35px;
+      min-height: 35px;
+      filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.55));
+
+      &:nth-child(1) {
+        transform: translate(-50%, -50%);
+        z-index: 1;
+      }
+
+      &:nth-child(2) {
+        transform: translate(calc(-50% + 12px), calc(-50% - 10px));
+      }
+
+      &:nth-child(3) {
+        transform: translate(calc(-50% - 14px), calc(-50% + 8px));
+      }
+
+      &:nth-child(4) {
+        transform: translate(calc(-50% + 6px), calc(-50% + 14px));
+      }
+
+      &:nth-child(5) {
+        transform: translate(calc(-50% - 8px), calc(-50% - 14px));
+      }
+    }
+
+    &[data-mushroom='true'] > .undertheleaves-piece {
+      &:nth-child(1) {
+        transform: translate(calc(-50% + 12px), calc(-50% - 10px));
+        z-index: 1;
+      }
+      &:nth-child(2) {
+        transform: translate(calc(-50% - 14px), calc(-50% + 8px));
+      }
+      &:nth-child(3) {
+        transform: translate(calc(-50% + 6px), calc(-50% + 14px));
+      }
+      &:nth-child(4) {
+        transform: translate(calc(-50% - 8px), calc(-50% - 14px));
       }
     }
   }

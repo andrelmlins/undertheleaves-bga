@@ -334,6 +334,7 @@ var TileManager = /** @class */ (function () {
             _this.gridMap[playerId].bAdaptHeightAuto = false;
             _this.gridMap[playerId].create($(container.id), $("undertheleaves-player-map-scrollable-".concat(playerId)), $("undertheleaves-player-map-surface-".concat(playerId)), $("undertheleaves-player-map-scrollable-oversurface-".concat(playerId)));
             _this.gridMap[playerId].onsurface_div.insertAdjacentHTML('beforeend', "<div id=\"undertheleaves-player-grid-".concat(playerId, "\" class=\"undertheleaves-player-grid\"></div>"));
+            _this.gridMap[playerId].onsurface_div.insertAdjacentHTML('beforeend', "<div id=\"undertheleaves-player-beings-".concat(playerId, "\" class=\"undertheleaves-player-beings\"></div>"));
             _this.createGridTiles(_this.game.gamedatas.gridTiles[playerId], Number(playerId));
         });
         requestAnimationFrame(function () {
@@ -392,7 +393,7 @@ var TileManager = /** @class */ (function () {
     };
     TileManager.prototype.formatGridTile = function (gridTile) {
         var tileConfig = this.getTileConfig(gridTile.tile);
-        return "\n      <div id=\"undertheleaves-tile-".concat(gridTile.tile.id, "\" class=\"undertheleaves-tile\" line=\"").concat(tileConfig.position.row, "\" column=\"").concat(tileConfig.position.column, "\" type=\"").concat(gridTile.tile.type, "\" data-x=\"").concat(gridTile.x, "\" data-y=\"").concat(gridTile.y, "\" data-rotation=\"").concat(gridTile.rotation, "\" data-side=\"").concat(gridTile.side, "\">\n        <div class=\"undertheleaves-tile-flipper\" style=\"").concat(gridTile.side == 1 ? 'transform: rotateY(180deg)' : '', "\">\n          <div class=\"undertheleaves-tile-box\" style=\"transform: rotate(").concat(gridTile.rotation, "deg)\">\n            <div class=\"undertheleaves-tile-inner\">\n              <div class=\"undertheleaves-tile-front\"></div>\n              <div class=\"undertheleaves-tile-back\"></div>\n            </div>\n          </div>\n        </div>\n        ").concat(this.formatBeingPositions(gridTile.x, gridTile.y, tileConfig === null || tileConfig === void 0 ? void 0 : tileConfig.terrains, gridTile.rotation, gridTile.side), "\n      </div>\n    ");
+        return "\n      <div id=\"undertheleaves-tile-".concat(gridTile.tile.id, "\" class=\"undertheleaves-tile\" line=\"").concat(tileConfig.position.row, "\" column=\"").concat(tileConfig.position.column, "\" type=\"").concat(gridTile.tile.type, "\" data-x=\"").concat(gridTile.x, "\" data-y=\"").concat(gridTile.y, "\" data-rotation=\"").concat(gridTile.rotation, "\" data-side=\"").concat(gridTile.side, "\">\n        <div class=\"undertheleaves-tile-flipper\" style=\"").concat(gridTile.side == 1 ? 'transform: rotateY(180deg)' : '', "\">\n          <div class=\"undertheleaves-tile-box\" style=\"transform: rotate(").concat(gridTile.rotation, "deg)\">\n            <div class=\"undertheleaves-tile-inner\">\n              <div class=\"undertheleaves-tile-front\"></div>\n              <div class=\"undertheleaves-tile-back\"></div>\n            </div>\n          </div>\n        </div>\n      </div>\n    ");
     };
     TileManager.prototype.formatBeingPositions = function (x, y, terrains, rotation, side) {
         if (rotation === void 0) { rotation = 0; }
@@ -443,6 +444,9 @@ var TileManager = /** @class */ (function () {
         var _this = this;
         var playerGridBox = this.getGridBoxDiv(Number(playerId));
         playerGridBox.innerHTML = '';
+        var beingsOverlayInit = document.getElementById("undertheleaves-player-beings-".concat(playerId));
+        if (beingsOverlayInit)
+            beingsOverlayInit.innerHTML = '';
         tiles.forEach(function (gridTile) {
             var cellDiv = document.createElement('div');
             cellDiv.className = 'undertheleaves-player-cell';
@@ -450,6 +454,9 @@ var TileManager = /** @class */ (function () {
             cellDiv.dataset.y = String(gridTile.y);
             playerGridBox.appendChild(cellDiv);
             cellDiv.insertAdjacentHTML('beforeend', _this.formatGridTile(gridTile));
+            var tileConfig = _this.getTileConfig(gridTile.tile);
+            var terrainHTML = _this.formatBeingPositions(gridTile.x, gridTile.y, tileConfig === null || tileConfig === void 0 ? void 0 : tileConfig.terrains, gridTile.rotation, gridTile.side);
+            beingsOverlayInit === null || beingsOverlayInit === void 0 ? void 0 : beingsOverlayInit.insertAdjacentHTML('beforeend', terrainHTML);
             _this.createBeingPositionDivs(cellDiv, gridTile.x, gridTile.y, gridTile.rotation, gridTile.side);
         });
         this.recalculateGrid(playerId);
@@ -496,6 +503,33 @@ var TileManager = /** @class */ (function () {
         var frag = document.createDocumentFragment();
         newCells.forEach(function (el) { return frag.appendChild(el); });
         playerGridBox.appendChild(frag);
+        this.updateBeingsOverlayPositions(playerId, minX, maxX, minY, maxY);
+    };
+    TileManager.prototype.addTileToBeingsOverlay = function (gridTile, playerId) {
+        var overlay = document.getElementById("undertheleaves-player-beings-".concat(playerId));
+        if (!overlay)
+            return;
+        var tileConfig = this.getTileConfig(gridTile.tile);
+        var terrainHTML = this.formatBeingPositions(gridTile.x, gridTile.y, tileConfig === null || tileConfig === void 0 ? void 0 : tileConfig.terrains, gridTile.rotation, gridTile.side);
+        overlay.insertAdjacentHTML('beforeend', terrainHTML);
+        this.recalculateGrid(playerId);
+    };
+    TileManager.prototype.updateBeingsOverlayPositions = function (playerId, minX, maxX, minY, maxY) {
+        var overlay = document.getElementById("undertheleaves-player-beings-".concat(playerId));
+        if (!overlay)
+            return;
+        overlay.style.width = "".concat((maxX - minX + 1) * TILE_SIZE, "px");
+        overlay.style.height = "".concat((maxY - minY + 1) * TILE_SIZE, "px");
+        overlay.querySelectorAll('.undertheleaves-terrain').forEach(function (div) {
+            var tx = Number(div.dataset.x);
+            var ty = Number(div.dataset.y);
+            var cx = Math.floor(tx / 2);
+            var cy = ty % 2 === 0 ? ty / 2 : (ty + 1) / 2;
+            var left = (cx - minX) * TILE_SIZE + (tx % 2 === 0 ? 0.25 : 0.75) * TILE_SIZE;
+            var top = (maxY - cy) * TILE_SIZE + (ty % 2 === 0 ? 0.25 : 0.75) * TILE_SIZE;
+            div.style.left = "".concat(left, "px");
+            div.style.top = "".concat(top, "px");
+        });
     };
     TileManager.prototype.showOfferCardSelectable = function (onChanged) {
         var _this = this;
@@ -731,7 +765,7 @@ var BeingsManager = /** @class */ (function () {
         return "<div ".concat(id ? "id=".concat(id) : '', " class=\"undertheleaves-piece\" piece=\"").concat(piece, "\"></div>");
     };
     BeingsManager.prototype.getTerrainDiv = function (playerId, cell) {
-        return document.querySelector("#undertheleaves-player-grid-".concat(playerId, " .undertheleaves-terrain[data-x='").concat(cell[0], "'][data-y='").concat(cell[1], "']"));
+        return document.querySelector("#undertheleaves-player-beings-".concat(playerId, " .undertheleaves-terrain[data-x='").concat(cell[0], "'][data-y='").concat(cell[1], "']"));
     };
     BeingsManager.prototype.countPiecesInSector = function (playerId, cells, pieceType) {
         var _this = this;
@@ -884,10 +918,9 @@ var BeingsManager = /** @class */ (function () {
         var terrainDiv = this.getTerrainDiv(playerId, topLeftCell);
         if (!terrainDiv)
             return null;
-        terrainDiv.style.zIndex = '10';
         var centerDiv = document.createElement('div');
         centerDiv.id = id;
-        centerDiv.className = 'undertheleaves-being-corner-position';
+        centerDiv.className = 'undertheleaves-being-center-position';
         terrainDiv.appendChild(centerDiv);
         return centerDiv;
     };
@@ -1221,13 +1254,12 @@ var PlaceTile = /** @class */ (function () {
     };
     PlaceTile.prototype.placeTileNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var tileBoxElement, flipperElement, playerGridBoxElement, tileElement, externalElement, animation;
+            var isCurrentPlayer, tileBoxElement, flipperElement, playerGridBoxElement, tileElement, externalElement, animation;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (notif.args.playerId == this.game.bga.players.getCurrentPlayerId()) {
-                            return [2 /*return*/];
-                        }
+                        isCurrentPlayer = notif.args.playerId == this.game.bga.players.getCurrentPlayerId();
+                        if (!!isCurrentPlayer) return [3 /*break*/, 3];
                         tileBoxElement = this.game.games.tileManager.getBoxTileById(notif.args.gridTile.tile.id);
                         flipperElement = this.game.games.tileManager.getFlipperTileById(notif.args.gridTile.tile.id);
                         tileBoxElement.style.transform = "rotate(".concat(notif.args.gridTile.rotation, "deg)");
@@ -1251,8 +1283,10 @@ var PlaceTile = /** @class */ (function () {
                         return [4 /*yield*/, animation.call()];
                     case 2:
                         _a.sent();
-                        tileElement.insertAdjacentHTML('beforeend', this.game.games.tileManager.formatBeingPositions(notif.args.gridTile.x, notif.args.gridTile.y));
                         externalElement.classList.remove('selectable');
+                        _a.label = 3;
+                    case 3:
+                        this.game.games.tileManager.addTileToBeingsOverlay(notif.args.gridTile, notif.args.playerId);
                         return [2 /*return*/];
                 }
             });

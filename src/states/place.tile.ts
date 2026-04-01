@@ -235,51 +235,48 @@ class PlaceTile implements Game {
   }
 
   private async placeTileNotif(notif: Notif<PlaceTileNotif>) {
-    if (notif.args.playerId == this.game.bga.players.getCurrentPlayerId()) {
-      return;
-    }
+    const isCurrentPlayer = notif.args.playerId == this.game.bga.players.getCurrentPlayerId();
 
-    const tileBoxElement = this.game.games.tileManager.getBoxTileById(notif.args.gridTile.tile.id);
-    const flipperElement = this.game.games.tileManager.getFlipperTileById(notif.args.gridTile.tile.id);
-    tileBoxElement.style.transform = `rotate(${notif.args.gridTile.rotation}deg)`;
-    flipperElement.style.transform = notif.args.gridTile.side == 1 ? 'rotateY(180deg)' : '';
+    if (!isCurrentPlayer) {
+      const tileBoxElement = this.game.games.tileManager.getBoxTileById(notif.args.gridTile.tile.id);
+      const flipperElement = this.game.games.tileManager.getFlipperTileById(notif.args.gridTile.tile.id);
+      tileBoxElement.style.transform = `rotate(${notif.args.gridTile.rotation}deg)`;
+      flipperElement.style.transform = notif.args.gridTile.side == 1 ? 'rotateY(180deg)' : '';
 
-    const playerGridBoxElement = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
+      const playerGridBoxElement = this.game.games.tileManager.getGridBoxDiv(notif.args.playerId);
 
-    if (
-      !playerGridBoxElement.querySelector<HTMLElement>(
+      if (
+        !playerGridBoxElement.querySelector<HTMLElement>(
+          `.undertheleaves-player-cell[data-x="${notif.args.gridTile.x}"][data-y="${notif.args.gridTile.y}"]`,
+        )
+      ) {
+        this.game.games.tileManager
+          .getGridBoxDiv(notif.args.playerId)
+          .insertAdjacentHTML(
+            'afterbegin',
+            `<div class="undertheleaves-player-cell selectable" data-x="${notif.args.gridTile.x}" data-y="${notif.args.gridTile.y}"></div>`,
+          );
+      }
+
+      this.game.games.tileManager.recalculateGrid(notif.args.playerId);
+      this.game.games.tileManager.applyZoom(notif.args.playerId);
+
+      await delayTime(300);
+
+      const tileElement = this.game.games.tileManager.getTileById(notif.args.gridTile.tile.id);
+      const externalElement = playerGridBoxElement.querySelector<HTMLElement>(
         `.undertheleaves-player-cell[data-x="${notif.args.gridTile.x}"][data-y="${notif.args.gridTile.y}"]`,
-      )
-    ) {
-      this.game.games.tileManager
-        .getGridBoxDiv(notif.args.playerId)
-        .insertAdjacentHTML(
-          'afterbegin',
-          `<div class="undertheleaves-player-cell selectable" data-x="${notif.args.gridTile.x}" data-y="${notif.args.gridTile.y}"></div>`,
-        );
+      );
+
+      const animation = new BgaLocalAnimation(this.game);
+      animation.setWhere('afterbegin');
+      animation.setOptions(tileElement, externalElement, 700);
+
+      await animation.call();
+
+      externalElement.classList.remove('selectable');
     }
 
-    this.game.games.tileManager.recalculateGrid(notif.args.playerId);
-    this.game.games.tileManager.applyZoom(notif.args.playerId);
-
-    await delayTime(300);
-
-    const tileElement = this.game.games.tileManager.getTileById(notif.args.gridTile.tile.id);
-    const externalElement = playerGridBoxElement.querySelector<HTMLElement>(
-      `.undertheleaves-player-cell[data-x="${notif.args.gridTile.x}"][data-y="${notif.args.gridTile.y}"]`,
-    );
-
-    const animation = new BgaLocalAnimation(this.game);
-    animation.setWhere('afterbegin');
-    animation.setOptions(tileElement, externalElement, 700);
-
-    await animation.call();
-
-    tileElement.insertAdjacentHTML(
-      'beforeend',
-      this.game.games.tileManager.formatBeingPositions(notif.args.gridTile.x, notif.args.gridTile.y),
-    );
-
-    externalElement.classList.remove('selectable');
+    this.game.games.tileManager.addTileToBeingsOverlay(notif.args.gridTile, notif.args.playerId);
   }
 }

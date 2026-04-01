@@ -59,6 +59,11 @@ class TileManager implements Game {
         `<div id="undertheleaves-player-grid-${playerId}" class="undertheleaves-player-grid"></div>`,
       );
 
+      this.gridMap[playerId].onsurface_div.insertAdjacentHTML(
+        'beforeend',
+        `<div id="undertheleaves-player-beings-${playerId}" class="undertheleaves-player-beings"></div>`,
+      );
+
       this.createGridTiles(this.game.gamedatas.gridTiles[playerId], Number(playerId));
     });
 
@@ -161,7 +166,6 @@ class TileManager implements Game {
             </div>
           </div>
         </div>
-        ${this.formatBeingPositions(gridTile.x, gridTile.y, tileConfig?.terrains, gridTile.rotation, gridTile.side)}
       </div>
     `;
   }
@@ -223,6 +227,9 @@ class TileManager implements Game {
 
     playerGridBox.innerHTML = '';
 
+    const beingsOverlayInit = document.getElementById(`undertheleaves-player-beings-${playerId}`);
+    if (beingsOverlayInit) beingsOverlayInit.innerHTML = '';
+
     tiles.forEach((gridTile) => {
       const cellDiv = document.createElement('div');
       cellDiv.className = 'undertheleaves-player-cell';
@@ -232,6 +239,11 @@ class TileManager implements Game {
       playerGridBox.appendChild(cellDiv);
 
       cellDiv.insertAdjacentHTML('beforeend', this.formatGridTile(gridTile));
+
+      const tileConfig = this.getTileConfig(gridTile.tile);
+      const terrainHTML = this.formatBeingPositions(gridTile.x, gridTile.y, tileConfig?.terrains, gridTile.rotation, gridTile.side);
+      beingsOverlayInit?.insertAdjacentHTML('beforeend', terrainHTML);
+
       this.createBeingPositionDivs(cellDiv, gridTile.x, gridTile.y, gridTile.rotation, gridTile.side);
     });
 
@@ -296,6 +308,39 @@ class TileManager implements Game {
     const frag = document.createDocumentFragment();
     newCells.forEach((el) => frag.appendChild(el));
     playerGridBox.appendChild(frag);
+
+    this.updateBeingsOverlayPositions(playerId, minX, maxX, minY, maxY);
+  }
+
+  public addTileToBeingsOverlay(gridTile: GridTile, playerId: number) {
+    const overlay = document.getElementById(`undertheleaves-player-beings-${playerId}`);
+    if (!overlay) return;
+
+    const tileConfig = this.getTileConfig(gridTile.tile);
+    const terrainHTML = this.formatBeingPositions(gridTile.x, gridTile.y, tileConfig?.terrains, gridTile.rotation, gridTile.side);
+    overlay.insertAdjacentHTML('beforeend', terrainHTML);
+    this.recalculateGrid(playerId);
+  }
+
+  private updateBeingsOverlayPositions(playerId: number, minX: number, maxX: number, minY: number, maxY: number) {
+    const overlay = document.getElementById(`undertheleaves-player-beings-${playerId}`);
+    if (!overlay) return;
+
+    overlay.style.width = `${(maxX - minX + 1) * TILE_SIZE}px`;
+    overlay.style.height = `${(maxY - minY + 1) * TILE_SIZE}px`;
+
+    overlay.querySelectorAll<HTMLElement>('.undertheleaves-terrain').forEach((div) => {
+      const tx = Number(div.dataset.x);
+      const ty = Number(div.dataset.y);
+      const cx = Math.floor(tx / 2);
+      const cy = ty % 2 === 0 ? ty / 2 : (ty + 1) / 2;
+
+      const left = (cx - minX) * TILE_SIZE + (tx % 2 === 0 ? 0.25 : 0.75) * TILE_SIZE;
+      const top = (maxY - cy) * TILE_SIZE + (ty % 2 === 0 ? 0.25 : 0.75) * TILE_SIZE;
+
+      div.style.left = `${left}px`;
+      div.style.top = `${top}px`;
+    });
   }
 
   public showOfferCardSelectable(onChanged: (tileId?: string) => void) {
