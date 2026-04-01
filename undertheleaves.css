@@ -302,7 +302,7 @@
   transition: 0.1s ease-in-out;
   cursor: pointer;
 }
-.undertheleaves-tile.selected .undertheleaves-tile-box {
+.undertheleaves-tile.selected {
   z-index: 2;
 }
 .undertheleaves-tile.selected .undertheleaves-tile-box .undertheleaves-tile-front,

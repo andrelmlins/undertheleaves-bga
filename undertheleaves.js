@@ -825,7 +825,7 @@ var BeingsManager = /** @class */ (function () {
                         finally { if (e_2) throw e_2.error; }
                         return [7 /*endfinally*/];
                     case 7:
-                        this.game.games.playerManager.incCounter(notif.args.playerId, 'mushroom', notif.args.sectors.length);
+                        this.game.games.playerManager.incCounter(notif.args.playerId, notif.args.being, notif.args.sectors.length);
                         return [2 /*return*/];
                 }
             });

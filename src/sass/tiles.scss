@@ -84,17 +84,19 @@
     cursor: pointer;
   }
 
-  &.selected .undertheleaves-tile-box {
+  &.selected {
     z-index: 2;
 
-    .undertheleaves-tile-front,
-    .undertheleaves-tile-back {
-      box-shadow: none;
-      -webkit-box-shadow: none;
-    }
+    & .undertheleaves-tile-box {
+      .undertheleaves-tile-front,
+      .undertheleaves-tile-back {
+        box-shadow: none;
+        -webkit-box-shadow: none;
+      }
 
-    .undertheleaves-tile-inner {
-      outline: 2px solid red;
+      .undertheleaves-tile-inner {
+        outline: 2px solid red;
+      }
     }
   }
 
