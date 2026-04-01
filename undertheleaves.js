@@ -741,10 +741,16 @@ var BeingsManager = /** @class */ (function () {
         dojo.subscribe('majorityBonus', this, function (notif) { return _this.majorityBonusNotif(notif); });
     };
     BeingsManager.prototype.renderBeing = function (being) {
-        var _a;
         for (var i = 0; i < being.count; i++) {
             var cell = being.cells[i % being.cells.length];
-            (_a = this.getTerrainDiv(being.playerId, cell)) === null || _a === void 0 ? void 0 : _a.insertAdjacentHTML('beforeend', this.formatPiece(being.type));
+            var terrainDiv = this.getTerrainDiv(being.playerId, cell);
+            var centerDiv = terrainDiv === null || terrainDiv === void 0 ? void 0 : terrainDiv.querySelector('.undertheleaves-being-center-position');
+            if (centerDiv) {
+                centerDiv.insertAdjacentHTML('beforebegin', this.formatPiece(being.type));
+            }
+            else {
+                terrainDiv === null || terrainDiv === void 0 ? void 0 : terrainDiv.insertAdjacentHTML('beforeend', this.formatPiece(being.type));
+            }
         }
     };
     BeingsManager.prototype.renderHummingbird = function (being) {

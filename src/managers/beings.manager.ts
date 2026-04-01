@@ -54,7 +54,13 @@ class BeingsManager implements Game {
   public renderBeing(being: Being) {
     for (let i = 0; i < being.count; i++) {
       const cell = being.cells[i % being.cells.length];
-      this.getTerrainDiv(being.playerId, cell)?.insertAdjacentHTML('beforeend', this.formatPiece(being.type));
+      const terrainDiv = this.getTerrainDiv(being.playerId, cell);
+      const centerDiv = terrainDiv?.querySelector('.undertheleaves-being-center-position');
+      if (centerDiv) {
+        centerDiv.insertAdjacentHTML('beforebegin', this.formatPiece(being.type));
+      } else {
+        terrainDiv?.insertAdjacentHTML('beforeend', this.formatPiece(being.type));
+      }
     }
   }
 
