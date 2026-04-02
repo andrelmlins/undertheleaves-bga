@@ -97,6 +97,8 @@ class PlaceTile implements Game {
       });
     });
 
+    const externalsSet = new Set(externalsMap.map((p) => `${p.x},${p.y}`));
+
     externalsMap.forEach((pos) => {
       let element = gridBoxDiv.querySelector<HTMLElement>(
         `.undertheleaves-player-cell[data-x="${pos.x}"][data-y="${pos.y}"]`,
@@ -114,6 +116,9 @@ class PlaceTile implements Game {
       } else {
         element.classList.add('selectable');
       }
+
+      if (!externalsSet.has(`${pos.x},${pos.y + 1}`)) element.classList.add('selectable-border-top');
+      if (!externalsSet.has(`${pos.x - 1},${pos.y}`)) element.classList.add('selectable-border-left');
 
       this.handlers.push(
         dojo.connect(element, 'onclick', async () => {

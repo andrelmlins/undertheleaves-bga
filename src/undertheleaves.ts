@@ -56,6 +56,11 @@ class UndertheLeavesGame extends GameGui<Player, UndertheLeavesGamedatas> {
       this.games[gameName].setup(gamedatas);
     }
 
+    document
+      .getElementById(`undertheleaves-player-board-${this.gamedatas.firstPlayerId}`)
+      .insertAdjacentHTML('afterbegin', '<div id="undertheleaves-first-player" class="undertheleaves-first-player"/>');
+    (this as any).addTooltip('undertheleaves-first-player', '', _('This is the first player'));
+
     this.setupNotifications();
   }
 

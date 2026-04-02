@@ -6,6 +6,7 @@ interface UndertheLeavesGamedatas extends Gamedatas {
   cards: { leaf: CardConfig; mushroom: CardConfig; puddle: CardConfig };
   beings: Record<string, Being[]>;
   countDeckTiles: number;
+  firstPlayerId: number;
 }
 
 interface BeingPosition {

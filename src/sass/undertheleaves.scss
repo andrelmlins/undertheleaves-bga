@@ -124,9 +124,28 @@ html {
         box-sizing: border-box;
 
         &.selectable {
-          background: #ff000050;
           cursor: pointer;
-          box-sizing: border-box;
+          position: relative;
+
+          &:before {
+            content: '';
+            background: #ff000050;
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            position: absolute;
+            border-right: 2px dashed red;
+            border-bottom: 2px dashed red;
+          }
+
+          &.selectable-border-top:before {
+            border-top: 2px dashed red;
+          }
+          &.selectable-border-left:before {
+            border-left: 2px dashed red;
+          }
         }
 
         .undertheleaves-tile .undertheleaves-tile-box {
@@ -148,6 +167,10 @@ html {
   z-index: 5;
   pointer-events: none;
 
+  .selectable {
+    pointer-events: initial;
+  }
+
   .undertheleaves-terrain {
     position: absolute;
     width: $TILE_SIZE * 0.5;
@@ -155,6 +178,25 @@ html {
     box-sizing: border-box;
     overflow: visible;
     transform: translate(-50%, -50%);
+
+    &.selectable {
+      &::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: #ff000050;
+        border: 1px solid red;
+        cursor: pointer;
+        transition: 0.1s ease-in-out;
+        box-sizing: border-box;
+      }
+
+      &.selected::before {
+        background: #0000ff50;
+        border: 1px solid blue;
+      }
+    }
 
     .undertheleaves-being-center-position {
       position: absolute;
@@ -270,23 +312,43 @@ html {
 
 .undertheleaves-player-board {
   display: flex;
-  align-items: center;
-  justify-content: space-around;
-  margin: 4px 0px;
+  align-items: flex-start;
+  flex-direction: column;
+  padding: 4px;
+  box-sizing: border-box;
+  gap: 4px;
 
-  & .undertheleaves-player-board-count {
+  & .undertheleaves-first-player {
+    width: 30px;
+    height: 30px;
+    background-image: url('img/first_player.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: 0%;
+    position: relative;
+  }
+
+  & .undertheleaves-player-board-counters {
     display: flex;
-    flex-direction: column;
     align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
 
-    & span {
-      font-family: 'Libre Baskerville';
-      font-weight: 700;
-    }
+    & .undertheleaves-player-board-count {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
 
-    & .undertheleaves-piece {
-      width: 30px;
-      height: 30px;
+      & span {
+        font-family: 'Libre Baskerville';
+        font-weight: 700;
+      }
+
+      & .undertheleaves-piece {
+        width: 30px;
+        height: 30px;
+      }
     }
   }
 }

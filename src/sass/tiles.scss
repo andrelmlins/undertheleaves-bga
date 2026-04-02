@@ -85,8 +85,6 @@
   }
 
   &.selected {
-    z-index: 2;
-
     & .undertheleaves-tile-box {
       .undertheleaves-tile-front,
       .undertheleaves-tile-back {
@@ -95,7 +93,15 @@
       }
 
       .undertheleaves-tile-inner {
-        outline: 2px solid red;
+        &::after {
+          content: '';
+          width: 100%;
+          height: 100%;
+          position: absolute;
+          inset: 0;
+          box-shadow: inset 0 0 20px rgba(255, 0, 0, 0.7);
+          pointer-events: none;
+        }
       }
     }
   }

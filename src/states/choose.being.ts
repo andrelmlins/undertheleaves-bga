@@ -23,7 +23,9 @@ class ChooseBeing implements Game {
         this.chooseTerrain(beingTypes[0], notif.args.beings[beingTypes[0]][0], notif.args);
       }
     } else if (stateName === 'client_ChooseTerrain') {
-      const playerId = this.game.bga.players.getCurrentPlayerId();
+      const playerId = this.game.bga.players.getActivePlayerId();
+
+      document.getElementById(`undertheleaves-player-beings-${playerId}`).classList.add('selectable');
 
       notif.args.beingTerrains.forEach((terrain) => {
         const terrainDiv = this.game.games.beingsManager.getTerrainDiv(playerId, terrain);
@@ -59,6 +61,8 @@ class ChooseBeing implements Game {
   }
 
   private cleanupTerrain() {
+    const playerId = this.game.bga.players.getActivePlayerId();
+
     this.handlers.forEach((h) => dojo.disconnect(h));
     this.handlers = [];
 
@@ -68,6 +72,8 @@ class ChooseBeing implements Game {
 
     this.terrainSelected = null;
     this.actionButton = null;
+
+    document.getElementById(`undertheleaves-player-beings-${playerId}`).classList.remove('selectable');
   }
 
   public onUpdateActionButtons(stateName: string, args: ChooseBeingState) {

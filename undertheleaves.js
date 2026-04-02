@@ -71,6 +71,10 @@ var UndertheLeavesGame = /** @class */ (function (_super) {
         for (var gameName in this.games) {
             this.games[gameName].setup(gamedatas);
         }
+        document
+            .getElementById("undertheleaves-player-board-".concat(this.gamedatas.firstPlayerId))
+            .insertAdjacentHTML('afterbegin', '<div id="undertheleaves-first-player" class="undertheleaves-first-player"/>');
+        this.addTooltip('undertheleaves-first-player', '', _('This is the first player'));
         this.setupNotifications();
     };
     UndertheLeavesGame.prototype.bgaFormatText = function (log, args) {
@@ -629,7 +633,7 @@ var PlayerManager = /** @class */ (function () {
                 hummingbird: new ebg.counter(),
                 bee: new ebg.counter(),
             };
-            var playerBoardHtml = "\n        <div id=\"undertheleaves-player-board-".concat(playerId, "\" class=\"undertheleaves-player-board\">\n          <div class=\"undertheleaves-player-board-count\">\n            ").concat(this.game.games.beingsManager.formatPiece('bee'), "\n            <span id=\"undertheleaves-bee-count-").concat(playerId, "\">0</span>\n          </div>\n          <div class=\"undertheleaves-player-board-count\">\n            ").concat(this.game.games.beingsManager.formatPiece('hummingbird'), "\n            <span id=\"undertheleaves-hummingbird-count-").concat(playerId, "\">0</span>\n          </div>\n          <div class=\"undertheleaves-player-board-count\">\n            ").concat(this.game.games.beingsManager.formatPiece('leaf'), "\n            <span id=\"undertheleaves-leaf-count-").concat(playerId, "\">0</span>\n          </div>\n          <div class=\"undertheleaves-player-board-count\">\n            ").concat(this.game.games.beingsManager.formatPiece('mushroom'), "\n            <span id=\"undertheleaves-mushroom-count-").concat(playerId, "\">0</span>\n          </div>\n          <div class=\"undertheleaves-player-board-count\">\n            ").concat(this.game.games.beingsManager.formatPiece('puddle'), "\n            <span id=\"undertheleaves-puddle-count-").concat(playerId, "\">0</span>\n          </div>\n        </div>\n      ");
+            var playerBoardHtml = "\n        <div id=\"undertheleaves-player-board-".concat(playerId, "\" class=\"undertheleaves-player-board\">\n          <div class=\"undertheleaves-player-board-counters\">\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('bee'), "\n              <span id=\"undertheleaves-bee-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('hummingbird'), "\n              <span id=\"undertheleaves-hummingbird-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('leaf'), "\n              <span id=\"undertheleaves-leaf-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('mushroom'), "\n              <span id=\"undertheleaves-mushroom-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('puddle'), "\n              <span id=\"undertheleaves-puddle-count-").concat(playerId, "\">0</span>\n            </div>\n          </div>\n        </div>\n      ");
             this.game.bga.playerPanels.getElement(Number(playerId)).insertAdjacentHTML('beforeend', playerBoardHtml);
             this.counters[playerId].leaf.create("undertheleaves-leaf-count-".concat(playerId));
             this.counters[playerId].puddle.create("undertheleaves-puddle-count-".concat(playerId));
@@ -1120,6 +1124,7 @@ var PlaceTile = /** @class */ (function () {
                 }
             });
         });
+        var externalsSet = new Set(externalsMap.map(function (p) { return "".concat(p.x, ",").concat(p.y); }));
         externalsMap.forEach(function (pos) {
             var element = gridBoxDiv.querySelector(".undertheleaves-player-cell[data-x=\"".concat(pos.x, "\"][data-y=\"").concat(pos.y, "\"]"));
             if (!element) {
@@ -1129,6 +1134,10 @@ var PlaceTile = /** @class */ (function () {
             else {
                 element.classList.add('selectable');
             }
+            if (!externalsSet.has("".concat(pos.x, ",").concat(pos.y + 1)))
+                element.classList.add('selectable-border-top');
+            if (!externalsSet.has("".concat(pos.x - 1, ",").concat(pos.y)))
+                element.classList.add('selectable-border-left');
             _this.handlers.push(dojo.connect(element, 'onclick', function () { return __awaiter(_this, void 0, void 0, function () {
                 var tileElement;
                 var _a, _b;
@@ -1343,7 +1352,8 @@ var ChooseBeing = /** @class */ (function () {
             }
         }
         else if (stateName === 'client_ChooseTerrain') {
-            var playerId_1 = this.game.bga.players.getCurrentPlayerId();
+            var playerId_1 = this.game.bga.players.getActivePlayerId();
+            document.getElementById("undertheleaves-player-beings-".concat(playerId_1)).classList.add('selectable');
             notif.args.beingTerrains.forEach(function (terrain) {
                 var terrainDiv = _this.game.games.beingsManager.getTerrainDiv(playerId_1, terrain);
                 terrainDiv.classList.add('selectable');
@@ -1371,6 +1381,7 @@ var ChooseBeing = /** @class */ (function () {
         }
     };
     ChooseBeing.prototype.cleanupTerrain = function () {
+        var playerId = this.game.bga.players.getActivePlayerId();
         this.handlers.forEach(function (h) { return dojo.disconnect(h); });
         this.handlers = [];
         document
@@ -1378,6 +1389,7 @@ var ChooseBeing = /** @class */ (function () {
             .forEach(function (el) { return el.classList.remove('selectable', 'selected'); });
         this.terrainSelected = null;
         this.actionButton = null;
+        document.getElementById("undertheleaves-player-beings-".concat(playerId)).classList.remove('selectable');
     };
     ChooseBeing.prototype.onUpdateActionButtons = function (stateName, args) {
         var _this = this;

@@ -110,6 +110,11 @@ class Game extends \Bga\GameFramework\Table
         $result["cards"] = $this->cardService->list();
         $result["beings"] = $this->beingService->getAllBeings();
 
+        $sql = "SELECT player_id FROM player WHERE player_no = 1";
+        $item = $this->getObjectFromDB($sql);
+
+        $result["firstPlayerId"] = (int)$item['player_id'];
+
         return $result;
     }
 

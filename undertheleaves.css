@@ -302,16 +302,19 @@
   transition: 0.1s ease-in-out;
   cursor: pointer;
 }
-.undertheleaves-tile.selected {
-  z-index: 2;
-}
 .undertheleaves-tile.selected .undertheleaves-tile-box .undertheleaves-tile-front,
 .undertheleaves-tile.selected .undertheleaves-tile-box .undertheleaves-tile-back {
   box-shadow: none;
   -webkit-box-shadow: none;
 }
-.undertheleaves-tile.selected .undertheleaves-tile-box .undertheleaves-tile-inner {
-  outline: 2px solid red;
+.undertheleaves-tile.selected .undertheleaves-tile-box .undertheleaves-tile-inner::after {
+  content: "";
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 20px rgba(255, 0, 0, 0.7);
+  pointer-events: none;
 }
 .undertheleaves-tile.notif {
   height: 90px;
@@ -602,9 +605,26 @@ html {
   box-sizing: border-box;
 }
 .undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell.selectable {
-  background: rgba(255, 0, 0, 0.3137254902);
   cursor: pointer;
+  position: relative;
+}
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell.selectable:before {
+  content: "";
+  background: rgba(255, 0, 0, 0.3137254902);
   box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  position: absolute;
+  border-right: 2px dashed red;
+  border-bottom: 2px dashed red;
+}
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell.selectable.selectable-border-top:before {
+  border-top: 2px dashed red;
+}
+.undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell.selectable.selectable-border-left:before {
+  border-left: 2px dashed red;
 }
 .undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-tile .undertheleaves-tile-box .undertheleaves-tile-front,
 .undertheleaves-box .undertheleaves-player .undertheleaves-player-grid .undertheleaves-player-cell .undertheleaves-tile .undertheleaves-tile-box .undertheleaves-tile-back {
@@ -619,6 +639,9 @@ html {
   z-index: 5;
   pointer-events: none;
 }
+.undertheleaves-player-beings .selectable {
+  pointer-events: initial;
+}
 .undertheleaves-player-beings .undertheleaves-terrain {
   position: absolute;
   width: 75px;
@@ -626,6 +649,21 @@ html {
   box-sizing: border-box;
   overflow: visible;
   transform: translate(-50%, -50%);
+}
+.undertheleaves-player-beings .undertheleaves-terrain.selectable::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 0, 0, 0.3137254902);
+  border: 1px solid red;
+  cursor: pointer;
+  transition: 0.1s ease-in-out;
+  box-sizing: border-box;
+}
+.undertheleaves-player-beings .undertheleaves-terrain.selectable.selected::before {
+  background: rgba(0, 0, 255, 0.3137254902);
+  border: 1px solid blue;
 }
 .undertheleaves-player-beings .undertheleaves-terrain .undertheleaves-being-center-position {
   position: absolute;
@@ -722,20 +760,38 @@ html {
 
 .undertheleaves-player-board {
   display: flex;
-  align-items: center;
-  justify-content: space-around;
-  margin: 4px 0px;
+  align-items: flex-start;
+  flex-direction: column;
+  padding: 4px;
+  box-sizing: border-box;
+  gap: 4px;
 }
-.undertheleaves-player-board .undertheleaves-player-board-count {
+.undertheleaves-player-board .undertheleaves-first-player {
+  width: 30px;
+  height: 30px;
+  background-image: url("img/first_player.png");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: 0%;
+  position: relative;
+}
+.undertheleaves-player-board .undertheleaves-player-board-counters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
+}
+.undertheleaves-player-board .undertheleaves-player-board-counters .undertheleaves-player-board-count {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-.undertheleaves-player-board .undertheleaves-player-board-count span {
+.undertheleaves-player-board .undertheleaves-player-board-counters .undertheleaves-player-board-count span {
   font-family: "Libre Baskerville";
   font-weight: 700;
 }
-.undertheleaves-player-board .undertheleaves-player-board-count .undertheleaves-piece {
+.undertheleaves-player-board .undertheleaves-player-board-counters .undertheleaves-player-board-count .undertheleaves-piece {
   width: 30px;
   height: 30px;
 }

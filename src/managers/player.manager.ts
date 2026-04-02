@@ -15,25 +15,27 @@ class PlayerManager implements Game {
 
       const playerBoardHtml = `
         <div id="undertheleaves-player-board-${playerId}" class="undertheleaves-player-board">
-          <div class="undertheleaves-player-board-count">
-            ${this.game.games.beingsManager.formatPiece('bee')}
-            <span id="undertheleaves-bee-count-${playerId}">0</span>
-          </div>
-          <div class="undertheleaves-player-board-count">
-            ${this.game.games.beingsManager.formatPiece('hummingbird')}
-            <span id="undertheleaves-hummingbird-count-${playerId}">0</span>
-          </div>
-          <div class="undertheleaves-player-board-count">
-            ${this.game.games.beingsManager.formatPiece('leaf')}
-            <span id="undertheleaves-leaf-count-${playerId}">0</span>
-          </div>
-          <div class="undertheleaves-player-board-count">
-            ${this.game.games.beingsManager.formatPiece('mushroom')}
-            <span id="undertheleaves-mushroom-count-${playerId}">0</span>
-          </div>
-          <div class="undertheleaves-player-board-count">
-            ${this.game.games.beingsManager.formatPiece('puddle')}
-            <span id="undertheleaves-puddle-count-${playerId}">0</span>
+          <div class="undertheleaves-player-board-counters">
+            <div class="undertheleaves-player-board-count">
+              ${this.game.games.beingsManager.formatPiece('bee')}
+              <span id="undertheleaves-bee-count-${playerId}">0</span>
+            </div>
+            <div class="undertheleaves-player-board-count">
+              ${this.game.games.beingsManager.formatPiece('hummingbird')}
+              <span id="undertheleaves-hummingbird-count-${playerId}">0</span>
+            </div>
+            <div class="undertheleaves-player-board-count">
+              ${this.game.games.beingsManager.formatPiece('leaf')}
+              <span id="undertheleaves-leaf-count-${playerId}">0</span>
+            </div>
+            <div class="undertheleaves-player-board-count">
+              ${this.game.games.beingsManager.formatPiece('mushroom')}
+              <span id="undertheleaves-mushroom-count-${playerId}">0</span>
+            </div>
+            <div class="undertheleaves-player-board-count">
+              ${this.game.games.beingsManager.formatPiece('puddle')}
+              <span id="undertheleaves-puddle-count-${playerId}">0</span>
+            </div>
           </div>
         </div>
       `;
