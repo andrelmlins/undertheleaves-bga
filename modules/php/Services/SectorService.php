@@ -36,8 +36,11 @@ class SectorService
                 continue;
             }
 
-            $terrains = $tileConfig->getTerrains($gridTile->side === 1);
+            $terrains = $tileConfig->getTerrains(false);
             $terrains = $this->rotateTerrains($terrains, $gridTile->rotation);
+            if ($gridTile->side === 1) {
+                $terrains = [$terrains[1], $terrains[0], $terrains[3], $terrains[2]];
+            }
 
             foreach ($positions as $index => $coords) {
                 $groupKey = $terrainFilter($terrains[$index]);

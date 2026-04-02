@@ -73,9 +73,12 @@ class BeeBeing
             $this->game->statsService->incBee(1, $playerId, false);
         }
 
-        foreach ($colorsToIncrement as $color) {
-            $this->game->beingService->incrementBeesByColor($playerId, $color);
-            $this->game->statsService->incBee(1, $playerId, true);
+        if (!empty($existingSectorsForNotif)) {
+            $existingIds = array_map(fn($being) => $being->id, $existingSectorsForNotif);
+            $this->game->beingService->incrementBeesByIds($existingIds);
+            foreach ($existingSectorsForNotif as $being) {
+                $this->game->statsService->incBee(1, $playerId, true);
+            }
         }
 
         $transformedNew = array_map(function ($sector) {

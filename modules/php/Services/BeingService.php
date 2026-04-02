@@ -126,6 +126,16 @@ class BeingService
         $this->game->DbQuery(sprintf($sql, $increment, $playerId, $color));
     }
 
+    public function incrementBeesByIds(array $ids, int $increment = 1): void
+    {
+        if (empty($ids)) return;
+
+        $placeholders = implode(',', array_fill(0, count($ids), "'%s'"));
+        $sql = "UPDATE beings SET being_count = being_count + '%s' WHERE being_id IN ($placeholders)";
+
+        $this->game->DbQuery(sprintf($sql, $increment, ...$ids));
+    }
+
     public function formatBeing(array $row): Being
     {
         return new Being(
