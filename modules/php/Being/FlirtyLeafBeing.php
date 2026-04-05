@@ -25,6 +25,10 @@ class FlirtyLeafBeing extends DwellerBeing
         foreach ($terrainGrid as $cellKey => $type) {
             [$x, $y] = SectorService::cellKeyToCoordinates($cellKey);
 
+            if ($x === 0 && $y === -1) {
+                continue;
+            }
+
             $trKey = SectorService::coordinatesToCellKey([$x + 1, $y]);
             $blKey = SectorService::coordinatesToCellKey([$x, $y + 1]);
             $brKey = SectorService::coordinatesToCellKey([$x + 1, $y + 1]);
