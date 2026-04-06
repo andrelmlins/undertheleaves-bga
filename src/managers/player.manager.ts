@@ -11,10 +11,17 @@ class PlayerManager implements Game {
         mushroom: new ebg.counter(),
         hummingbird: new ebg.counter(),
         bee: new ebg.counter(),
+        round: new ebg.counter(),
       };
 
       const playerBoardHtml = `
         <div id="undertheleaves-player-board-${playerId}" class="undertheleaves-player-board">
+          <div id="undertheleaves-player-board-round-${playerId}" class="undertheleaves-player-board-round">
+            <span>
+              <span class="undertheleaves-player-board-round-icon"></span>
+              <span id="undertheleaves-round-count-${playerId}">0</span>&nbsp;/ 13
+            </span>
+          </div>
           <div class="undertheleaves-player-board-counters">
             <div class="undertheleaves-player-board-count">
               ${this.game.games.beingsManager.formatPiece('bee')}
@@ -47,6 +54,7 @@ class PlayerManager implements Game {
       this.counters[playerId].mushroom.create(`undertheleaves-mushroom-count-${playerId}`);
       this.counters[playerId].hummingbird.create(`undertheleaves-hummingbird-count-${playerId}`);
       this.counters[playerId].bee.create(`undertheleaves-bee-count-${playerId}`);
+      this.counters[playerId].round.create(`undertheleaves-round-count-${playerId}`);
 
       const playerBeings = this.game.gamedatas.beings[playerId] ?? [];
       const totals = playerBeings.reduce(
@@ -62,10 +70,16 @@ class PlayerManager implements Game {
       this.counters[playerId].leaf.setValue(totals['leaf'] ?? 0);
       this.counters[playerId].mushroom.setValue(totals['mushroom'] ?? 0);
       this.counters[playerId].puddle.setValue(totals['puddle'] ?? 0);
+      this.counters[playerId].round.setValue(this.game.gamedatas.gridTiles[Number(playerId)]?.length ?? 0);
     }
+
+    document
+      .getElementById(`undertheleaves-player-board-round-${this.game.gamedatas.firstPlayerId}`)
+      .insertAdjacentHTML('beforeend', '<div id="undertheleaves-first-player" class="undertheleaves-first-player"/>');
+    this.game.addTooltip('undertheleaves-first-player', '', _('This is the first player'));
   }
 
-  public incCounter(playerId: string | number, type: BeingType, by: number) {
+  public incCounter(playerId: string | number, type: BeingType | string, by: number) {
     this.counters[String(playerId)]?.[type]?.incValue(by);
   }
 

@@ -284,5 +284,7 @@ class PlaceTile implements Game {
     } else {
       this.game.games.tileManager.addTileToBeingsOverlay(notif.args.gridTile, notif.args.playerId);
     }
+
+    this.game.games.playerManager.incCounter(notif.args.playerId, 'round', 1);
   }
 }

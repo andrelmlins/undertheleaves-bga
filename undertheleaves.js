@@ -71,10 +71,6 @@ var UndertheLeavesGame = /** @class */ (function (_super) {
         for (var gameName in this.games) {
             this.games[gameName].setup(gamedatas);
         }
-        document
-            .getElementById("undertheleaves-player-board-".concat(this.gamedatas.firstPlayerId))
-            .insertAdjacentHTML('afterbegin', '<div id="undertheleaves-first-player" class="undertheleaves-first-player"/>');
-        this.addTooltip('undertheleaves-first-player', '', _('This is the first player'));
         this.setupNotifications();
     };
     UndertheLeavesGame.prototype.bgaFormatText = function (log, args) {
@@ -624,7 +620,7 @@ var PlayerManager = /** @class */ (function () {
         this.counters = {};
     }
     PlayerManager.prototype.setup = function () {
-        var _a, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f, _g, _h;
         for (var playerId in this.game.gamedatas.players) {
             this.counters[playerId] = {
                 leaf: new ebg.counter(),
@@ -632,14 +628,16 @@ var PlayerManager = /** @class */ (function () {
                 mushroom: new ebg.counter(),
                 hummingbird: new ebg.counter(),
                 bee: new ebg.counter(),
+                round: new ebg.counter(),
             };
-            var playerBoardHtml = "\n        <div id=\"undertheleaves-player-board-".concat(playerId, "\" class=\"undertheleaves-player-board\">\n          <div class=\"undertheleaves-player-board-counters\">\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('bee'), "\n              <span id=\"undertheleaves-bee-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('hummingbird'), "\n              <span id=\"undertheleaves-hummingbird-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('leaf'), "\n              <span id=\"undertheleaves-leaf-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('mushroom'), "\n              <span id=\"undertheleaves-mushroom-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('puddle'), "\n              <span id=\"undertheleaves-puddle-count-").concat(playerId, "\">0</span>\n            </div>\n          </div>\n        </div>\n      ");
+            var playerBoardHtml = "\n        <div id=\"undertheleaves-player-board-".concat(playerId, "\" class=\"undertheleaves-player-board\">\n          <div id=\"undertheleaves-player-board-round-").concat(playerId, "\" class=\"undertheleaves-player-board-round\">\n            <span>\n              <span class=\"undertheleaves-player-board-round-icon\"></span>\n              <span id=\"undertheleaves-round-count-").concat(playerId, "\">0</span>&nbsp;/ 13\n            </span>\n          </div>\n          <div class=\"undertheleaves-player-board-counters\">\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('bee'), "\n              <span id=\"undertheleaves-bee-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('hummingbird'), "\n              <span id=\"undertheleaves-hummingbird-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('leaf'), "\n              <span id=\"undertheleaves-leaf-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('mushroom'), "\n              <span id=\"undertheleaves-mushroom-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('puddle'), "\n              <span id=\"undertheleaves-puddle-count-").concat(playerId, "\">0</span>\n            </div>\n          </div>\n        </div>\n      ");
             this.game.bga.playerPanels.getElement(Number(playerId)).insertAdjacentHTML('beforeend', playerBoardHtml);
             this.counters[playerId].leaf.create("undertheleaves-leaf-count-".concat(playerId));
             this.counters[playerId].puddle.create("undertheleaves-puddle-count-".concat(playerId));
             this.counters[playerId].mushroom.create("undertheleaves-mushroom-count-".concat(playerId));
             this.counters[playerId].hummingbird.create("undertheleaves-hummingbird-count-".concat(playerId));
             this.counters[playerId].bee.create("undertheleaves-bee-count-".concat(playerId));
+            this.counters[playerId].round.create("undertheleaves-round-count-".concat(playerId));
             var playerBeings = (_a = this.game.gamedatas.beings[playerId]) !== null && _a !== void 0 ? _a : [];
             var totals = playerBeings.reduce(function (acc, b) {
                 var _a;
@@ -651,7 +649,12 @@ var PlayerManager = /** @class */ (function () {
             this.counters[playerId].leaf.setValue((_d = totals['leaf']) !== null && _d !== void 0 ? _d : 0);
             this.counters[playerId].mushroom.setValue((_e = totals['mushroom']) !== null && _e !== void 0 ? _e : 0);
             this.counters[playerId].puddle.setValue((_f = totals['puddle']) !== null && _f !== void 0 ? _f : 0);
+            this.counters[playerId].round.setValue((_h = (_g = this.game.gamedatas.gridTiles[Number(playerId)]) === null || _g === void 0 ? void 0 : _g.length) !== null && _h !== void 0 ? _h : 0);
         }
+        document
+            .getElementById("undertheleaves-player-board-round-".concat(this.game.gamedatas.firstPlayerId))
+            .insertAdjacentHTML('beforeend', '<div id="undertheleaves-first-player" class="undertheleaves-first-player"/>');
+        this.game.addTooltip('undertheleaves-first-player', '', _('This is the first player'));
     };
     PlayerManager.prototype.incCounter = function (playerId, type, by) {
         var _a, _b;
@@ -1323,7 +1326,9 @@ var PlaceTile = /** @class */ (function () {
                     case 3:
                         this.game.games.tileManager.addTileToBeingsOverlay(notif.args.gridTile, notif.args.playerId);
                         _a.label = 4;
-                    case 4: return [2 /*return*/];
+                    case 4:
+                        this.game.games.playerManager.incCounter(notif.args.playerId, 'round', 1);
+                        return [2 /*return*/];
                 }
             });
         });
