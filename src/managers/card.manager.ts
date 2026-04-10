@@ -43,12 +43,9 @@ class CardManager implements Game {
 
     return `
       <div class="undertheleaves-card-tooltip">
-        <div class="undertheleaves-card undertheleaves-card-tooltip-image" line="${card.position.row}" column="${card.position.column}"></div>
-        <div class="undertheleaves-card-tooltip-content">
-          <span class="undertheleaves-card-tooltip-type">${typeName[card.type]}</span>
-          <span class="undertheleaves-card-tooltip-name">${_(card.name)}</span>
-          <span class="undertheleaves-card-tooltip-description">${_(card.description)}</span>
-        </div>
+        <span class="undertheleaves-card-tooltip-type">${typeName[card.type]}</span>
+        <span class="undertheleaves-card-tooltip-name">${_(card.name)}</span>
+        <span class="undertheleaves-card-tooltip-description">${_(card.description)}</span>
       </div>
     `;
   }

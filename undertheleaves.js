@@ -610,7 +610,7 @@ var CardManager = /** @class */ (function () {
             mushroom: _('Mushroom Dweller'),
             puddle: _('Puddle Dweller'),
         };
-        return "\n      <div class=\"undertheleaves-card-tooltip\">\n        <div class=\"undertheleaves-card undertheleaves-card-tooltip-image\" line=\"".concat(card.position.row, "\" column=\"").concat(card.position.column, "\"></div>\n        <div class=\"undertheleaves-card-tooltip-content\">\n          <span class=\"undertheleaves-card-tooltip-type\">").concat(typeName[card.type], "</span>\n          <span class=\"undertheleaves-card-tooltip-name\">").concat(_(card.name), "</span>\n          <span class=\"undertheleaves-card-tooltip-description\">").concat(_(card.description), "</span>\n        </div>\n      </div>\n    ");
+        return "\n      <div class=\"undertheleaves-card-tooltip\">\n        <span class=\"undertheleaves-card-tooltip-type\">".concat(typeName[card.type], "</span>\n        <span class=\"undertheleaves-card-tooltip-name\">").concat(_(card.name), "</span>\n        <span class=\"undertheleaves-card-tooltip-description\">").concat(_(card.description), "</span>\n      </div>\n    ");
     };
     return CardManager;
 }());

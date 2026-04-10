@@ -388,7 +388,11 @@ html {
 
 .show_settings,
 .scrollmap_button_wrapper.info,
-.scrollmap_button_wrapper.toogle_buttons_visibility {
+.scrollmap_button_wrapper.toogle_buttons_visibility,
+.scrollmap_button_wrapper.enlargedisplay,
+.scrollmap_button_wrapper.reducedisplay,
+.scrollmap_button_wrapper.reset_height,
+.scrollmap_button_wrapper.maximize_height {
   display: none !important;
 }
 

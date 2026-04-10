@@ -419,37 +419,24 @@
 
 .undertheleaves-card-tooltip {
   display: flex;
-  gap: 12px;
-  padding: 4px;
-  max-width: 320px;
-  align-items: center;
-  font-family: "Libre Baskerville";
-}
-.undertheleaves-card-tooltip .undertheleaves-card-tooltip-image {
-  width: 70px;
-  height: 105px;
-  min-width: 70px;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 1px 8px rgba(0, 0, 0, 0.15);
-}
-.undertheleaves-card-tooltip .undertheleaves-card-tooltip-content {
-  display: flex;
   flex-direction: column;
   gap: 6px;
-  padding-top: 4px;
+  padding: 4px;
+  max-width: 320px;
+  font-family: "Libre Baskerville";
 }
-.undertheleaves-card-tooltip .undertheleaves-card-tooltip-content .undertheleaves-card-tooltip-type {
+.undertheleaves-card-tooltip .undertheleaves-card-tooltip-type {
   font-size: 10px;
   text-transform: uppercase;
   color: #888;
 }
-.undertheleaves-card-tooltip .undertheleaves-card-tooltip-content .undertheleaves-card-tooltip-name {
+.undertheleaves-card-tooltip .undertheleaves-card-tooltip-name {
   font-size: 15px;
   font-weight: 700;
   color: #2c2c2c;
   line-height: 1.2;
 }
-.undertheleaves-card-tooltip .undertheleaves-card-tooltip-content .undertheleaves-card-tooltip-description {
+.undertheleaves-card-tooltip .undertheleaves-card-tooltip-description {
   font-size: 12px;
   line-height: 1.5;
   color: #555;
@@ -822,7 +809,11 @@ html {
 
 .show_settings,
 .scrollmap_button_wrapper.info,
-.scrollmap_button_wrapper.toogle_buttons_visibility {
+.scrollmap_button_wrapper.toogle_buttons_visibility,
+.scrollmap_button_wrapper.enlargedisplay,
+.scrollmap_button_wrapper.reducedisplay,
+.scrollmap_button_wrapper.reset_height,
+.scrollmap_button_wrapper.maximize_height {
   display: none !important;
 }
 
