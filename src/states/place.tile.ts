@@ -240,9 +240,10 @@ class PlaceTile implements Game {
   }
 
   private async placeTileNotif(notif: Notif<PlaceTileNotif>) {
-    const isCurrentPlayer = notif.args.playerId == this.game.bga.players.getCurrentPlayerId();
+    const tileElement = this.game.games.tileManager.getTileById(notif.args.gridTile.tile.id);
+    const alreadyInGrid = !!tileElement?.closest('.undertheleaves-player-cell');
 
-    if (!isCurrentPlayer) {
+    if (!alreadyInGrid) {
       const tileBoxElement = this.game.games.tileManager.getBoxTileById(notif.args.gridTile.tile.id);
       const flipperElement = this.game.games.tileManager.getFlipperTileById(notif.args.gridTile.tile.id);
       tileBoxElement.style.transform = `rotate(${notif.args.gridTile.rotation}deg)`;
@@ -269,7 +270,6 @@ class PlaceTile implements Game {
 
       await delayTime(300);
 
-      const tileElement = this.game.games.tileManager.getTileById(notif.args.gridTile.tile.id);
       const externalElement = playerGridBoxElement.querySelector<HTMLElement>(
         `.undertheleaves-player-cell[data-x="${notif.args.gridTile.x}"][data-y="${notif.args.gridTile.y}"]`,
       );

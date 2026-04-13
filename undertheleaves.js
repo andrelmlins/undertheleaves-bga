@@ -1291,12 +1291,13 @@ var PlaceTile = /** @class */ (function () {
     };
     PlaceTile.prototype.placeTileNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var isCurrentPlayer, tileBoxElement, flipperElement, playerGridBoxElement, tileElement, externalElement, animation;
+            var tileElement, alreadyInGrid, tileBoxElement, flipperElement, playerGridBoxElement, externalElement, animation;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        isCurrentPlayer = notif.args.playerId == this.game.bga.players.getCurrentPlayerId();
-                        if (!!isCurrentPlayer) return [3 /*break*/, 3];
+                        tileElement = this.game.games.tileManager.getTileById(notif.args.gridTile.tile.id);
+                        alreadyInGrid = !!(tileElement === null || tileElement === void 0 ? void 0 : tileElement.closest('.undertheleaves-player-cell'));
+                        if (!!alreadyInGrid) return [3 /*break*/, 3];
                         tileBoxElement = this.game.games.tileManager.getBoxTileById(notif.args.gridTile.tile.id);
                         flipperElement = this.game.games.tileManager.getFlipperTileById(notif.args.gridTile.tile.id);
                         tileBoxElement.style.transform = "rotate(".concat(notif.args.gridTile.rotation, "deg)");
@@ -1313,7 +1314,6 @@ var PlaceTile = /** @class */ (function () {
                         return [4 /*yield*/, delayTime(300)];
                     case 1:
                         _a.sent();
-                        tileElement = this.game.games.tileManager.getTileById(notif.args.gridTile.tile.id);
                         externalElement = playerGridBoxElement.querySelector(".undertheleaves-player-cell[data-x=\"".concat(notif.args.gridTile.x, "\"][data-y=\"").concat(notif.args.gridTile.y, "\"]"));
                         animation = new BgaLocalAnimation(this.game);
                         animation.setWhere('afterbegin');
