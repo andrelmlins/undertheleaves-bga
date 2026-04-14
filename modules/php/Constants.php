@@ -519,10 +519,10 @@ trait Constants
                 ]
             ),
             new TileConfig(
-                new Position(9, 3),
+                new Position(9, 4),
                 [
                     new Terrain(TerrainType::Puddle),
-                    new Terrain(TerrainType::Yellow),
+                    new Terrain(TerrainType::Purple),
                     new Terrain(TerrainType::Green),
                     new Terrain(TerrainType::Green),
                 ]
