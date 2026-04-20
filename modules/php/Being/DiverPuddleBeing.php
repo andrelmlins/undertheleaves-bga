@@ -51,22 +51,24 @@ class DiverPuddleBeing extends DwellerBeing
             $this->game->statsService->incDweller(CardType::Puddle, 1, $playerId);
         }
 
-        $transformedGroups = array_map(function ($groupCells) {
+        $playerName = $this->game->getPlayerNameById($playerId);
+
+        foreach ($newGroups as $groupCells) {
             $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $groupCells);
             usort($cells, fn($a, $b) => $a[1] !== $b[1] ? $b[1] - $a[1] : $a[0] - $b[0]);
 
-            return ['cells' => $cells];
-        }, $newGroups);
-
-        $this->game->notify->all('arrivalDiverPuddle', Messages::$ArrivalBeing, [
-            'player_name' => $this->game->getPlayerNameById($playerId),
-            'playerId' => $playerId,
-            'count_beings' => count($newGroups),
-            'sectors' => $transformedGroups,
-            'being' => 'puddle',
-            'being_icon' => 'puddle',
-        ]);
-        $this->game->beingService->notifyBeingArrivalPause(count($newGroups));
+            $this->game->notify->all('arrivalDiverPuddle', Messages::$ArrivalDiverPuddle, [
+                'player_name'  => $playerName,
+                'playerId'     => $playerId,
+                'count_beings' => 1,
+                'sectors'      => [['cells' => $cells]],
+                'being'        => 'puddle',
+                'being_icon'   => 'puddle',
+                'size'         => count($groupCells),
+                'size_label'   => count($groupCells),
+            ]);
+            $this->game->notify->all('simplePause', '', ['time' => 600]);
+        }
     }
 
     private function hasExistingDiver(array $registeredDivers, array $groupCells): bool

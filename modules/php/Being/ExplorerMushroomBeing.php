@@ -70,17 +70,19 @@ class ExplorerMushroomBeing extends DwellerBeing
             $this->game->statsService->incDweller(CardType::Mushroom, 1, $playerId);
         }
 
-        $sectors = array_map(fn($m) => ['cells' => [$m]], array_values($newMiddles));
+        $playerName = $this->game->getPlayerNameById($playerId);
 
-        $this->game->notify->all('arrivalExplorerMushroom', Messages::$ArrivalBeing, [
-            'player_name' => $this->game->getPlayerNameById($playerId),
-            'playerId' => $playerId,
-            'count_beings' => count($newMiddles),
-            'sectors' => $sectors,
-            'being' => 'mushroom',
-            'being_icon' => 'mushroom',
-        ]);
-        $this->game->beingService->notifyBeingArrivalPause(count($newMiddles));
+        foreach ($newMiddles as $middleCoord) {
+            $this->game->notify->all('arrivalExplorerMushroom', Messages::$ArrivalExplorerMushroom, [
+                'player_name'  => $playerName,
+                'playerId'     => $playerId,
+                'count_beings' => 1,
+                'sectors'      => [['cells' => [$middleCoord]]],
+                'being'        => 'mushroom',
+                'being_icon'   => 'mushroom',
+            ]);
+            $this->game->notify->all('simplePause', '', ['time' => 600]);
+        }
     }
 
     private function isMiddle(array $m, array $a, array $b): bool

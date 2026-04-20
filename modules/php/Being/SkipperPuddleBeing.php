@@ -76,19 +76,18 @@ class SkipperPuddleBeing extends DwellerBeing
             $this->game->statsService->incDweller(CardType::Puddle, 1, $playerId);
         }
 
-        $transformedSectors = array_values(array_map(
-            fn($cellKey) => ['cells' => [SectorService::cellKeyToCoordinates($cellKey)]],
-            $newMiddleCells
-        ));
+        $playerName = $this->game->getPlayerNameById($playerId);
 
-        $this->game->notify->all('arrivalSkipperPuddle', Messages::$ArrivalBeing, [
-            'player_name' => $this->game->getPlayerNameById($playerId),
-            'playerId' => $playerId,
-            'count_beings' => count($newMiddleCells),
-            'sectors' => $transformedSectors,
-            'being' => 'puddle',
-            'being_icon' => 'puddle',
-        ]);
-        $this->game->notify->all('simplePause', '', ['time' => 1000]);
+        foreach ($newMiddleCells as $cellKey) {
+            $this->game->notify->all('arrivalSkipperPuddle', Messages::$ArrivalSkipperPuddle, [
+                'player_name'  => $playerName,
+                'playerId'     => $playerId,
+                'count_beings' => 1,
+                'sectors'      => [['cells' => [SectorService::cellKeyToCoordinates($cellKey)]]],
+                'being'        => 'puddle',
+                'being_icon'   => 'puddle',
+            ]);
+            $this->game->notify->all('simplePause', '', ['time' => 600]);
+        }
     }
 }

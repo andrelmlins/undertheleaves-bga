@@ -79,19 +79,18 @@ class ShyPuddleBeing extends DwellerBeing
             $this->game->statsService->incDweller(CardType::Puddle, 1, $playerId);
         }
 
-        $transformedSectors = array_values(array_map(
-            fn($cellKey) => ['cells' => [SectorService::cellKeyToCoordinates($cellKey)]],
-            $newCells
-        ));
+        $playerName = $this->game->getPlayerNameById($playerId);
 
-        $this->game->notify->all('arrivalShyPuddle', Messages::$ArrivalBeing, [
-            'player_name' => $this->game->getPlayerNameById($playerId),
-            'playerId' => $playerId,
-            'count_beings' => count($newCells),
-            'sectors' => $transformedSectors,
-            'being' => 'puddle',
-            'being_icon' => 'puddle',
-        ]);
-        $this->game->beingService->notifyBeingArrivalPause(count($newCells));
+        foreach ($newCells as $cellKey) {
+            $this->game->notify->all('arrivalShyPuddle', Messages::$ArrivalShyPuddle, [
+                'player_name'  => $playerName,
+                'playerId'     => $playerId,
+                'count_beings' => 1,
+                'sectors'      => [['cells' => [SectorService::cellKeyToCoordinates($cellKey)]]],
+                'being'        => 'puddle',
+                'being_icon'   => 'puddle',
+            ]);
+            $this->game->notify->all('simplePause', '', ['time' => 600]);
+        }
     }
 }

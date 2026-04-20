@@ -26,7 +26,9 @@ class PlaceTile implements Game {
       });
     } else if (stateName === 'client_PlaceTile') {
       this.game.games.tileManager.removeOfferCardSelectable();
-      this.game.games.tileManager.getTileById(this.externalTileSelected.tileId).classList.add('selected');
+      const tileElement = this.game.games.tileManager.getTileById(this.externalTileSelected.tileId)!;
+      tileElement.classList.add('selected');
+      this.handlers.push(dojo.connect(tileElement, 'onclick', () => this.onClickChangeDirection('right')));
       this.showSelectExternals(notif.args.tableTiles);
     }
   }

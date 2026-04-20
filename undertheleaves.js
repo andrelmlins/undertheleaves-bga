@@ -1,5 +1,5 @@
-var BOLD_ARGS_VALUE = ['count_beings'];
-var BOLD_ARGS_I18N = [];
+var BOLD_ARGS_VALUE = ['count_beings', 'count_label', 'size_label'];
+var BOLD_ARGS_I18N = ['color_name'];
 var FormatStrings = /** @class */ (function () {
     function FormatStrings(game, args) {
         this.game = game;
@@ -1073,7 +1073,9 @@ var PlaceTile = /** @class */ (function () {
         }
         else if (stateName === 'client_PlaceTile') {
             this.game.games.tileManager.removeOfferCardSelectable();
-            this.game.games.tileManager.getTileById(this.externalTileSelected.tileId).classList.add('selected');
+            var tileElement = this.game.games.tileManager.getTileById(this.externalTileSelected.tileId);
+            tileElement.classList.add('selected');
+            this.handlers.push(dojo.connect(tileElement, 'onclick', function () { return _this.onClickChangeDirection('right'); }));
             this.showSelectExternals(notif.args.tableTiles);
         }
     };

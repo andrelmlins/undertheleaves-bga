@@ -81,29 +81,40 @@ class BeeBeing
             }
         }
 
-        $transformedNew = array_map(function ($sector) {
+        $playerName = $this->game->getPlayerNameById($playerId);
+
+        foreach ($newSectors as $sector) {
             $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $sector['cells']);
             usort($cells, fn($a, $b) => $a[1] !== $b[1] ? $b[1] - $a[1] : $a[0] - $b[0]);
 
-            return ['color' => $sector['color'], 'cells' => $cells];
-        }, $newSectors);
+            $this->game->notify->all('arrivalBee', Messages::$ArrivalBeeNew, [
+                'player_name'  => $playerName,
+                'playerId'     => $playerId,
+                'count_beings' => 1,
+                'sectors'      => [['color' => $sector['color'], 'cells' => $cells]],
+                'being'        => 'bee',
+                'being_icon'   => 'bee',
+                'color_name'   => TerrainType::getTranslatedName($sector['color']),
+                'i18n'         => ['color_name'],
+                'size'         => count($sector['cells']),
+                'size_label'   => count($sector['cells']),
+            ]);
+            $this->game->notify->all('simplePause', '', ['time' => 600]);
+        }
 
-        $transformedExisting = array_map(fn($being) => [
-            'color' => $being->color,
-            'cells' => $being->cells,
-        ], $existingSectorsForNotif);
-
-        $countBeings = count($newSectors) + count($existingSectorsForNotif);
-
-        $this->game->notify->all('arrivalBee', Messages::$ArrivalBeing, [
-            'player_name' => $this->game->getPlayerNameById($playerId),
-            'playerId' => $playerId,
-            'count_beings' => $countBeings,
-            'sectors' => array_merge($transformedNew, $transformedExisting),
-            'being' => 'bee',
-            'being_icon' => 'bee',
-        ]);
-        $this->game->beingService->notifyBeingArrivalPause($countBeings);
+        foreach ($existingSectorsForNotif as $being) {
+            $this->game->notify->all('arrivalBee', Messages::$ArrivalBeeExisting, [
+                'player_name'  => $playerName,
+                'playerId'     => $playerId,
+                'count_beings' => 1,
+                'sectors'      => [['color' => $being->color, 'cells' => $being->cells]],
+                'being'        => 'bee',
+                'being_icon'   => 'bee',
+                'color_name'   => TerrainType::getTranslatedName($being->color),
+                'i18n'         => ['color_name'],
+            ]);
+            $this->game->notify->all('simplePause', '', ['time' => 600]);
+        }
     }
 
     private function findBeingsContainedInSector(array $registeredBees, string $color, array $sectorCells): array
@@ -144,10 +155,11 @@ class BeeBeing
 
         $this->game->notify->all('mergeBee', '', [
             'playerId' => $playerId,
+            'color' => $mergedBeing->color,
             'mergedBeing' => ['cells' => $mergedBeing->cells, 'count' => $mergedBeing->count, 'color' => $mergedBeing->color],
             'oldBeings' => array_map(fn($b) => ['cells' => $b->cells], $beingsInSector),
         ]);
-        $this->game->notify->all('simplePause', '', ['time' => 500]);
+        $this->game->notify->all('simplePause', '', ['time' => 600]);
 
         return $updatedBeings;
     }

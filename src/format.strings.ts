@@ -1,5 +1,5 @@
-const BOLD_ARGS_VALUE = ['count_beings'];
-const BOLD_ARGS_I18N = [];
+const BOLD_ARGS_VALUE = ['count_beings', 'count_label', 'size_label'];
+const BOLD_ARGS_I18N = ['color_name'];
 
 class FormatStrings {
   constructor(

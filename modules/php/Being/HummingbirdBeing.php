@@ -129,21 +129,32 @@ class HummingbirdBeing
             }
         }
 
-        $newHummingbirds = array_merge($baseHummingbirds, $bonusHummingbirds);
-
-        if (empty($newHummingbirds)) {
+        if (empty($baseHummingbirds) && empty($bonusHummingbirds)) {
             return;
         }
 
-        $totalCount = array_sum(array_column($newHummingbirds, 'delta'));
+        $playerName = $this->game->getPlayerNameById($playerId);
 
-        $this->game->notify->all('arrivalHummingbird', Messages::$ArrivalBeing, [
-            'player_name' => $this->game->getPlayerNameById($playerId),
-            'playerId' => $playerId,
-            'count_beings' => $totalCount,
-            'tiles' => $newHummingbirds,
-            'being_icon' => 'hummingbird',
-        ]);
-        $this->game->beingService->notifyBeingArrivalPause($totalCount);
+        foreach ($baseHummingbirds as $tile) {
+            $this->game->notify->all('arrivalHummingbird', Messages::$ArrivalHummingbirdBase, [
+                'player_name'  => $playerName,
+                'playerId'     => $playerId,
+                'count_beings' => 1,
+                'tiles'        => [$tile],
+                'being_icon'   => 'hummingbird',
+            ]);
+            $this->game->notify->all('simplePause', '', ['time' => 600]);
+        }
+
+        foreach ($bonusHummingbirds as $tile) {
+            $this->game->notify->all('arrivalHummingbird', Messages::$ArrivalHummingbirdBonus, [
+                'player_name'  => $playerName,
+                'playerId'     => $playerId,
+                'count_beings' => 1,
+                'tiles'        => [$tile],
+                'being_icon'   => 'hummingbird',
+            ]);
+            $this->game->notify->all('simplePause', '', ['time' => 600]);
+        }
     }
 }

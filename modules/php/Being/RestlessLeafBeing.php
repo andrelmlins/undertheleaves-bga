@@ -23,10 +23,10 @@ class RestlessLeafBeing extends DwellerBeing
 
         $newGroups = [];
 
-        foreach ($allTerrainGroups as $colorGroup) {
+        foreach ($allTerrainGroups as $color => $colorGroup) {
             foreach ($colorGroup as $sectorCells) {
                 if (!$this->hasExistingRestless($registeredRestless, $sectorCells)) {
-                    $newGroups[] = $sectorCells;
+                    $newGroups[] = ['cells' => $sectorCells, 'color' => $color];
                 }
             }
         }
@@ -35,8 +35,8 @@ class RestlessLeafBeing extends DwellerBeing
             return;
         }
 
-        foreach ($newGroups as $groupCells) {
-            $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $groupCells);
+        foreach ($newGroups as $group) {
+            $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $group['cells']);
 
             $this->game->beingService->addBeing(new Being(
                 playerId: $playerId,
@@ -49,22 +49,26 @@ class RestlessLeafBeing extends DwellerBeing
             $this->game->statsService->incDweller(CardType::Leaf, 1, $playerId);
         }
 
-        $transformedGroups = array_map(function ($groupCells) {
-            $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $groupCells);
+        $playerName = $this->game->getPlayerNameById($playerId);
+
+        foreach ($newGroups as $group) {
+            $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $group['cells']);
             usort($cells, fn($a, $b) => $a[1] !== $b[1] ? $b[1] - $a[1] : $a[0] - $b[0]);
 
-            return ['cells' => $cells];
-        }, $newGroups);
-
-        $this->game->notify->all('arrivalRestlessLeaf', Messages::$ArrivalBeing, [
-            'player_name' => $this->game->getPlayerNameById($playerId),
-            'playerId' => $playerId,
-            'count_beings' => count($newGroups),
-            'sectors' => $transformedGroups,
-            'being' => 'leaf',
-            'being_icon' => 'leaf',
-        ]);
-        $this->game->beingService->notifyBeingArrivalPause(count($newGroups));
+            $this->game->notify->all('arrivalRestlessLeaf', Messages::$ArrivalRestlessLeaf, [
+                'player_name'  => $playerName,
+                'playerId'     => $playerId,
+                'count_beings' => 1,
+                'sectors'      => [['cells' => $cells]],
+                'being'        => 'leaf',
+                'being_icon'   => 'leaf',
+                'color_name'   => TerrainType::getTranslatedName($group['color']),
+                'i18n'         => ['color_name'],
+                'size'         => count($group['cells']),
+                'size_label'   => count($group['cells']),
+            ]);
+            $this->game->notify->all('simplePause', '', ['time' => 600]);
+        }
     }
 
     private function hasExistingRestless(array $registeredRestless, array $sectorCells): bool

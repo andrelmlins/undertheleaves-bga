@@ -23,7 +23,7 @@ class ThoughtfulLeafBeing extends DwellerBeing
 
         $newSquares = [];
 
-        foreach ($allTerrainGroups as $colorGroup) {
+        foreach ($allTerrainGroups as $color => $colorGroup) {
             foreach ($colorGroup as $sectorCells) {
                 $sectorSet = array_flip($sectorCells);
 
@@ -37,7 +37,7 @@ class ThoughtfulLeafBeing extends DwellerBeing
                     if (isset($sectorSet[$tr]) && isset($sectorSet[$bl]) && isset($sectorSet[$br])) {
                         $square = [[$x, $y], [$x + 1, $y], [$x, $y + 1], [$x + 1, $y + 1]];
                         if (!$this->hasExistingThoughtful($registeredThoughtfuls, $square)) {
-                            $newSquares[] = $square;
+                            $newSquares[] = ['square' => $square, 'color' => $color];
                             break; // 1 leaf por setor — parar após o primeiro quadrado válido
                         }
                     }
@@ -49,28 +49,32 @@ class ThoughtfulLeafBeing extends DwellerBeing
             return;
         }
 
-        foreach ($newSquares as $square) {
+        foreach ($newSquares as $entry) {
             $this->game->beingService->addBeing(new Being(
                 playerId: $playerId,
                 type: 'leaf',
                 subtype: 'thoughtful',
-                cells: $square,
+                cells: $entry['square'],
                 count: 1,
             ));
 
             $this->game->statsService->incDweller(CardType::Leaf, 1, $playerId);
         }
 
-        $transformedSquares = array_map(fn($square) => ['cells' => $square], $newSquares);
+        $playerName = $this->game->getPlayerNameById($playerId);
 
-        $this->game->notify->all('arrivalThoughtfulLeaf', Messages::$ArrivalBeing, [
-            'player_name' => $this->game->getPlayerNameById($playerId),
-            'playerId' => $playerId,
-            'count_beings' => count($newSquares),
-            'sectors' => $transformedSquares,
-            'being_icon' => 'leaf',
-        ]);
-        $this->game->beingService->notifyBeingArrivalPause(count($newSquares));
+        foreach ($newSquares as $entry) {
+            $this->game->notify->all('arrivalThoughtfulLeaf', Messages::$ArrivalThoughtfulLeaf, [
+                'player_name'  => $playerName,
+                'playerId'     => $playerId,
+                'count_beings' => 1,
+                'sectors'      => [['cells' => $entry['square']]],
+                'being_icon'   => 'leaf',
+                'color_name'   => TerrainType::getTranslatedName($entry['color']),
+                'i18n'         => ['color_name'],
+            ]);
+            $this->game->notify->all('simplePause', '', ['time' => 600]);
+        }
     }
 
     private function hasExistingThoughtful(array $registeredThoughtfuls, array $square): bool

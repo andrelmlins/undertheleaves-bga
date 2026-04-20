@@ -66,16 +66,18 @@ class FlirtyLeafBeing extends DwellerBeing
             $this->game->statsService->incDweller(CardType::Leaf, 1, $playerId);
         }
 
-        $transformedSquares = array_map(fn($square) => ['cells' => $square], $newSquares);
+        $playerName = $this->game->getPlayerNameById($playerId);
 
-        $this->game->notify->all('arrivalFlirtyLeaf', Messages::$ArrivalBeing, [
-            'player_name' => $this->game->getPlayerNameById($playerId),
-            'playerId' => $playerId,
-            'count_beings' => count($newSquares),
-            'sectors' => $transformedSquares,
-            'being_icon' => 'leaf',
-        ]);
-        $this->game->beingService->notifyBeingArrivalPause(count($newSquares));
+        foreach ($newSquares as $square) {
+            $this->game->notify->all('arrivalFlirtyLeaf', Messages::$ArrivalFlirtyLeaf, [
+                'player_name'  => $playerName,
+                'playerId'     => $playerId,
+                'count_beings' => 1,
+                'sectors'      => [['cells' => $square]],
+                'being_icon'   => 'leaf',
+            ]);
+            $this->game->notify->all('simplePause', '', ['time' => 600]);
+        }
     }
 
     private function hasExistingFlirty(array $registeredFlirtys, array $newSquares, array $square): bool

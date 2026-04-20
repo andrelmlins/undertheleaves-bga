@@ -28,11 +28,11 @@ class HostMushroomBeing extends DwellerBeing
         $mushroomKeySet = array_flip($mushroomService->getTerrainKeys());
 
         $qualifiedGroups = [];
-        foreach ($colorGroups as $sectors) {
+        foreach ($colorGroups as $color => $sectors) {
             foreach ($sectors as $sectorCells) {
                 $mushroomCells = array_values(array_filter($sectorCells, fn($key) => isset($mushroomKeySet[$key])));
                 if (count($mushroomCells) >= 2) {
-                    $qualifiedGroups[] = $mushroomCells;
+                    $qualifiedGroups[] = ['cells' => $mushroomCells, 'color' => $color, 'count' => count($mushroomCells)];
                 }
             }
         }
@@ -45,9 +45,9 @@ class HostMushroomBeing extends DwellerBeing
 
         $newGroups = [];
 
-        foreach ($qualifiedGroups as $groupCells) {
-            if (!$this->hasExistingHost($registeredHosts, $groupCells)) {
-                $newGroups[] = $groupCells;
+        foreach ($qualifiedGroups as $group) {
+            if (!$this->hasExistingHost($registeredHosts, $group['cells'])) {
+                $newGroups[] = $group;
             }
         }
 
@@ -55,8 +55,8 @@ class HostMushroomBeing extends DwellerBeing
             return;
         }
 
-        foreach ($newGroups as $groupCells) {
-            $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $groupCells);
+        foreach ($newGroups as $group) {
+            $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $group['cells']);
 
             $this->game->beingService->addBeing(new Being(
                 playerId: $playerId,
@@ -69,22 +69,26 @@ class HostMushroomBeing extends DwellerBeing
             $this->game->statsService->incDweller(CardType::Mushroom, 1, $playerId);
         }
 
-        $transformedGroups = array_map(function ($groupCells) {
-            $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $groupCells);
+        $playerName = $this->game->getPlayerNameById($playerId);
+
+        foreach ($newGroups as $group) {
+            $cells = array_map(fn($key) => SectorService::cellKeyToCoordinates($key), $group['cells']);
             usort($cells, fn($a, $b) => $a[1] !== $b[1] ? $b[1] - $a[1] : $a[0] - $b[0]);
 
-            return ['cells' => $cells];
-        }, $newGroups);
-
-        $this->game->notify->all('arrivalHostMushroom', Messages::$ArrivalBeing, [
-            'player_name' => $this->game->getPlayerNameById($playerId),
-            'playerId' => $playerId,
-            'count_beings' => count($newGroups),
-            'sectors' => $transformedGroups,
-            'being' => 'mushroom',
-            'being_icon' => 'mushroom',
-        ]);
-        $this->game->beingService->notifyBeingArrivalPause(count($newGroups));
+            $this->game->notify->all('arrivalHostMushroom', Messages::$ArrivalHostMushroom, [
+                'player_name'  => $playerName,
+                'playerId'     => $playerId,
+                'count_beings' => 1,
+                'sectors'      => [['cells' => $cells]],
+                'being'        => 'mushroom',
+                'being_icon'   => 'mushroom',
+                'color_name'   => TerrainType::getTranslatedName($group['color']),
+                'i18n'         => ['color_name'],
+                'count'        => $group['count'],
+                'count_label'  => $group['count'],
+            ]);
+            $this->game->notify->all('simplePause', '', ['time' => 600]);
+        }
     }
 
     private function hasExistingHost(array $registeredHosts, array $groupCells): bool

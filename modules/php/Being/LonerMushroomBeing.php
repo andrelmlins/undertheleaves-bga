@@ -78,19 +78,18 @@ class LonerMushroomBeing extends DwellerBeing
             $this->game->statsService->incDweller(CardType::Mushroom, 1, $playerId);
         }
 
-        $transformedSectors = array_values(array_map(
-            fn($cellKey) => ['cells' => [SectorService::cellKeyToCoordinates($cellKey)]],
-            $newCells
-        ));
+        $playerName = $this->game->getPlayerNameById($playerId);
 
-        $this->game->notify->all('arrivalLonerMushroom', Messages::$ArrivalBeing, [
-            'player_name' => $this->game->getPlayerNameById($playerId),
-            'playerId' => $playerId,
-            'count_beings' => count($newCells),
-            'sectors' => $transformedSectors,
-            'being' => 'mushroom',
-            'being_icon' => 'mushroom',
-        ]);
-        $this->game->beingService->notifyBeingArrivalPause(count($newCells));
+        foreach ($newCells as $cellKey) {
+            $this->game->notify->all('arrivalLonerMushroom', Messages::$ArrivalLonerMushroom, [
+                'player_name'  => $playerName,
+                'playerId'     => $playerId,
+                'count_beings' => 1,
+                'sectors'      => [['cells' => [SectorService::cellKeyToCoordinates($cellKey)]]],
+                'being'        => 'mushroom',
+                'being_icon'   => 'mushroom',
+            ]);
+            $this->game->notify->all('simplePause', '', ['time' => 600]);
+        }
     }
 }
