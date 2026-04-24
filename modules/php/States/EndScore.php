@@ -7,6 +7,7 @@ namespace Bga\Games\undertheleaves\States;
 use Bga\GameFramework\NotificationMessage;
 use Bga\GameFramework\StateType;
 use Bga\Games\undertheleaves\Entities\Being;
+use Bga\Games\undertheleaves\Entities\Messages;
 use Bga\Games\undertheleaves\Game;
 
 const ST_END_GAME = 99;
