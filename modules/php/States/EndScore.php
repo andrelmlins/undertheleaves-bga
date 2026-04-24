@@ -74,7 +74,7 @@ class EndScore extends \Bga\GameFramework\States\GameState
                                 y: $targetGroup->y,
                             );
                             $this->game->beingService->addBeing($bonus);
-                            $this->game->notify->all('majorityBonus', '${player_name} receives 2 ${being_icon} for majority', [
+                            $this->game->notify->all('majorityBonus', Messages::$MajorityBonus, [
                                 'player_name' => $this->game->getPlayerNameById($playerId),
                                 'playerId' => $playerId,
                                 'type' => $type,

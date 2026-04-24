@@ -31,6 +31,7 @@ class Messages
     static string $ArrivalRestlessLeaf = '';
     static string $ArrivalRunnerLeaf = '';
 
+    static string $MajorityBonus = '';
 
     static string $InvalidPosition = '';
     static string $InvalidTile = '';
@@ -63,6 +64,8 @@ class Messages
         Messages::$ArrivalFlirtyLeaf = clienttranslate('${player_name} receives 1 ${being_icon} by completing a 2x2 square with 4 different terrain types');
         Messages::$ArrivalRestlessLeaf = clienttranslate('${player_name} receives 1 ${being_icon} with a ${color_name} connected group of ${size_label} terrains');
         Messages::$ArrivalRunnerLeaf = clienttranslate('${player_name} receives 1 ${being_icon} by forming a 4-in-a-row of ${color_name} terrains');
+
+        Messages::$MajorityBonus = clienttranslate('${player_name} receives 2 ${being_icon} for majority');
 
         Messages::$InvalidPosition = clienttranslate('Invalid position');
         Messages::$InvalidTile = clienttranslate('Invalid tile');
