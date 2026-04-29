@@ -1145,23 +1145,22 @@ var PlaceTile = /** @class */ (function () {
                 element.classList.add('selectable-border-left');
             _this.handlers.push(dojo.connect(element, 'onclick', function () { return __awaiter(_this, void 0, void 0, function () {
                 var tileElement;
-                var _a, _b;
-                return __generator(this, function (_c) {
-                    switch (_c.label) {
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
                         case 0:
-                            if (!(((_a = this.externalTileSelected) === null || _a === void 0 ? void 0 : _a.x) != pos.x || ((_b = this.externalTileSelected) === null || _b === void 0 ? void 0 : _b.y) != pos.y)) return [3 /*break*/, 2];
+                            if (!(this.externalTileSelected && (this.externalTileSelected.x != pos.x || this.externalTileSelected.y != pos.y))) return [3 /*break*/, 2];
                             this.externalTileSelected.x = pos.x;
                             this.externalTileSelected.y = pos.y;
                             return [4 /*yield*/, this.moveTileSelected(this.externalTileSelected.tileId)];
                         case 1:
-                            _c.sent();
+                            _a.sent();
                             tileElement = this.game.games.tileManager.getTileById(this.externalTileSelected.tileId);
                             tileElement.querySelectorAll('.undertheleaves-terrain').forEach(function (item) { return item.remove(); });
                             tileElement.insertAdjacentHTML('beforeend', this.game.games.tileManager.formatBeingPositions(pos.x, pos.y));
                             this.game.bga.states.setClientState('client_MoveTile', {
                                 descriptionmyturn: _('${you} must place a garden tile'),
                             });
-                            _c.label = 2;
+                            _a.label = 2;
                         case 2: return [2 /*return*/];
                     }
                 });
@@ -1174,6 +1173,8 @@ var PlaceTile = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             var playerId;
             return __generator(this, function (_a) {
+                this.handlers.forEach(function (h) { return dojo.disconnect(h); });
+                this.handlers = [];
                 playerId = this.game.bga.players.getCurrentPlayerId();
                 this.game.games.tileManager
                     .getGridBoxDiv(playerId)
@@ -1188,8 +1189,10 @@ var PlaceTile = /** @class */ (function () {
     PlaceTile.prototype.onClick = function () {
         var _this = this;
         var rotation = ((this.externalTileSelected.rotation % 360) + 360) % 360;
+        var tileId = this.externalTileSelected.tileId;
         this.game.bga.actions.performAction('actPlaceTile', __assign(__assign({}, this.externalTileSelected), { rotation: rotation })).then(function () {
-            _this.game.games.tileManager.getTileById(_this.externalTileSelected.tileId).classList.remove('selected');
+            var _a;
+            (_a = _this.game.games.tileManager.getTileById(tileId)) === null || _a === void 0 ? void 0 : _a.classList.remove('selected');
             _this.externalTileSelected = null;
             _this.removeSelectExternals();
         });

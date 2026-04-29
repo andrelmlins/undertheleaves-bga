@@ -124,7 +124,7 @@ class PlaceTile implements Game {
 
       this.handlers.push(
         dojo.connect(element, 'onclick', async () => {
-          if (this.externalTileSelected?.x != pos.x || this.externalTileSelected?.y != pos.y) {
+          if (this.externalTileSelected && (this.externalTileSelected.x != pos.x || this.externalTileSelected.y != pos.y)) {
             this.externalTileSelected.x = pos.x;
             this.externalTileSelected.y = pos.y;
 
@@ -147,6 +147,9 @@ class PlaceTile implements Game {
   }
 
   public async removeSelectExternals() {
+    this.handlers.forEach((h) => dojo.disconnect(h));
+    this.handlers = [];
+
     const playerId = this.game.bga.players.getCurrentPlayerId();
     this.game.games.tileManager
       .getGridBoxDiv(playerId)
@@ -159,9 +162,10 @@ class PlaceTile implements Game {
 
   public onClick() {
     const rotation = ((this.externalTileSelected.rotation % 360) + 360) % 360;
+    const tileId = this.externalTileSelected.tileId;
 
     this.game.bga.actions.performAction('actPlaceTile', { ...this.externalTileSelected, rotation }).then(() => {
-      this.game.games.tileManager.getTileById(this.externalTileSelected.tileId).classList.remove('selected');
+      this.game.games.tileManager.getTileById(tileId)?.classList.remove('selected');
 
       this.externalTileSelected = null;
       this.removeSelectExternals();
