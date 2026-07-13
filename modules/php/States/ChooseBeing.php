@@ -10,6 +10,7 @@ use Bga\GameFramework\States\PossibleAction;
 use Bga\GameFramework\SystemException;
 use Bga\Games\undertheleaves\Entities\Messages;
 use Bga\Games\undertheleaves\Game;
+use Bga\Games\undertheleaves\States\EndScore;
 use Bga\Games\undertheleaves\States\NextPlayer;
 
 class ChooseBeing extends GameState
@@ -69,6 +70,10 @@ class ChooseBeing extends GameState
 
         if ($hasPending) {
             return ChooseBeing::class;
+        }
+
+        if ($this->game->getGameStateValue('visibleScore') == 2) {
+            (new EndScore($this->game))->computeAndUpdateScores();
         }
 
         return NextPlayer::class;
