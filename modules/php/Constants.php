@@ -14,6 +14,7 @@ use Bga\Games\undertheleaves\Being\RestlessLeafBeing;
 use Bga\Games\undertheleaves\Being\RunnerLeafBeing;
 use Bga\Games\undertheleaves\Being\FlirtyLeafBeing;
 use Bga\Games\undertheleaves\Being\ThoughtfulLeafBeing;
+use Bga\Games\undertheleaves\Being\BurlyTreeBeing;
 use Bga\Games\undertheleaves\Entities\CardConfig;
 use Bga\Games\undertheleaves\Entities\CardType;
 use Bga\Games\undertheleaves\Entities\Position;
@@ -616,6 +617,13 @@ trait Constants
                 clienttranslate('Shy'),
                 clienttranslate('If you surround a puddle space with eight terrain spaces of any type (not puddles), it will attract a puddle dweller. Place the dweller piece on the puddle.'),
                 dweller: new ShyPuddleBeing(),
+            ),
+            new CardConfig(
+                new Position(3, 0),
+                CardType::Tree,
+                clienttranslate('Burly'),
+                clienttranslate('If you form a sector of 5 or more terrains, you take this card. If another player forms a sector with more terrains than you, they take the card instead. This can happen multiple times.'),
+                dweller: new BurlyTreeBeing(),
             ),
         ];
 

@@ -27,5 +27,18 @@ class FormatStrings {
     if (this.args.being_icon) {
       this.args.being_icon = `<div class="undertheleaves-piece notif" piece="${this.args.being_icon}"></div>`;
     }
+
+    if (this.args.previousPlayerId !== undefined) {
+      this.args.previous_player_name = this.game.bga.players.getFormattedPlayerName(this.args.previousPlayerId, {});
+    }
+
+    if (this.args.burly_image) {
+      const tree = this.game.gamedatas.cards.tree;
+      // Same crop as CardManager.formatCard, but without a DOM id: safe to embed multiple times
+      // in the game log without colliding with the actual card element (or with itself, across log entries).
+      this.args.burly_image = tree
+        ? `<div class="undertheleaves-card undertheleaves-card-mini notif" line="${tree.position.row}" column="${tree.position.column}"></div>`
+        : '';
+    }
   }
 }

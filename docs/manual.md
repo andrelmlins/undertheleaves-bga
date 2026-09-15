@@ -24,6 +24,10 @@ Build a pretty and diverse garden, attract bees and hummingbirds by obtaining co
 - 10 x3 bee pieces
 - 1 Rule book
 
+### Expansion: Tree Dweller
+
+- 1 tree dweller card (Burly)
+
 ## Game Setup
 
 1. Deal one starting tile to each player. Put the rest of the starting tiles back in the box, since they will not be used anymore in this game.
@@ -149,6 +153,14 @@ Then, each player counts up all the creature pieces in their garden, taking into
 **FRIENDLY** — If you create a diagonal using 2 puddles, it will attract a puddle dweller. Place its piece in one of the two puddle spaces. The puddle that remains empty can be used to attract another dweller if the condition is fulfilled again with the placement of a new tile in a later turn.
 
 **SHY** — If you surround a puddle space with eight terrain spaces of any type (not puddles), it will attract a puddle dweller. Place the dweller piece on the puddle.
+
+## Expansion: Tree Dweller
+
+This expansion adds a new type of dweller card that is not chosen randomly like the leaf, mushroom, and puddle dweller cards. Instead, it is placed in the center of the table from the start of the game (alongside the other dweller cards) and its ownership can change hands during play.
+
+**BURLY** — If you form a sector of 5 or more terrain spaces, you take this card. If, later in the game, another player forms a sector with **more** terrain spaces than the sector that earned you the card, they take the card from you instead. This can happen multiple times over the course of the game, with the card changing owners each time a larger sector is formed.
+
+The Burly card does not grant a dweller piece. Instead, whoever holds the card at the end of the game scores 3 points, added to their final score along with the rest of the majority and dweller scoring described in [End of the Game](#end-of-the-game).
 
 ## Credits
 

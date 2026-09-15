@@ -33,6 +33,14 @@ class CardService
             $this->game->globals->set('card:mushroom', $mushroomCard->position);
             $this->game->globals->set('card:puddle', $puddleCard->position);
         }
+
+        if ($this->game->getGameStateValue('treeDwellerExpansion') == 2) {
+            $treeCard = array_find($this->game->CARD_CONFIGS, fn($config) => $config->type == CardType::Tree);
+
+            if ($treeCard !== null) {
+                $this->game->globals->set('card:tree', $treeCard->position);
+            }
+        }
     }
 
     public function list()
@@ -40,11 +48,18 @@ class CardService
         $leafPosition = $this->game->globals->get('card:leaf', null, Position::class);
         $mushroomPosition = $this->game->globals->get('card:mushroom', null, Position::class);
         $puddlePosition = $this->game->globals->get('card:puddle', null, Position::class);
+        $treePosition = $this->game->globals->get('card:tree', null, Position::class);
 
-        return [
+        $cards = [
             'leaf' => array_find($this->game->CARD_CONFIGS, fn($config) => $config->position->row == $leafPosition->row && $config->position->column == $leafPosition->column),
             'mushroom' => array_find($this->game->CARD_CONFIGS, fn($config) => $config->position->row == $mushroomPosition->row && $config->position->column == $mushroomPosition->column),
             'puddle' => array_find($this->game->CARD_CONFIGS, fn($config) => $config->position->row == $puddlePosition->row && $config->position->column == $puddlePosition->column),
         ];
+
+        if ($treePosition !== null) {
+            $cards['tree'] = array_find($this->game->CARD_CONFIGS, fn($config) => $config->position->row == $treePosition->row && $config->position->column == $treePosition->column);
+        }
+
+        return $cards;
     }
 }

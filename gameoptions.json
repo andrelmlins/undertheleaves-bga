@@ -27,5 +27,20 @@
       }
     },
     "default": 2
+  },
+  "102": {
+    "name": "Tree Dweller expansion (Burly)",
+    "beta": true,
+    "values": {
+      "1": {
+        "name": "Off",
+        "tmdisplay": "Play without the Tree Dweller expansion"
+      },
+      "2": {
+        "name": "On",
+        "tmdisplay": "Play with the Tree Dweller expansion"
+      }
+    },
+    "default": 1
   }
 }

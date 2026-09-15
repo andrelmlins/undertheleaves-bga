@@ -384,6 +384,17 @@ html {
       }
     }
   }
+
+  & .undertheleaves-player-board-tree {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 10px;
+
+    &:empty {
+      display: none;
+    }
+  }
 }
 
 .show_settings,
