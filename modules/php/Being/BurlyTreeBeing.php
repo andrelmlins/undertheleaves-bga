@@ -62,12 +62,12 @@ class BurlyTreeBeing extends DwellerBeing
             ]);
         } else {
             $this->game->notify->all('takeBurlyTreeCard', Messages::$StealBurlyTreeCard, [
-                'player_name'      => $playerName,
-                'playerId'         => $playerId,
-                'previousPlayerId' => $currentOwner,
-                'color_name'       => TerrainType::getTranslatedName($largest['color']),
-                'size_label'       => $newSize,
-                'burly_image'      => true,
+                'player_name'     => $playerName,
+                'playerId'        => $playerId,
+                'previous_player' => $currentOwner,
+                'color_name'      => TerrainType::getTranslatedName($largest['color']),
+                'size_label'      => $newSize,
+                'burly_image'     => true,
             ]);
         }
 

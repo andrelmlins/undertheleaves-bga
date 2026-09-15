@@ -727,6 +727,24 @@ html {
     flex: 1;
   }
 }
+@container undertheleaves-box (980px <= width < 1130px) {
+  .undertheleaves-box .undertheleaves-header:has(.undertheleaves-cards #undertheleaves-card-tree) {
+    flex: 1;
+    gap: 24px;
+    flex-direction: column;
+  }
+  .undertheleaves-box .undertheleaves-header:has(.undertheleaves-cards #undertheleaves-card-tree) .undertheleaves-cards {
+    flex: 1;
+    order: -1;
+  }
+  .undertheleaves-box .undertheleaves-header:has(.undertheleaves-cards #undertheleaves-card-tree) .undertheleaves-cards .undertheleaves-card {
+    width: 100px;
+    height: 150px;
+  }
+  .undertheleaves-box .undertheleaves-header:has(.undertheleaves-cards #undertheleaves-card-tree) .undertheleaves-offer {
+    flex: 1;
+  }
+}
 .undertheleaves-void-stock {
   top: 50%;
   left: 50%;

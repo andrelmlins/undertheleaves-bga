@@ -69,7 +69,7 @@ class Messages
         Messages::$ArrivalRunnerLeaf = clienttranslate('${player_name} receives 1 ${being_icon} by forming a 4-in-a-row of ${color_name} terrains');
 
         Messages::$ClaimBurlyTreeCard = clienttranslate('${player_name} takes the Burly card by forming a ${color_name} group of ${size_label} terrains ${burly_image}');
-        Messages::$StealBurlyTreeCard = clienttranslate('${player_name} takes the Burly card from ${previous_player_name} by forming a ${color_name} group of ${size_label} terrains ${burly_image}');
+        Messages::$StealBurlyTreeCard = clienttranslate('${player_name} takes the Burly card from ${previous_player} by forming a ${color_name} group of ${size_label} terrains ${burly_image}');
 
         Messages::$MajorityBonus = clienttranslate('${player_name} receives 2 ${being_icon} for majority');
 

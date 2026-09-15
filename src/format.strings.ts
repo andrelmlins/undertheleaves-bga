@@ -28,8 +28,8 @@ class FormatStrings {
       this.args.being_icon = `<div class="undertheleaves-piece notif" piece="${this.args.being_icon}"></div>`;
     }
 
-    if (this.args.previousPlayerId !== undefined) {
-      this.args.previous_player_name = this.game.bga.players.getFormattedPlayerName(this.args.previousPlayerId, {});
+    if (this.args.previous_player !== undefined) {
+      this.args.previous_player = this.game.bga.players.getFormattedPlayerName(this.args.previous_player, {});
     }
 
     if (this.args.burly_image) {
