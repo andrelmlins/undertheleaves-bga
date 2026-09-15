@@ -19,7 +19,8 @@ npx sass --no-source-map src/sass/undertheleaves.scss undertheleaves.css
 
 - Custom options live in `gameoptions.json` (ids 100+ in this project), and each must have a matching entry registered in `initGameStateLabels(...)` inside `Game.php`'s constructor, mapping a label name to that same id.
 - Read them with `getGameStateValue('label') == 2` (this project's convention: `"1"` = Off, `"2"` = On).
-- BGA Studio only supports a `"beta": true` flag on an option (shows a BETA tag in table creation). There is no "alpha" equivalent.
+- `"beta": true` / `"alpha": true` (like `"firstgameonly"`) go on a specific *value* inside `values`, not on the option itself, e.g. `values["2"].beta = true` marks picking "On" as beta, while "Off" stays a normal option. They show *no* visible mark in the table creation screen; the only effect is a warning shown to players when they actually **start** the game with that value selected (alpha additionally restricts starting to training mode, except for the developer).
+- From the client, an option's raw value can also be read directly with `this.bga.tableOptions.get(optionId)` (returns an `int`), as an alternative to threading it through gamedatas.
 
 ## `cards.png` sprite sheet
 
@@ -36,7 +37,7 @@ npx sass --no-source-map src/sass/undertheleaves.scss undertheleaves.css
 ## Notifications (server side)
 
 - A single-notify being arrival (most `Being/*.php` classes) sends its `notify->all('arrivalX', ..., [...])` immediately followed by `$this->game->notify->all('simplePause', '', ['time' => 600])`, inline. The `beingService->notifyBeingArrivalPause(count)` helper (`count*500+200`) is reserved for the `endProcess()` batch-placement flow (`CollectorMushroomBeing`, `FriendlyPuddleBeing`), not general single-notify cases.
-- `player_name` + `playerId` in notif args are auto-colored by the BGA framework, no client formatting needed. Any *other* player name field (e.g. `previous_player_name`) is not auto-handled: pass only the id (e.g. `previousPlayerId`) from PHP and resolve the name client-side.
+- `player_name` + `playerId` in notif args are auto-colored by the BGA framework, no client formatting needed. Any *other* player name field is not auto-handled: pass only the id from PHP under that same key (e.g. `previous_player` holding a playerId) and have `format.strings.ts` overwrite it in place with `this.game.bga.players.getFormattedPlayerName(id, {})`.
 - `${being_icon}` renders a piece sprite (`.undertheleaves-piece[piece="..."]`), only use it for things that actually have a piece there.
 - A log-only image placeholder (like `${tile_image}` or `${burly_image}`) should be built in `src/format.strings.ts`, not in the manager class, since that markup only exists for the log. It must never reuse a real element's DOM id (duplicate ids break later `getElementById` lookups elsewhere on the page) and should get a `.notif` CSS modifier to center under the log line (see `.undertheleaves-tile.notif` / `.undertheleaves-card.notif`: `display:block; margin:8px auto 0;`).
 
