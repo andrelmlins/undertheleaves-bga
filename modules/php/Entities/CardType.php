@@ -7,4 +7,5 @@ enum CardType: string
     case Leaf = 'leaf';
     case Puddle = 'puddle';
     case Mushroom = 'mushroom';
+    case Tree = 'tree';
 }

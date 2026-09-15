@@ -93,6 +93,10 @@ class EndScore extends \Bga\GameFramework\States\GameState
             $totals = $this->game->beingService->getTotalsByPlayer();
         }
 
+        $treeCardOwnerId = $this->game->getGameStateValue('treeDwellerExpansion') == 2
+            ? $this->game->globals->get('card:tree:owner')
+            : null;
+
         foreach ($players as $player) {
             $playerId = (int)$player['player_id'];
             $playerTotals = $totals[$playerId] ?? [];
@@ -102,8 +106,9 @@ class EndScore extends \Bga\GameFramework\States\GameState
             $leaf = $playerTotals['leaf'] ?? 0;
             $mushroom = $playerTotals['mushroom'] ?? 0;
             $puddle = $playerTotals['puddle'] ?? 0;
+            $tree = ($treeCardOwnerId !== null && $playerId === (int)$treeCardOwnerId) ? 3 : 0;
 
-            $score = $bees + $hummingbirds + $leaf + $mushroom + $puddle;
+            $score = $bees + $hummingbirds + $leaf + $mushroom + $puddle + $tree;
             $scoreAux = $hummingbirds * 10000 + $bees;
 
             $message = $this->game->getGameStateValue('visibleScore') == 2 ? new NotificationMessage() : null;

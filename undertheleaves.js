@@ -23,6 +23,17 @@ var FormatStrings = /** @class */ (function () {
         if (this.args.being_icon) {
             this.args.being_icon = "<div class=\"undertheleaves-piece notif\" piece=\"".concat(this.args.being_icon, "\"></div>");
         }
+        if (this.args.previous_player !== undefined) {
+            this.args.previous_player = this.game.bga.players.getFormattedPlayerName(this.args.previous_player, {});
+        }
+        if (this.args.burly_image) {
+            var tree = this.game.gamedatas.cards.tree;
+            // Same crop as CardManager.formatCard, but without a DOM id: safe to embed multiple times
+            // in the game log without colliding with the actual card element (or with itself, across log entries).
+            this.args.burly_image = tree
+                ? "<div class=\"undertheleaves-card undertheleaves-card-mini notif\" line=\"".concat(tree.position.row, "\" column=\"").concat(tree.position.column, "\"></div>")
+                : '';
+        }
     };
     return FormatStrings;
 }());
@@ -52,8 +63,8 @@ var UndertheLeavesGame = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         _this.games = {
             tileManager: new TileManager(_this),
-            cardManager: new CardManager(_this),
             playerManager: new PlayerManager(_this),
+            cardManager: new CardManager(_this),
             placeTile: new PlaceTile(_this),
             beingsManager: new BeingsManager(_this),
             chooseBeing: new ChooseBeing(_this),
@@ -581,13 +592,17 @@ var CardManager = /** @class */ (function () {
     }
     CardManager.prototype.setup = function () {
         var cardsBox = document.getElementById('undertheleaves-cards');
-        var _a = this.game.gamedatas.cards, leaf = _a.leaf, mushroom = _a.mushroom, puddle = _a.puddle;
+        var _a = this.game.gamedatas.cards, leaf = _a.leaf, mushroom = _a.mushroom, puddle = _a.puddle, tree = _a.tree;
         cardsBox.insertAdjacentHTML('beforeend', this.formatCard(leaf));
         cardsBox.insertAdjacentHTML('beforeend', this.formatCard(mushroom));
         cardsBox.insertAdjacentHTML('beforeend', this.formatCard(puddle));
         this.game.addTooltipHtml('undertheleaves-card-leaf', this.formatCardTooltip(leaf));
         this.game.addTooltipHtml('undertheleaves-card-mushroom', this.formatCardTooltip(mushroom));
         this.game.addTooltipHtml('undertheleaves-card-puddle', this.formatCardTooltip(puddle));
+        if (tree) {
+            this.renderTreeCard(tree, this.game.gamedatas.treeCardOwnerId);
+            this.game.addTooltipHtml('undertheleaves-card-tree', this.formatCardTooltip(tree));
+        }
     };
     CardManager.prototype.onEnteringState = function (stateName, notif) {
         //
@@ -599,16 +614,71 @@ var CardManager = /** @class */ (function () {
         //
     };
     CardManager.prototype.setupNotifications = function () {
-        //
+        var _this = this;
+        dojo.subscribe('takeBurlyTreeCard', this, function (notif) { return _this.takeBurlyTreeCardNotif(notif); });
     };
-    CardManager.prototype.formatCard = function (card) {
-        return "<div id=\"undertheleaves-card-".concat(card.type, "\" class=\"undertheleaves-card\" line=\"").concat(card.position.row, "\" column=\"").concat(card.position.column, "\"></div>");
+    CardManager.prototype.takeBurlyTreeCardNotif = function (notif) {
+        return __awaiter(this, void 0, void 0, function () {
+            var tree;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        tree = this.game.gamedatas.cards.tree;
+                        if (!tree)
+                            return [2 /*return*/];
+                        this.game.gamedatas.treeCardOwnerId = notif.args.playerId;
+                        return [4 /*yield*/, this.moveTreeCard(notif.args.playerId)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    CardManager.prototype.renderTreeCard = function (tree, ownerId) {
+        var isOwned = ownerId != null;
+        var container = isOwned
+            ? document.getElementById("undertheleaves-player-board-tree-".concat(ownerId))
+            : document.getElementById('undertheleaves-cards');
+        if (!container)
+            return;
+        container.insertAdjacentHTML('beforeend', this.formatCard(tree, isOwned));
+    };
+    CardManager.prototype.moveTreeCard = function (ownerId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var cardElement, isOwned, container, animation;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        cardElement = document.getElementById('undertheleaves-card-tree');
+                        isOwned = ownerId != null;
+                        container = isOwned
+                            ? document.getElementById("undertheleaves-player-board-tree-".concat(ownerId))
+                            : document.getElementById('undertheleaves-cards');
+                        if (!cardElement || !container)
+                            return [2 /*return*/];
+                        cardElement.classList.toggle('undertheleaves-card-mini', isOwned);
+                        animation = new BgaLocalAnimation(this.game);
+                        animation.setWhere('beforeend');
+                        animation.setOptions(cardElement, container, 500);
+                        return [4 /*yield*/, animation.call()];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    CardManager.prototype.formatCard = function (card, mini) {
+        if (mini === void 0) { mini = false; }
+        return "<div id=\"undertheleaves-card-".concat(card.type, "\" class=\"undertheleaves-card").concat(mini ? ' undertheleaves-card-mini' : '', "\" line=\"").concat(card.position.row, "\" column=\"").concat(card.position.column, "\"></div>");
     };
     CardManager.prototype.formatCardTooltip = function (card) {
         var typeName = {
             leaf: _('Leaf Dweller'),
             mushroom: _('Mushroom Dweller'),
             puddle: _('Puddle Dweller'),
+            tree: _('Tree Dweller'),
         };
         return "\n      <div class=\"undertheleaves-card-tooltip\">\n        <span class=\"undertheleaves-card-tooltip-type\">".concat(typeName[card.type], "</span>\n        <span class=\"undertheleaves-card-tooltip-name\">").concat(_(card.name), "</span>\n        <span class=\"undertheleaves-card-tooltip-description\">").concat(_(card.description), "</span>\n      </div>\n    ");
     };
@@ -630,7 +700,7 @@ var PlayerManager = /** @class */ (function () {
                 bee: new ebg.counter(),
                 round: new ebg.counter(),
             };
-            var playerBoardHtml = "\n        <div id=\"undertheleaves-player-board-".concat(playerId, "\" class=\"undertheleaves-player-board\">\n          <div id=\"undertheleaves-player-board-round-").concat(playerId, "\" class=\"undertheleaves-player-board-round\">\n            <span>\n              <span class=\"undertheleaves-player-board-round-icon\"></span>\n              <span id=\"undertheleaves-round-count-").concat(playerId, "\">0</span>&nbsp;/ 13\n            </span>\n          </div>\n          <div class=\"undertheleaves-player-board-counters\">\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('bee'), "\n              <span id=\"undertheleaves-bee-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('hummingbird'), "\n              <span id=\"undertheleaves-hummingbird-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('leaf'), "\n              <span id=\"undertheleaves-leaf-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('mushroom'), "\n              <span id=\"undertheleaves-mushroom-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('puddle'), "\n              <span id=\"undertheleaves-puddle-count-").concat(playerId, "\">0</span>\n            </div>\n          </div>\n        </div>\n      ");
+            var playerBoardHtml = "\n        <div id=\"undertheleaves-player-board-".concat(playerId, "\" class=\"undertheleaves-player-board\">\n          <div id=\"undertheleaves-player-board-round-").concat(playerId, "\" class=\"undertheleaves-player-board-round\">\n            <span>\n              <span class=\"undertheleaves-player-board-round-icon\"></span>\n              <span id=\"undertheleaves-round-count-").concat(playerId, "\">0</span>&nbsp;/ 13\n            </span>\n          </div>\n          <div class=\"undertheleaves-player-board-counters\">\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('bee'), "\n              <span id=\"undertheleaves-bee-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('hummingbird'), "\n              <span id=\"undertheleaves-hummingbird-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('leaf'), "\n              <span id=\"undertheleaves-leaf-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('mushroom'), "\n              <span id=\"undertheleaves-mushroom-count-").concat(playerId, "\">0</span>\n            </div>\n            <div class=\"undertheleaves-player-board-count\">\n              ").concat(this.game.games.beingsManager.formatPiece('puddle'), "\n              <span id=\"undertheleaves-puddle-count-").concat(playerId, "\">0</span>\n            </div>\n          </div>\n          <div id=\"undertheleaves-player-board-tree-").concat(playerId, "\" class=\"undertheleaves-player-board-tree\"></div>\n        </div>\n      ");
             this.game.bga.playerPanels.getElement(Number(playerId)).insertAdjacentHTML('beforeend', playerBoardHtml);
             this.counters[playerId].leaf.create("undertheleaves-leaf-count-".concat(playerId));
             this.counters[playerId].puddle.create("undertheleaves-puddle-count-".concat(playerId));

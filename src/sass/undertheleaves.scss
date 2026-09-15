@@ -271,26 +271,40 @@ html {
   }
 }
 
+@mixin undertheleaves-narrow-header-layout {
+  flex: 1;
+  gap: 24px;
+  flex-direction: column;
+
+  .undertheleaves-cards {
+    flex: 1;
+    order: -1;
+
+    .undertheleaves-card {
+      width: 100px;
+      height: 150px;
+    }
+  }
+
+  .undertheleaves-offer {
+    flex: 1;
+  }
+}
+
 @container undertheleaves-box (width < 980px) {
   .undertheleaves-box {
     .undertheleaves-header {
-      flex: 1;
-      gap: 24px;
-      flex-direction: column;
+      @include undertheleaves-narrow-header-layout;
+    }
+  }
+}
 
-      .undertheleaves-cards {
-        flex: 1;
-        order: -1;
-
-        .undertheleaves-card {
-          width: 100px;
-          height: 150px;
-        }
-      }
-
-      .undertheleaves-offer {
-        flex: 1;
-      }
+// With the Burly card still unclaimed in the header, there are 4 cards instead of 3, so switch
+// to the narrow/stacked layout a bit earlier to avoid a cramped single row.
+@container undertheleaves-box (980px <= width < 1130px) {
+  .undertheleaves-box {
+    .undertheleaves-header:has(.undertheleaves-cards #undertheleaves-card-tree) {
+      @include undertheleaves-narrow-header-layout;
     }
   }
 }
@@ -382,6 +396,17 @@ html {
         width: 30px;
         height: 30px;
       }
+    }
+  }
+
+  & .undertheleaves-player-board-tree {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 10px;
+
+    &:empty {
+      display: none;
     }
   }
 }

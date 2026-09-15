@@ -43,7 +43,7 @@ class Game extends \Bga\GameFramework\Table
     public function __construct()
     {
         parent::__construct();
-        $this->initGameStateLabels(['initialCards' => 100, 'visibleScore' => 101]);
+        $this->initGameStateLabels(['initialCards' => 100, 'visibleScore' => 101, 'treeDwellerExpansion' => 102]);
 
         Messages::initMessages();
         $this->startConstants();
@@ -109,6 +109,9 @@ class Game extends \Bga\GameFramework\Table
         $result["countDeckTiles"] = (int)$this->tiles->countCardsInLocation(CardLocation::Deck->value);
         $result["cards"] = $this->cardService->list();
         $result["beings"] = $this->beingService->getAllBeings();
+
+        $treeCardOwnerId = $this->globals->get('card:tree:owner');
+        $result["treeCardOwnerId"] = $treeCardOwnerId !== null ? (int)$treeCardOwnerId : null;
 
         $sql = "SELECT player_id FROM player WHERE player_no = 1";
         $item = $this->getObjectFromDB($sql);

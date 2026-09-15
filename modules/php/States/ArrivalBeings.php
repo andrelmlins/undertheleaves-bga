@@ -40,6 +40,11 @@ class ArrivalBeings extends GameState
             $leafCard->dweller->setGame($this->game)->process($activePlayerId);
         }
 
+        $treeCard = $this->game->cardService->list()['tree'] ?? null;
+        if ($treeCard?->dweller !== null) {
+            $treeCard->dweller->setGame($this->game)->process($activePlayerId);
+        }
+
         if ($this->game->getGameStateValue('visibleScore') == 2) {
             (new EndScore($this->game))->computeAndUpdateScores();
         }

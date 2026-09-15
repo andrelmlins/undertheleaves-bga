@@ -3,7 +3,8 @@ interface UndertheLeavesGamedatas extends Gamedatas {
   initialTileConfigs: TileConfig[];
   tileConfigs: TileConfig[];
   gridTiles: Record<string, GridTile[]>;
-  cards: { leaf: CardConfig; mushroom: CardConfig; puddle: CardConfig };
+  cards: { leaf: CardConfig; mushroom: CardConfig; puddle: CardConfig; tree?: CardConfig };
+  treeCardOwnerId: number | null;
   beings: Record<string, Being[]>;
   countDeckTiles: number;
   firstPlayerId: number;
@@ -62,6 +63,10 @@ interface CardConfig {
   name: string;
   description: string;
   firstGame: boolean;
+}
+
+interface TakeBurlyTreeCardNotif {
+  playerId: number;
 }
 
 interface PlaceTileState {

@@ -44,6 +44,7 @@ class PlayerManager implements Game {
               <span id="undertheleaves-puddle-count-${playerId}">0</span>
             </div>
           </div>
+          <div id="undertheleaves-player-board-tree-${playerId}" class="undertheleaves-player-board-tree"></div>
         </div>
       `;
 

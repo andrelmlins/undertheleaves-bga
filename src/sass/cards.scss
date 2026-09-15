@@ -14,16 +14,27 @@
     0 2px 2px 0 rgba(0, 0, 0, 0.14),
     0 3px 1px -2px rgba(0, 0, 0, 0.12),
     0 1px 5px 0 rgba(0, 0, 0, 0.2);
-  background-size: 500% 300%;
+  background-size: 500% 400%;
   background-repeat: no-repeat;
   background-image: url('img/cards.png');
 
-  @for $i from 0 through 5 {
+  @for $i from 0 through 4 {
     @for $j from 0 through 3 {
       &[line='#{$j}'][column='#{$i}'] {
-        background-position: calc((100% / 4) * $i) calc((100% / 2) * $j) !important;
+        background-position: calc((100% / 4) * $i) calc((100% / 3) * $j) !important;
       }
     }
+  }
+
+  &.undertheleaves-card-mini {
+    width: 56px;
+    height: 84px;
+    border-radius: 4px;
+  }
+
+  &.notif {
+    display: block;
+    margin: 8px auto 0;
   }
 }
 
