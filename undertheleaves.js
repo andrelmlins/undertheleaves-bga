@@ -1155,8 +1155,8 @@ var PlaceTile = /** @class */ (function () {
             this.game.statusBar.addActionButton(_('Place tile'), function () { return _this.onClick(); });
         }
         if (stateName === 'client_PlaceTile' || stateName === 'client_MoveTile') {
-            this.game.statusBar.addActionButton('<i class="fa6 fa6-rotate-right"></i>', function () { return _this.onClickChangeDirection('right'); }, { color: 'secondary' });
             this.game.statusBar.addActionButton('<i class="fa6 fa6-rotate-left"></i>', function () { return _this.onClickChangeDirection('left'); }, { color: 'secondary' });
+            this.game.statusBar.addActionButton('<i class="fa6 fa6-rotate-right"></i>', function () { return _this.onClickChangeDirection('right'); }, { color: 'secondary' });
             this.game.statusBar.addActionButton('<i class="fa6 fa6-right-left"></i>', function () { return _this.onClickChangeDirection('inverse'); }, { color: 'secondary' });
             this.game.statusBar.addActionButton(_('Cancel'), function () { return _this.onClickCancel(); }, {
                 color: 'alert',

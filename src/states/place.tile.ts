@@ -40,13 +40,13 @@ class PlaceTile implements Game {
 
     if (stateName === 'client_PlaceTile' || stateName === 'client_MoveTile') {
       this.game.statusBar.addActionButton(
-        '<i class="fa6 fa6-rotate-right"></i>',
-        () => this.onClickChangeDirection('right'),
+        '<i class="fa6 fa6-rotate-left"></i>',
+        () => this.onClickChangeDirection('left'),
         { color: 'secondary' },
       );
       this.game.statusBar.addActionButton(
-        '<i class="fa6 fa6-rotate-left"></i>',
-        () => this.onClickChangeDirection('left'),
+        '<i class="fa6 fa6-rotate-right"></i>',
+        () => this.onClickChangeDirection('right'),
         { color: 'secondary' },
       );
       this.game.statusBar.addActionButton(
