@@ -9,7 +9,6 @@ class UndertheLeavesGame extends GameGui<Player, UndertheLeavesGamedatas> {
 
   animationManager: AnimationManager;
 
-  scoreCtrl: Record<string, Counter>;
 
   constructor() {
     super();

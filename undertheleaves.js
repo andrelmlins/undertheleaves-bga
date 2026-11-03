@@ -746,7 +746,7 @@ var PlayerManager = /** @class */ (function () {
     PlayerManager.prototype.scoreNotif = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                this.game.scoreCtrl[notif.args.playerId].toValue(notif.args.playerScore);
+                this.game.bga.playerPanels.getScoreCounter(notif.args.playerId).toValue(notif.args.playerScore);
                 return [2 /*return*/];
             });
         });

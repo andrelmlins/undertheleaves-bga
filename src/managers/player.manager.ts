@@ -101,6 +101,6 @@ class PlayerManager implements Game {
   }
 
   private async scoreNotif(notif: Notif<ScoreNotif>) {
-    this.game.scoreCtrl[notif.args.playerId].toValue(notif.args.playerScore);
+    this.game.bga.playerPanels.getScoreCounter(notif.args.playerId).toValue(notif.args.playerScore);
   }
 }
