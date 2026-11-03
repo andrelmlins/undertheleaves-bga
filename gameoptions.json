@@ -37,8 +37,7 @@
       },
       "2": {
         "name": "On",
-        "tmdisplay": "Play with the Tree Dweller expansion",
-        "beta": true
+        "tmdisplay": "Play with the Tree Dweller expansion"
       }
     },
     "default": 1
