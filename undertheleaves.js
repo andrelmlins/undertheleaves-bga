@@ -1413,6 +1413,8 @@ var PlaceTile = /** @class */ (function () {
 var ChooseBeing = /** @class */ (function () {
     function ChooseBeing(game) {
         this.game = game;
+        this.squareCandidates = [];
+        this.selectedSquare = null;
         this.handlers = [];
     }
     ChooseBeing.prototype.setup = function () {
@@ -1427,9 +1429,13 @@ var ChooseBeing = /** @class */ (function () {
         }
         else if (stateName === 'client_ChooseBeing') {
             var beingTypes = Object.keys(notif.args.beings);
-            if (beingTypes.length == 1 && notif.args.beings[beingTypes[0]].length == 1) {
+            if (beingTypes.length == 1 &&
+                notif.args.beings[beingTypes[0]].length == 1 &&
+                !this.isWholeGroupSelection(beingTypes[0])) {
                 this.chooseTerrain(beingTypes[0], notif.args.beings[beingTypes[0]][0], notif.args);
+                return;
             }
+            this.setupSquareMarkers(notif.args);
         }
         else if (stateName === 'client_ChooseTerrain') {
             var playerId_1 = this.game.bga.players.getActivePlayerId();
@@ -1467,20 +1473,72 @@ var ChooseBeing = /** @class */ (function () {
         document
             .querySelectorAll('.undertheleaves-terrain.selectable, .undertheleaves-terrain.selected')
             .forEach(function (el) { return el.classList.remove('selectable', 'selected'); });
+        document.querySelectorAll('.undertheleaves-square-marker').forEach(function (el) { return el.remove(); });
         this.terrainSelected = null;
         this.actionButton = null;
+        this.squareCandidates = [];
+        this.selectedSquare = null;
+        this.squareButton = null;
         document.getElementById("undertheleaves-player-beings-".concat(playerId)).classList.remove('selectable');
+    };
+    // Flirty ('leaf') offers whole 2x2 squares: the player clicks the center dot of the square
+    // they want, and the piece goes there. Puddle/mushroom pairs still pick one space.
+    ChooseBeing.prototype.isWholeGroupSelection = function (beingType) {
+        return beingType === 'leaf';
+    };
+    ChooseBeing.prototype.setupSquareMarkers = function (args) {
+        var _this = this;
+        var _a;
+        this.squareCandidates = (_a = args.beings['leaf']) !== null && _a !== void 0 ? _a : [];
+        var playerId = this.game.bga.players.getActivePlayerId();
+        this.squareCandidates.forEach(function (square) {
+            var maxY = Math.max.apply(Math, __spreadArray([], __read(square.map(function (c) { return c[1]; })), false));
+            var topLeft = square.filter(function (c) { return c[1] === maxY; }).sort(function (a, b) { return a[0] - b[0]; })[0];
+            var anchorDiv = _this.game.games.beingsManager.getTerrainDiv(playerId, topLeft);
+            if (!anchorDiv) {
+                return;
+            }
+            var marker = document.createElement('div');
+            marker.className = 'undertheleaves-square-marker selectable';
+            anchorDiv.appendChild(marker);
+            _this.handlers.push(dojo.connect(marker, 'onclick', function () { return _this.toggleSquareMarker(square, marker); }));
+        });
+    };
+    ChooseBeing.prototype.toggleSquareMarker = function (square, marker) {
+        document.querySelectorAll('.undertheleaves-square-marker.selected').forEach(function (el) { return el.classList.remove('selected'); });
+        if (this.selectedSquare === square) {
+            this.selectedSquare = null;
+        }
+        else {
+            this.selectedSquare = square;
+            marker.classList.add('selected');
+        }
+        this.updateSquareButton();
+    };
+    ChooseBeing.prototype.updateSquareButton = function () {
+        if (this.squareButton) {
+            this.squareButton.disabled = !this.selectedSquare;
+        }
     };
     ChooseBeing.prototype.onUpdateActionButtons = function (stateName, args) {
         var _this = this;
+        var _a;
         if (stateName === 'client_ChooseBeing') {
+            this.squareCandidates = (_a = args.beings['leaf']) !== null && _a !== void 0 ? _a : [];
             var _loop_1 = function (beingType) {
+                if (this_1.isWholeGroupSelection(beingType)) {
+                    return "continue";
+                }
                 args.beings[beingType].forEach(function (terrains) {
                     _this.game.statusBar.addActionButton(_this.game.games.beingsManager.formatPiece(beingType), function () { return _this.chooseTerrain(beingType, terrains, args); }, { color: 'secondary' });
                 });
             };
+            var this_1 = this;
             for (var beingType in args.beings) {
                 _loop_1(beingType);
+            }
+            if (this.squareCandidates.length > 0) {
+                this.squareButton = this.game.statusBar.addActionButton(_('Place the dweller'), function () { return _this.onClickSelectedSquare(); }, { disabled: true });
             }
             this.game.statusBar.addActionButton(_('Restart'), function () { return _this.onClickRestart(); }, { color: 'alert' });
         }
@@ -1500,6 +1558,18 @@ var ChooseBeing = /** @class */ (function () {
     };
     ChooseBeing.prototype.onClickRestart = function () {
         this.game.bga.actions.performAction('actChooseBeingRestart');
+    };
+    // The square's anchor cell (its top-left corner, always index 0) uniquely identifies it on
+    // the server even when it overlaps another candidate square on the other 3 spaces.
+    ChooseBeing.prototype.onClickSquare = function (beingType, group) {
+        var _this = this;
+        var _a = __read(group[0], 2), x = _a[0], y = _a[1];
+        this.game.bga.actions.performAction('actChooseBeing', { beingType: beingType, x: x, y: y }).then(function () { return _this.cleanupTerrain(); });
+    };
+    ChooseBeing.prototype.onClickSelectedSquare = function () {
+        if (this.selectedSquare) {
+            this.onClickSquare('leaf', this.selectedSquare);
+        }
     };
     ChooseBeing.prototype.onClickTerrain = function (beingType) {
         var _this = this;

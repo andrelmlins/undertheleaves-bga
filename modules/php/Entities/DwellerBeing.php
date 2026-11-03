@@ -18,5 +18,5 @@ abstract class DwellerBeing
 
     abstract public function process(int $playerId): void;
 
-    public function endProcess(int $playerId, array $placedCells) {}
+    public function endProcess(int $playerId, array $placedCells, array $selectedGroup = []) {}
 }

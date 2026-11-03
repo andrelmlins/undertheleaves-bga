@@ -59,7 +59,7 @@ class FriendlyPuddleBeing extends DwellerBeing
         $this->game->globals->set('pending:beings', $pending);
     }
 
-    public function endProcess(int $playerId, array $placedCells): void
+    public function endProcess(int $playerId, array $placedCells, array $selectedGroup = []): void
     {
         foreach ($placedCells as $coords) {
             $this->game->beingService->addBeing(new Being(

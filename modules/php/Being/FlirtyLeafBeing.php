@@ -19,8 +19,14 @@ class FlirtyLeafBeing extends DwellerBeing
         $terrainGrid = $sectorService->getTerrainGrid();
 
         $registeredFlirtys = $this->game->beingService->getBeingsBySector($playerId, 'leaf', 'flirty');
+        $usedKeys = [];
+        foreach ($registeredFlirtys as $being) {
+            foreach ($being->cells as $coord) {
+                $usedKeys[SectorService::coordinatesToCellKey($coord)] = true;
+            }
+        }
 
-        $newSquares = [];
+        $candidates = [];
 
         foreach ($terrainGrid as $cellKey => $type) {
             [$x, $y] = SectorService::cellKeyToCoordinates($cellKey);
@@ -43,18 +49,69 @@ class FlirtyLeafBeing extends DwellerBeing
                 continue;
             }
 
-            $square = [[$x, $y], [$x + 1, $y], [$x, $y + 1], [$x + 1, $y + 1]];
+            $squareKeys = [$cellKey, $trKey, $blKey, $brKey];
 
-            if (!$this->hasExistingFlirty($registeredFlirtys, $newSquares, $square)) {
-                $newSquares[] = $square;
+            if (array_intersect_key($usedKeys, array_flip($squareKeys))) {
+                continue;
             }
+
+            $candidates[] = [
+                'square' => [[$x, $y], [$x + 1, $y], [$x, $y + 1], [$x + 1, $y + 1]],
+                'keys' => $squareKeys,
+            ];
         }
 
-        if (empty($newSquares)) {
+        if (empty($candidates)) {
             return;
         }
 
-        foreach ($newSquares as $square) {
+        // Two candidate squares conflict when they share a space: the rule says a space
+        // used by one Flirty can never attract another, so at most one of them can be
+        // granted. Squares with no conflict are unambiguous and get placed immediately;
+        // conflicting ones must be resolved by the player (see ChooseBeing).
+        $autoSquares = [];
+        $conflictingSquares = [];
+
+        foreach ($candidates as $i => $candidate) {
+            $hasConflict = false;
+
+            foreach ($candidates as $j => $other) {
+                if ($i === $j) {
+                    continue;
+                }
+
+                if (array_intersect($candidate['keys'], $other['keys'])) {
+                    $hasConflict = true;
+                    break;
+                }
+            }
+
+            if ($hasConflict) {
+                $conflictingSquares[] = $candidate['square'];
+            } else {
+                $autoSquares[] = $candidate['square'];
+            }
+        }
+
+        if (!empty($autoSquares)) {
+            $this->commitSquares($playerId, $autoSquares);
+        }
+
+        if (!empty($conflictingSquares)) {
+            $pending = $this->game->globals->get('pending:beings') ?? [];
+            $pending['leaf'] = $conflictingSquares;
+            $this->game->globals->set('pending:beings', $pending);
+        }
+    }
+
+    public function endProcess(int $playerId, array $placedCells, array $selectedGroup = []): void
+    {
+        $this->commitSquares($playerId, [$selectedGroup]);
+    }
+
+    private function commitSquares(int $playerId, array $squares): void
+    {
+        foreach ($squares as $square) {
             $this->game->beingService->addBeing(new Being(
                 playerId: $playerId,
                 type: 'leaf',
@@ -68,7 +125,7 @@ class FlirtyLeafBeing extends DwellerBeing
 
         $playerName = $this->game->getPlayerNameById($playerId);
 
-        foreach ($newSquares as $square) {
+        foreach ($squares as $square) {
             $this->game->notify->all('arrivalFlirtyLeaf', Messages::$ArrivalFlirtyLeaf, [
                 'player_name'  => $playerName,
                 'playerId'     => $playerId,
@@ -78,30 +135,5 @@ class FlirtyLeafBeing extends DwellerBeing
             ]);
             $this->game->notify->all('simplePause', '', ['time' => 600]);
         }
-    }
-
-    private function hasExistingFlirty(array $registeredFlirtys, array $newSquares, array $square): bool
-    {
-        $squareKeys = array_map(fn($c) => SectorService::coordinatesToCellKey($c), $square);
-
-        foreach ($registeredFlirtys as $being) {
-            $beingKeys = array_map(fn($c) => SectorService::coordinatesToCellKey($c), $being->cells);
-            foreach ($squareKeys as $key) {
-                if (in_array($key, $beingKeys)) {
-                    return true;
-                }
-            }
-        }
-
-        foreach ($newSquares as $existingSquare) {
-            $existingKeys = array_map(fn($c) => SectorService::coordinatesToCellKey($c), $existingSquare);
-            foreach ($squareKeys as $key) {
-                if (in_array($key, $existingKeys)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 }
